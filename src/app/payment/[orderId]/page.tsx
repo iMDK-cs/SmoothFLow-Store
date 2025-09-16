@@ -5,7 +5,9 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { loadStripe } from '@stripe/stripe-js'
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : null
 
 export default function Payment({ params }: { params: Promise<{ orderId: string }> }) {
   const { data: session } = useSession()
@@ -34,8 +36,14 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
         throw new Error('Order not found')
       }
       const data = await response.json()
-      setOrder(data.order)
+      
+      if (data && data.order) {
+        setOrder(data.order)
+      } else {
+        throw new Error('Invalid order data')
+      }
     } catch (error) {
+      console.error('Fetch order error:', error)
       setError('Failed to load order')
     } finally {
       setLoading(false)
@@ -47,6 +55,10 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
     setError('')
 
     try {
+      if (!stripePromise) {
+        throw new Error('Stripe is not configured. Please contact support.')
+      }
+
       const response = await fetch('/api/payments/stripe', {
         method: 'POST',
         headers: {
@@ -67,6 +79,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
       // Redirect to success page
       router.push(`/orders/${orderId}?success=true`)
     } catch (error) {
+      console.error('Payment error:', error)
       setError(error instanceof Error ? error.message : 'Payment failed')
     } finally {
       setProcessing(false)
@@ -127,9 +140,9 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
           <div className="bg-gray-800 rounded-lg p-6 mb-6">
             <h2 className="text-xl font-semibold text-white mb-4">تفاصيل الطلب</h2>
             <div className="space-y-2">
-              <p className="text-gray-300">رقم الطلب: <span className="text-white font-medium">{order.orderNumber}</span></p>
-              <p className="text-gray-300">المجموع: <span className="text-white font-medium">{order.totalAmount.toFixed(2)} ريال</span></p>
-              <p className="text-gray-300">الحالة: <span className="text-yellow-400">{order.status}</span></p>
+              <p className="text-gray-300">رقم الطلب: <span className="text-white font-medium">{order.orderNumber || 'غير محدد'}</span></p>
+              <p className="text-gray-300">المجموع: <span className="text-white font-medium">{order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'} ريال</span></p>
+              <p className="text-gray-300">الحالة: <span className="text-yellow-400">{order.status || 'غير محدد'}</span></p>
             </div>
           </div>
 
