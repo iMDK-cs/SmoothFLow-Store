@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   // Open Graph metadata for social sharing
   openGraph: {
     title: "SmoothFlow - حلول تقنية متطورة",
-    description: "خدمات كمبيوتر احترافية في الرس مع ضمان شامل وخدمة عملاء متميزة",
-    url: "https://smoothflow.sa",
+    description: "خدمات كمبيوتر احترافية في الرس ",
+    url: "https://smoothflow-store-web.vercel.app",
     siteName: "SmoothFlow",
     images: [
       {
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     title: "SmoothFlow - حلول تقنية متطورة",
     description: "خدمات كمبيوتر احترافية في الرس",
     images: ["/images/twitter-image.jpg"],
-    creator: "@yourusername",
+    creator: "@MDK7_",
   },
   
   // Additional metadata
