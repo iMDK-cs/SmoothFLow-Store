@@ -77,7 +77,7 @@ export default function EnhancedShoppingCart() {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 mt-2 w-80 bg-gray-800/95 backdrop-blur-md rounded-lg shadow-2xl border border-gray-700 z-50 animate-in slide-in-from-top-2 duration-200">
+        <div className="absolute left-0 mt-2 w-96 bg-gray-800/95 backdrop-blur-md rounded-lg shadow-2xl border border-gray-700 z-50 animate-in slide-in-from-top-2 duration-200 max-h-[80vh]">
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-white flex items-center">
@@ -113,30 +113,45 @@ export default function EnhancedShoppingCart() {
                     </svg>
                     <span>حذف جميع المحتويات</span>
                   </button>
-                  <span className="text-gray-400 text-xs">
-                    {state.cart.items.length} عنصر
-                  </span>
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <span className="text-gray-400 text-xs">
+                      {state.cart.items.length} عنصر
+                    </span>
+                    {state.cart.items.length > 10 && (
+                      <span className="text-blue-400 text-xs bg-blue-900/20 px-2 py-1 rounded-full">
+                        قابل للتمرير
+                      </span>
+                    )}
+                  </div>
                 </div>
                 
-                <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-                  {state.cart.items.map((item) => (
+                <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 pr-2">
+                  {state.cart.items.map((item, index) => (
                     <div key={item.id} className="flex items-center space-x-3 p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors group">
-                      <div className="flex-1">
-                        <h4 className="text-sm font-medium text-white group-hover:text-blue-300 transition-colors">
+                      <div className="flex-shrink-0 w-6 h-6 bg-sky-500/20 rounded-full flex items-center justify-center text-xs text-sky-400 font-bold">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-medium text-white group-hover:text-blue-300 transition-colors truncate">
                           {item.service.title}
                         </h4>
                         {item.option && (
-                          <p className="text-xs text-gray-400 mt-1">{item.option.title}</p>
+                          <p className="text-xs text-gray-400 mt-1 truncate">{item.option.title}</p>
                         )}
-                        <p className="text-xs text-gray-400">الكمية: {item.quantity}</p>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-xs text-gray-400">الكمية: {item.quantity}</p>
+                          <p className="text-xs text-gray-400">
+                            {item.option ? item.option.price : item.service.basePrice} ريال × {item.quantity}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right flex-shrink-0">
                         <p className="text-sm font-medium text-white">
                           {((item.option ? item.option.price : item.service.basePrice) * item.quantity).toFixed(2)} ريال
                         </p>
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          className="text-red-400 hover:text-red-300 text-xs transition-colors hover:bg-red-900/20 px-2 py-1 rounded"
+                          className="text-red-400 hover:text-red-300 text-xs transition-colors hover:bg-red-900/20 px-2 py-1 rounded mt-1"
                         >
                           حذف
                         </button>
