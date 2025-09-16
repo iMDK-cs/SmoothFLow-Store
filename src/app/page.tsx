@@ -592,12 +592,6 @@ const DynamicHeader = memo(({
                 >
                   لوحة الإدارة
                 </Link>
-                <Link
-                  href="/test"
-                  className="text-gray-300 hover:text-sky-300 transition-colors text-sm font-medium"
-                >
-                  🧪 اختبار
-                </Link>
               </>
             )}
           </div>
