@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from '
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
+import { getUserFromSession } from '@/lib/auth';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -468,8 +469,17 @@ const DynamicHeader = memo(({
   isScrolled: boolean; 
   scrollY: number;
   scrollToSection: (sectionId: string) => void;
-  session: { user?: { name?: string; email?: string } } | null;
+  session: { user?: { name?: string | null; email?: string | null; image?: string | null } } | null;
 }) => {
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      const user = await getUserFromSession(session);
+      setUserRole(user?.role || null);
+    };
+    checkUserRole();
+  }, [session]);
   const getSectionTheme = useCallback((section: string) => {
     switch (section) {
       case 'assembly':
@@ -584,7 +594,7 @@ const DynamicHeader = memo(({
             <ErrorBoundary>
               <EnhancedShoppingCart />
             </ErrorBoundary>
-            {session?.user?.role === 'ADMIN' && (
+            {userRole === 'ADMIN' && (
               <>
                 <div className="w-px h-6 bg-gray-600"></div>
                 <Link
@@ -701,7 +711,7 @@ const ServiceCard = memo(({
   const { data: session } = useSession();
   const router = useRouter();
 
-  const handleCardClick = useCallback((e: React.MouseEvent) => {
+  const handleCardClick = useCallback((e: React.SyntheticEvent) => {
     // Don't navigate if clicking on the button or options
     if (e.target instanceof HTMLElement) {
       const isButton = e.target.closest('button');
@@ -773,7 +783,7 @@ const ServiceCard = memo(({
         data-service-id={service.id}
         role="article"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && handleCardClick(e as React.KeyboardEvent)}
+        onKeyDown={(e) => e.key === 'Enter' && handleCardClick(e)}
         aria-label={`خدمة ${service.title} - ${service.description}`}
       >
         {service.popular && <PopularBadge isHovered={isHovered} />}
@@ -979,7 +989,7 @@ const EnhancedServiceSection = memo(({
   onAddToCart
 }: { 
   sectionKey: string; 
-  category: { title: string; services: Service[] }; 
+  category: { title: string; icon: string; color: string; image: string; services: Service[] }; 
   activeSection: string;
   onAddToCart: (message: string, type: 'success' | 'error' | 'info') => void;
 }) => {
@@ -1003,7 +1013,7 @@ const EnhancedServiceSection = memo(({
         }`}
       >
         <SectionDivider 
-          title={category.title}
+          title={category.title}  
           icon={category.icon}
           color={category.color}
           image={category.image}

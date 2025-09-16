@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
+import { getUserFromSession } from '@/lib/auth'
 
 interface Message {
   id: string
@@ -59,10 +60,16 @@ export default function EnhancedSupportChat() {
   }, [isOpen, messages.length, session?.user?.name])
 
   useEffect(() => {
-    if (isOpen && session?.user?.id) {
-      fetchTickets()
-    }
-  }, [isOpen, session?.user?.id])
+    const checkUserAndFetchTickets = async () => {
+      if (isOpen && session) {
+        const user = await getUserFromSession(session);
+        if (user?.id) {
+          fetchTickets()
+        }
+      }
+    };
+    checkUserAndFetchTickets();
+  }, [isOpen, session])
 
   const fetchTickets = async () => {
     try {

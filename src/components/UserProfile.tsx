@@ -3,10 +3,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
+import { getUserFromSession } from '@/lib/auth'
 
 export default function UserProfile() {
   const { data: session } = useSession()
   const [isOpen, setIsOpen] = useState(false)
+  const [userRole, setUserRole] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -19,6 +21,16 @@ export default function UserProfile() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (session) {
+        const user = await getUserFromSession(session);
+        setUserRole(user?.role || null);
+      }
+    };
+    checkUserRole();
+  }, [session])
 
   if (!session) {
     return (
@@ -114,7 +126,7 @@ export default function UserProfile() {
               حجوزاتي
             </Link>
             
-            {session.user?.role === 'ADMIN' && (
+            {userRole === 'ADMIN' && (
               <Link
                 href="/admin-dashboard"
                 className="flex items-center px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors"

@@ -14,6 +14,7 @@ export default function Profile() {
     email: string;
     phone?: string;
     role: string;
+    createdAt: string;
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)

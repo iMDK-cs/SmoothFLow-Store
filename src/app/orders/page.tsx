@@ -163,7 +163,7 @@ export default function Orders() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex flex-wrap gap-2">
-                      {order.items.slice(0, 3).map((item: { service: { title: string } }) => (
+                      {order.items.slice(0, 3).map((item: { id: string; service: { title: string } }) => (
                         <span key={item.id} className="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">
                           {item.service.title}
                         </span>
