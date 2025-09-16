@@ -50,7 +50,7 @@ interface MagneticButtonProps {
   children: ReactNode;
   className?: string;
   strength?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function MagneticButton({ 
@@ -161,7 +161,7 @@ interface InteractiveCardProps {
   className?: string;
   hoverEffect?: 'glow' | 'lift' | 'tilt' | 'scale';
   glowColor?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function InteractiveCard({

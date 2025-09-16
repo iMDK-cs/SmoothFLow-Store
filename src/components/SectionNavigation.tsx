@@ -9,6 +9,22 @@ interface SectionNavigationProps {
   sectionProgress?: number
 }
 
+export default function SectionNavigation({ 
+  activeSection, 
+  onSectionClick, 
+  headerStyle = 'default',
+  sectionProgress = 0 
+}: SectionNavigationProps) {
+  const [isVisible, setIsVisible] = useState(true)
+  
+  const sections = [
+    { id: 'hero', label: 'الرئيسية', icon: '🏠', color: 'from-blue-500 to-blue-600' },
+    { id: 'maintenance', label: 'صيانة', icon: '🔧', color: 'from-orange-500 to-orange-600' },
+    { id: 'tweaking', label: 'تطوير', icon: '⚡', color: 'from-green-500 to-green-600' },
+    { id: 'assembly', label: 'تركيب', icon: '🖥️', color: 'from-purple-500 to-purple-600' },
+    { id: 'contact', label: 'تواصل', icon: '📞', color: 'from-red-500 to-red-600' }
+  ]
+
   const scrollToSection = useCallback((sectionId: string) => {
     if (sectionId === 'hero') {
       window.scrollTo({ 
@@ -355,9 +371,34 @@ export const useAdvancedScrollDetection = () => {
     }
   }, []);
 
-  return {
-    ...scrollState,
-    scrollToSection,
-    updateSections
-  };
-};
+  return (
+    <div className="fixed right-4 top-1/2 transform -translate-y-1/2 z-50 bg-black/80 backdrop-blur-lg rounded-xl border border-white/10 shadow-2xl">
+      <div className="flex flex-col gap-1 p-2">
+        {sections.map((section) => {
+          const isActive = activeSection === section.id
+          return (
+            <button
+              key={section.id}
+              onClick={() => scrollToSection(section.id)}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 group relative overflow-hidden ${
+                isActive
+                  ? `bg-gradient-to-r ${section.color} text-white shadow-xl scale-105 shadow-black/25`
+                  : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-105'
+              }`}
+              title={section.label}
+            >
+              <span className={`text-lg transition-all duration-300 ${
+                isActive ? 'scale-110' : 'group-hover:scale-110'
+              }`}>
+                {section.icon}
+              </span>
+              <span className="hidden sm:block transition-all duration-300 font-arabic">
+                {section.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

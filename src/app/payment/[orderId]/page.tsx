@@ -5,12 +5,18 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { loadStripe } from '@stripe/stripe-js'
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+// const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 export default function Payment({ params }: { params: Promise<{ orderId: string }> }) {
   const { data: session } = useSession()
   const router = useRouter()
-  const [order, setOrder] = useState<any>(null)
+  const [order, setOrder] = useState<{
+    id: string;
+    orderNumber: string;
+    totalAmount: number;
+    status: string;
+    items: any[];
+  } | null>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
@@ -25,7 +31,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
       return
     }
     fetchOrder()
-  }, [session, orderId])
+  }, [session, orderId, router])
 
   const fetchOrder = async () => {
     try {
@@ -35,7 +41,8 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
       }
       const data = await response.json()
       setOrder(data.order)
-    } catch (error) {
+    } catch (err) {
+      console.error('Failed to load order:', err)
       setError('Failed to load order')
     } finally {
       setLoading(false)

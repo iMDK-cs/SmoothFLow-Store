@@ -772,7 +772,7 @@ const ServiceCard = memo(({
         data-service-id={service.id}
         role="article"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && handleCardClick(e as any)}
+        onKeyDown={(e) => e.key === 'Enter' && handleCardClick(e as React.KeyboardEvent)}
         aria-label={`خدمة ${service.title} - ${service.description}`}
       >
         {service.popular && <PopularBadge isHovered={isHovered} />}
@@ -978,7 +978,7 @@ const EnhancedServiceSection = memo(({
   onAddToCart
 }: { 
   sectionKey: string; 
-  category: any; 
+  category: { title: string; services: any[] }; 
   activeSection: string;
   onAddToCart: (message: string, type: 'success' | 'error' | 'info') => void;
 }) => {
@@ -1146,7 +1146,7 @@ const InteractiveCard = memo(({
   children: React.ReactNode;
   className?: string;
   hoverEffect?: 'glow' | 'lift' | 'scale';
-  [key: string]: any;
+  [key: string]: unknown;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -1309,7 +1309,7 @@ FAQItem.displayName = 'FAQItem';
 // Main Component
 export default function MDKStore() {
   const { isScrolled, scrollY, scrollDirection } = useScrollPosition();
-  const { activeSection, sectionProgress } = useSectionObserver();
+  const { activeSection } = useSectionObserver();
   const [isClient, setIsClient] = useState(false);
   const [notification, setNotification] = useState<{
     message: string;

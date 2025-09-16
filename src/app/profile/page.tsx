@@ -8,7 +8,13 @@ import Link from 'next/link'
 export default function Profile() {
   const { data: session, update } = useSession()
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    role: string;
+  } | null>(null)
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [formData, setFormData] = useState({
@@ -22,7 +28,7 @@ export default function Profile() {
       return
     }
     fetchUserProfile()
-  }, [session])
+  }, [session, router])
 
   const fetchUserProfile = async () => {
     try {
@@ -231,7 +237,7 @@ export default function Profile() {
                   </Link>
 
                  
-                  {session.user && (session.user as any).role === 'ADMIN' && (
+                  {session.user && (session.user as { role?: string }).role === 'ADMIN' && (
                     <Link
                       href="/admin-dashboard"
                       className="flex items-center p-4 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors"
