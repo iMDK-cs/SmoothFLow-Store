@@ -16,6 +16,10 @@ interface AdminStats {
     totalAmount: number;
     status: string;
     createdAt: string;
+    user: {
+      name?: string;
+      email: string;
+    };
   }>
   topServices: Array<{
     id: string;
@@ -397,16 +401,16 @@ export default function AdminDashboard() {
           </h2>
           <div className="space-y-2">
             {stats.topServices.map((service, index) => (
-              <div key={service.serviceId} className="flex items-center justify-between p-2 bg-gradient-to-r from-slate-700 to-slate-800 rounded-lg hover:from-slate-600 hover:to-slate-700 transition-all duration-300 transform hover:scale-105 border border-slate-600">
+              <div key={service.id} className="flex items-center justify-between p-2 bg-gradient-to-r from-slate-700 to-slate-800 rounded-lg hover:from-slate-600 hover:to-slate-700 transition-all duration-300 transform hover:scale-105 border border-slate-600">
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <span className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg">
                     {index + 1}
                   </span>
-                  <span className="text-white font-medium text-sm">{service.serviceTitle}</span>
+                  <span className="text-white font-medium text-sm">{service.title}</span>
                 </div>
                 <div className="text-right">
-                  <p className="text-cyan-200 text-xs font-medium">{service._count.serviceId} طلب</p>
-                  <p className="text-white font-bold text-sm">{service._sum.totalPrice?.toFixed(2)} ريال</p>
+                  <p className="text-cyan-200 text-xs font-medium">{service.orderCount} طلب</p>
+                  <p className="text-white font-bold text-sm">{service.revenue.toFixed(2)} ريال</p>
                 </div>
               </div>
             ))}

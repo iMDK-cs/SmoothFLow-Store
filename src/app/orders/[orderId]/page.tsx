@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -37,9 +37,9 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
       return
     }
     fetchOrder()
-  }, [session, orderId, router])
+  }, [session, orderId, router, fetchOrder])
 
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       const response = await fetch(`/api/orders/${orderId}`)
       if (!response.ok) {
@@ -53,7 +53,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -187,7 +187,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
               <div className="bg-gray-800 rounded-lg p-6">
                 <h2 className="text-xl font-semibold text-white mb-4">الخدمات المطلوبة</h2>
                 <div className="space-y-4">
-                  {order.items.map((item: any) => (
+                  {order.items.map((item: { id: string; service: { title: string }; option?: { title: string }; quantity: number; unitPrice: number }) => (
                     <div key={item.id} className="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
                       <div className="flex-1">
                         <h3 className="text-white font-medium">{item.service.title}</h3>

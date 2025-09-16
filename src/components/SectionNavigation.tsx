@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useCallback } from 'react'
 
 interface SectionNavigationProps {
   activeSection: string
@@ -15,7 +15,7 @@ export default function SectionNavigation({
   headerStyle = 'default',
   sectionProgress = 0 
 }: SectionNavigationProps) {
-  const [isVisible, setIsVisible] = useState(true)
+  const [isVisible] = useState(true)
   
   const sections = [
     { id: 'hero', label: 'الرئيسية', icon: '🏠', color: 'from-blue-500 to-blue-600' },
@@ -109,7 +109,6 @@ export default function SectionNavigation({
       <div className="flex flex-col space-y-1 p-3 relative z-10">
         {sections.map((section) => {
           const isActive = activeSection === section.id
-          
           return (
             <button
               key={section.id}
@@ -155,249 +154,6 @@ export default function SectionNavigation({
         <div className="text-white/40 text-[10px] mt-1">
           {Math.round(sectionProgress * 100)}%
         </div>
-      </div>
-    </div>
-  )
-
-
-// Simplified scroll detection hook
-interface ScrollState {
-  currentSection: string;
-  previousSection: string;
-  scrollDirection: 'up' | 'down' | 'none';
-  scrollY: number;
-  isScrolled: boolean;
-  sectionProgress: number;
-  headerStyle: 'default' | 'maintenance' | 'tweaking' | 'assembly' | 'contact';
-}
-
-interface SectionInfo {
-  id: string;
-  element: HTMLElement;
-  top: number;
-  bottom: number;
-  height: number;
-}
-
-export const useAdvancedScrollDetection = () => {
-  const [scrollState, setScrollState] = useState<ScrollState>({
-    currentSection: 'hero',
-    previousSection: '',
-    scrollDirection: 'none',
-    scrollY: 0,
-    isScrolled: false,
-    sectionProgress: 0,
-    headerStyle: 'default'
-  });
-
-  const lastScrollY = useRef(0);
-  const ticking = useRef(false);
-  const sectionsRef = useRef<SectionInfo[]>([]);
-
-  const sectionIds = ['hero', 'assembly', 'maintenance', 'tweaking', 'contact'];
-
-  // Get header style based on current section
-  const getHeaderStyle = useCallback((section: string): ScrollState['headerStyle'] => {
-    switch (section) {
-      case 'maintenance':
-        return 'maintenance';
-      case 'tweaking':
-        return 'tweaking';
-      case 'assembly':
-        return 'assembly';
-      case 'contact':
-        return 'contact';
-      default:
-        return 'default';
-    }
-  }, []);
-
-  // Calculate section progress (0-1)
-  const calculateSectionProgress = useCallback((section: SectionInfo, scrollY: number): number => {
-    const viewportHeight = window.innerHeight;
-    const sectionTop = section.top;
-    const sectionHeight = section.height;
-
-    const scrollProgress = Math.max(0, Math.min(1, (scrollY - sectionTop + viewportHeight / 2) / sectionHeight));
-    return scrollProgress;
-  }, []);
-
-  // Update sections information
-  const updateSections = useCallback(() => {
-    const sections: SectionInfo[] = [];
-    
-    const sectionSelectors = [
-      { 
-        id: 'hero', 
-        selectors: ['#hero', 'section:first-of-type', '.hero-section'] 
-      },
-      { 
-        id: 'assembly', 
-        selectors: ['#assembly', '[data-section="assembly"]'] 
-      },
-      { 
-        id: 'maintenance', 
-        selectors: ['#maintenance', '[data-section="maintenance"]'] 
-      },
-      { 
-        id: 'tweaking', 
-        selectors: ['#tweaking', '[data-section="tweaking"]'] 
-      },
-      { 
-        id: 'contact', 
-        selectors: ['#contact', '[data-section="contact"]', 'section:last-of-type'] 
-      }
-    ];
-
-    sectionSelectors.forEach(({ id, selectors }) => {
-      let element: HTMLElement | null = null;
-      
-      for (const selector of selectors) {
-        try {
-          element = document.querySelector(selector) as HTMLElement;
-          if (element) break;
-        } catch (e) {
-          continue;
-        }
-      }
-      
-      if (element) {
-        const rect = element.getBoundingClientRect();
-        const scrollY = window.pageYOffset;
-        
-        sections.push({
-          id,
-          element,
-          top: rect.top + scrollY,
-          bottom: rect.bottom + scrollY,
-          height: rect.height
-        });
-      }
-    });
-
-    sectionsRef.current = sections;
-  }, []);
-
-  // Find current section
-  const findCurrentSection = useCallback((scrollY: number): string => {
-    const viewportHeight = window.innerHeight;
-    const scrollCenter = scrollY + viewportHeight / 3;
-
-    for (const section of sectionsRef.current) {
-      if (scrollCenter >= section.top && scrollCenter <= section.bottom) {
-        return section.id;
-      }
-    }
-
-    // Fallback to most visible section
-    let mostVisibleSection = sectionsRef.current[0]?.id || 'hero';
-    let maxVisibleArea = 0;
-
-    sectionsRef.current.forEach(section => {
-      const visibleTop = Math.max(scrollY, section.top);
-      const visibleBottom = Math.min(scrollY + viewportHeight, section.bottom);
-      const visibleArea = Math.max(0, visibleBottom - visibleTop);
-      
-      if (visibleArea > maxVisibleArea) {
-        maxVisibleArea = visibleArea;
-        mostVisibleSection = section.id;
-      }
-    });
-
-    return mostVisibleSection;
-  }, []);
-
-  // Handle scroll
-  const handleScroll = useCallback(() => {
-    if (!ticking.current) {
-      requestAnimationFrame(() => {
-        const currentScrollY = window.pageYOffset;
-        const direction = currentScrollY > lastScrollY.current ? 'down' : 
-                         currentScrollY < lastScrollY.current ? 'up' : 'none';
-        
-        const currentSection = findCurrentSection(currentScrollY);
-        const currentSectionInfo = sectionsRef.current.find(s => s.id === currentSection);
-        const sectionProgress = currentSectionInfo ? 
-          calculateSectionProgress(currentSectionInfo, currentScrollY) : 0;
-
-        setScrollState(prevState => ({
-          ...prevState,
-          scrollY: currentScrollY,
-          scrollDirection: direction,
-          currentSection,
-          previousSection: prevState.currentSection !== currentSection ? prevState.currentSection : prevState.previousSection,
-          isScrolled: currentScrollY > 50,
-          sectionProgress,
-          headerStyle: getHeaderStyle(currentSection)
-        }));
-
-        lastScrollY.current = currentScrollY;
-        ticking.current = false;
-      });
-      ticking.current = true;
-    }
-  }, [findCurrentSection, calculateSectionProgress, getHeaderStyle]);
-
-  // Initialize
-  useEffect(() => {
-    const initializeTimeout = setTimeout(() => {
-      updateSections();
-      handleScroll();
-    }, 100);
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', updateSections, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updateSections);
-      clearTimeout(initializeTimeout);
-    };
-  }, [handleScroll, updateSections]);
-
-  // Scroll to section
-  const scrollToSection = useCallback((sectionId: string) => {
-    const section = sectionsRef.current.find(s => s.id === sectionId);
-    if (section) {
-      window.scrollTo({
-        top: section.top - 80,
-        behavior: 'smooth'
-      });
-    } else if (sectionId === 'hero') {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-  }, []);
-
-  return (
-    <div className="fixed right-4 top-1/2 transform -translate-y-1/2 z-50 bg-black/80 backdrop-blur-lg rounded-xl border border-white/10 shadow-2xl">
-      <div className="flex flex-col gap-1 p-2">
-        {sections.map((section) => {
-          const isActive = activeSection === section.id
-          return (
-            <button
-              key={section.id}
-              onClick={() => scrollToSection(section.id)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 group relative overflow-hidden ${
-                isActive
-                  ? `bg-gradient-to-r ${section.color} text-white shadow-xl scale-105 shadow-black/25`
-                  : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-105'
-              }`}
-              title={section.label}
-            >
-              <span className={`text-lg transition-all duration-300 ${
-                isActive ? 'scale-110' : 'group-hover:scale-110'
-              }`}>
-                {section.icon}
-              </span>
-              <span className="hidden sm:block transition-all duration-300 font-arabic">
-                {section.label}
-              </span>
-            </button>
-          )
-        })}
       </div>
     </div>
   )

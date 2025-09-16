@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { loadStripe } from '@stripe/stripe-js'
+// import { loadStripe } from '@stripe/stripe-js'
 
 // const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
@@ -30,7 +30,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
   const resolvedParams = use(params)
   const orderId = resolvedParams.orderId
 
-  const fetchOrder = async () => {
+  const fetchOrder = useCallback(async () => {
     try {
       const response = await fetch(`/api/orders/${orderId}`)
       if (!response.ok) {
@@ -44,7 +44,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId])
 
   useEffect(() => {
     if (!session) {
@@ -52,7 +52,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
       return
     }
     fetchOrder()
-  }, [session, orderId, router])
+  }, [session, orderId, router, fetchOrder])
 
   const handleStripePayment = async () => {
     setProcessing(true)

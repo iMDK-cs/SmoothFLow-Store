@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
@@ -1308,7 +1308,7 @@ FAQItem.displayName = 'FAQItem';
 
 // Main Component
 export default function MDKStore() {
-  const { isScrolled, scrollY, scrollDirection } = useScrollPosition();
+  const { isScrolled, scrollY } = useScrollPosition();
   const { activeSection } = useSectionObserver();
   const [isClient, setIsClient] = useState(false);
   const [notification, setNotification] = useState<{

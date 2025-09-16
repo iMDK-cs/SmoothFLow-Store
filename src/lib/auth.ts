@@ -72,3 +72,17 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-key-for-development',
 }
+
+// Helper function to get user from session
+export async function getUserFromSession(session: { user?: { email?: string | null } } | null) {
+  if (!session?.user?.email) {
+    return null
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true, role: true, name: true, email: true }
+  })
+
+  return user
+}

@@ -14,7 +14,12 @@ export default function Orders() {
     totalAmount: number;
     status: string;
     createdAt: string;
-    items: any[];
+    items: Array<{
+      id: string;
+      service: { title: string };
+      quantity: number;
+      unitPrice: number;
+    }>;
   }>>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
