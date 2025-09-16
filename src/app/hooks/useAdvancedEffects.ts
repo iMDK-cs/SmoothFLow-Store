@@ -100,8 +100,9 @@ export const useRevealAnimation = (threshold = 0.1) => {
     }
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
+      const currentRef = ref.current;
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, [threshold]);
@@ -156,7 +157,7 @@ export const useParticleSystem = (count = 50) => {
 // Cursor trail effect hook
 export const useCursorTrail = () => {
   const [trail, setTrail] = useState<Array<{ x: number; y: number; id: number }>>([]);
-  const trailRef = useRef<number[]>([]);
+  // const trailRef = useRef<number[]>([]); // Removed unused variable
 
   useEffect(() => {
     let animationId: number;

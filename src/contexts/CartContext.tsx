@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useReducer, useEffect, useState } from 'react'
+import React, { createContext, useContext, useReducer, useEffect, useState, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 
 interface CartItem {
@@ -87,17 +87,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lastAddedItem, setLastAddedItem] = useState<string | null>(null)
   const { data: session } = useSession()
 
-  // Fetch cart on mount
-  useEffect(() => {
-    if (session?.user) {
-      fetchCart()
-    } else {
-      // Clear cart when user logs out
-      dispatch({ type: 'CLEAR_CART' })
-    }
-  }, [session])
-
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     // Don't make API calls if user is not logged in
     if (!session?.user) {
       return
@@ -126,7 +116,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.error('Fetch cart error:', error) // Debug log
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load cart' })
     }
-  }
+  }, [session])
+
+  // Fetch cart on mount
+  useEffect(() => {
+    if (session?.user) {
+      fetchCart()
+    } else {
+      // Clear cart when user logs out
+      dispatch({ type: 'CLEAR_CART' })
+    }
+  }, [session, fetchCart])
 
   const addToCart = async (serviceId: string, optionId?: string, quantity = 1) => {
     // Don't make API calls if user is not logged in
@@ -196,7 +196,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       
       await fetchCart()
-    } catch (error) {
+    } catch {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to remove item from cart' })
     }
   }
@@ -207,7 +207,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       
       // Implementation for updating quantity
       await fetchCart()
-    } catch (error) {
+    } catch {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to update quantity' })
     }
   }
@@ -225,7 +225,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       
       await fetchCart()
-    } catch (error) {
+    } catch {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to clear cart' })
     }
   }

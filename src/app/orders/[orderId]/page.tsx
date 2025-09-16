@@ -16,11 +16,14 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
     status: string;
     paymentStatus: string;
     createdAt: string;
+    notes?: string;
     items: Array<{
       id: string;
       service: { title: string };
+      option?: { title: string };
       quantity: number;
       unitPrice: number;
+      totalPrice: number;
     }>;
   } | null>(null)
   const [loading, setLoading] = useState(true)
@@ -30,14 +33,6 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
   // Unwrap the params Promise
   const resolvedParams = use(params)
   const orderId = resolvedParams.orderId
-
-  useEffect(() => {
-    if (!session) {
-      router.push('/auth/signin')
-      return
-    }
-    fetchOrder()
-  }, [session, orderId, router, fetchOrder])
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -54,6 +49,14 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
       setLoading(false)
     }
   }, [orderId])
+
+  useEffect(() => {
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+    fetchOrder()
+  }, [session, orderId, router, fetchOrder])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -198,7 +201,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
                       </div>
                       <div className="text-left">
                         <p className="text-white font-semibold">
-                          {item.totalPrice.toFixed(2)} ريال
+                          {(item.unitPrice * item.quantity).toFixed(2)} ريال
                         </p>
                         <p className="text-gray-400 text-sm">
                           {item.unitPrice.toFixed(2)} ريال × {item.quantity}

@@ -2,8 +2,8 @@ import AdminJS from 'adminjs'
 import AdminJSExpress from '@adminjs/express'
 import AdminJSPrisma from '@adminjs/prisma'
 import { PrismaClient } from '@prisma/client'
-import { getServerSession } from 'next-auth'
-import { authOptions } from './auth'
+// import { getServerSession } from 'next-auth' // Removed unused imports
+// import { authOptions } from './auth'
 
 const prisma = new PrismaClient()
 

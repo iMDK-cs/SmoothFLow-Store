@@ -38,7 +38,7 @@ export default function LiveChat() {
         }
       ])
     }
-  }, [isOpen])
+  }, [isOpen, messages.length])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()

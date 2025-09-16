@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { sendOrderConfirmation } from '@/lib/email'
@@ -22,12 +22,14 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    const user = await getUserFromSession(session)
+    
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const orders = await prisma.order.findMany({
-      where: { userId: session.user.id },
+      where: { userId: user.id },
       include: {
         items: {
           include: {
@@ -54,7 +56,9 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    const user = await getUserFromSession(session)
+    
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -73,7 +77,7 @@ export async function POST(request: NextRequest) {
     // Create order
     const order = await prisma.order.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         orderNumber,
         totalAmount,
         notes,
@@ -101,7 +105,7 @@ export async function POST(request: NextRequest) {
 
     // Clear cart after successful order
     const cart = await prisma.cart.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: user.id }
     })
 
     if (cart) {
@@ -112,16 +116,16 @@ export async function POST(request: NextRequest) {
 
     // Send order confirmation email
     try {
-      const user = await prisma.user.findUnique({
-        where: { id: session.user.id },
+      const userData = await prisma.user.findUnique({
+        where: { id: user.id },
         select: { name: true, email: true }
       })
 
-      if (user?.email) {
+      if (userData?.email) {
         await sendOrderConfirmation({
           orderId: order.id,
-          customerName: user.name || 'عميل',
-          customerEmail: user.email,
+          customerName: userData.name || 'عميل',
+          customerEmail: userData.email,
           items: order.items.map(item => ({
             serviceName: item.service.title,
             quantity: item.quantity,

@@ -23,9 +23,6 @@ export async function GET() {
 
     const bookings = await prisma.booking.findMany({
       where: { userId: user.id },
-      include: {
-        service: true
-      },
       orderBy: { date: 'desc' }
     })
 
@@ -43,7 +40,9 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    const user = await getUserFromSession(session)
+    
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -77,14 +76,6 @@ export async function POST(request: NextRequest) {
         time,
         notes,
         status: 'PENDING',
-      },
-      include: {
-        service: {
-          select: {
-            id: true,
-            title: true,
-          }
-        }
       }
     })
 

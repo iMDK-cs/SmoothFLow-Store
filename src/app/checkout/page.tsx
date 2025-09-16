@@ -8,7 +8,7 @@ import Link from 'next/link'
 
 export default function Checkout() {
   const { data: session } = useSession()
-  const { state, getTotalPrice, getItemCount } = useCart()
+  const { state, getTotalPrice } = useCart()
   const router = useRouter()
   const [formData, setFormData] = useState({
     notes: '',

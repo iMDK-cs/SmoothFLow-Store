@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Import components with fallbacks
 import EnhancedShoppingCart from '@/components/EnhancedShoppingCart';
@@ -136,7 +137,7 @@ const imageConfig = {
   categories: {
     assembly: "/images/categories/pc-biuld.jpg",
     maintenance: "/images/categories/pc-fix.jpg", 
-    tweaking: "/images/categories/Pc-tweak.jpg "
+    tweaking: "/images/categories/Pc-tweak.jpg"
   },
   services: {
     'ready-builds': "/images/services/ready-builds.jpg",
@@ -409,9 +410,11 @@ const EnhancedImage = memo(({
         </div>
       )}
       {isInView && (
-        <img
+        <Image
           src={imgSrc}
           alt={alt}
+          width={500}
+          height={300}
           className={`${className} ${loading ? 'opacity-0' : 'opacity-100 transition-opacity duration-300'}`}
           onError={handleError}
           onLoad={handleLoad}
@@ -457,14 +460,12 @@ PopularBadge.displayName = 'PopularBadge';
 const DynamicHeader = memo(({ 
   activeSection, 
   isScrolled, 
-  scrollDirection, 
   scrollY,
   scrollToSection,
   session
 }: { 
   activeSection: string; 
   isScrolled: boolean; 
-  scrollDirection: 'up' | 'down'; 
   scrollY: number;
   scrollToSection: (sectionId: string) => void;
   session: { user?: { name?: string; email?: string } } | null;
@@ -1046,17 +1047,16 @@ EnhancedServiceSection.displayName = 'EnhancedServiceSection';
 const useScrollPosition = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down');
+  // const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down'); // Removed unused variable
   const [isClient, setIsClient] = useState(false);
 
   const handleScroll = useCallback(() => {
     if (typeof window !== 'undefined') {
       const currentScrollY = window.scrollY;
       setIsScrolled(currentScrollY > 50);
-      setScrollDirection(currentScrollY > scrollY ? 'down' : 'up');
       setScrollY(currentScrollY);
     }
-  }, [scrollY]);
+  }, []);
 
   useEffect(() => {
     setIsClient(true);
@@ -1080,8 +1080,7 @@ const useScrollPosition = () => {
 
   return { 
     isScrolled: isClient ? isScrolled : false, 
-    scrollY: isClient ? scrollY : 0,
-    scrollDirection: isClient ? scrollDirection : 'down'
+    scrollY: isClient ? scrollY : 0
   };
 };
 
@@ -1442,7 +1441,6 @@ export default function MDKStore() {
         <DynamicHeader 
           activeSection={activeSection}
           isScrolled={isScrolled}
-          scrollDirection={scrollDirection}
           scrollY={scrollY}
           scrollToSection={scrollToSection}
           session={session}

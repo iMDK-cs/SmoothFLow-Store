@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
@@ -49,7 +49,9 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    const user = await getUserFromSession(session)
+    
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -59,7 +61,7 @@ export async function POST(request: NextRequest) {
     // Check if user already reviewed this service
     const existingReview = await prisma.review.findFirst({
       where: {
-        userId: session.user.id,
+        userId: user.id,
         serviceId,
         orderId: orderId || null,
       }
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest) {
     // Create review
     const review = await prisma.review.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         serviceId,
         orderId,
         rating,

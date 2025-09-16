@@ -35,7 +35,7 @@ export default function AdminServices() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [updating, setUpdating] = useState<string | null>(null)
-  const [showModal, setShowModal] = useState(false)
+  // const [showModal, setShowModal] = useState(false) // Removed unused variables
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [editingPrice, setEditingPrice] = useState(false)
   const [newPrice, setNewPrice] = useState('')

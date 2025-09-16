@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
+import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
 import { sendPaymentConfirmation } from '@/lib/email'
@@ -8,7 +8,7 @@ import { sendPaymentConfirmation } from '@/lib/email'
 // Initialize Stripe only if secret key is available
 const stripe = process.env.STRIPE_SECRET_KEY 
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2023-10-16',
+      apiVersion: '2025-08-27.basil',
     })
   : null
 
@@ -27,7 +27,9 @@ export async function POST(request: NextRequest) {
 
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.id) {
+    const user = await getUserFromSession(session)
+    
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -57,7 +59,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
-    if (order.userId !== session.user.id) {
+    if (order.userId !== user.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest) {
         gateway: 'stripe',
         transactionId: paymentIntent.id,
         status: paymentIntent.status === 'succeeded' ? 'COMPLETED' : 'PENDING',
-        gatewayData: paymentIntent,
+        gatewayData: JSON.parse(JSON.stringify(paymentIntent)),
       }
     })
 
@@ -98,16 +100,16 @@ export async function POST(request: NextRequest) {
 
       // Send payment confirmation email
       try {
-        const user = await prisma.user.findUnique({
-          where: { id: session.user.id },
+        const userData = await prisma.user.findUnique({
+          where: { id: user.id },
           select: { name: true, email: true }
         })
 
-        if (user?.email) {
+        if (userData?.email) {
           await sendPaymentConfirmation({
             orderId: orderId,
-            customerName: user.name || 'عميل',
-            customerEmail: user.email,
+            customerName: userData.name || 'عميل',
+            customerEmail: userData.email,
             amount: order.totalAmount,
             paymentMethod: 'بطاقة ائتمان',
             transactionId: paymentIntent.id,

@@ -411,12 +411,12 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ servic
     setIsAddingToCart(true);
     try {
       // Prepare cart item with selected options and add-ons
-      const cartItem = {
-        serviceId: service.id,
-        options: selectedOptions,
-        addOns: Object.keys(selectedAddOns).filter(key => selectedAddOns[key]),
-        quantity
-      };
+      // const cartItem = { // Removed unused variable
+      //   serviceId: service.id,
+      //   options: selectedOptions,
+      //   addOns: Object.keys(selectedAddOns).filter(key => selectedAddOns[key]),
+      //   quantity
+      // };
 
       await addToCart(service.id, selectedOptions.serviceOption, quantity);
       
@@ -424,7 +424,7 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ servic
         message: `تم إضافة ${service.title} إلى السلة بنجاح!`, 
         type: 'success' 
       });
-    } catch (error) {
+    } catch {
       setNotification({ 
         message: 'حدث خطأ أثناء إضافة الخدمة إلى السلة', 
         type: 'error' 
