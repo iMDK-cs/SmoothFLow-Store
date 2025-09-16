@@ -13,6 +13,7 @@ export default function Orders() {
     orderNumber: string;
     totalAmount: number;
     status: string;
+    paymentStatus: string;
     createdAt: string;
     items: Array<{
       id: string;
