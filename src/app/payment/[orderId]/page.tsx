@@ -150,17 +150,67 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
             <h2 className="text-xl font-semibold text-white mb-4">اختر طريقة الدفع</h2>
             
             <div className="space-y-4">
+              {/* Stripe Payment - Only show if configured */}
+              {stripePromise ? (
+                <button
+                  onClick={handleStripePayment}
+                  disabled={processing}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
+                >
+                  {processing ? 'جاري المعالجة...' : '💳 الدفع بالبطاقة الائتمانية'}
+                </button>
+              ) : (
+                <div className="w-full bg-gray-700 text-gray-400 py-3 px-4 rounded-lg flex items-center justify-center">
+                  💳 الدفع بالبطاقة الائتمانية (غير متاح حالياً)
+                </div>
+              )}
+
+              {/* Cash on Delivery */}
               <button
-                onClick={handleStripePayment}
-                disabled={processing}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
+                onClick={() => {
+                  alert('تم تأكيد الطلب! سيتم التواصل معك قريباً لتأكيد التفاصيل.')
+                  router.push(`/orders/${orderId}?success=true`)
+                }}
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center"
               >
-                {processing ? 'جاري المعالجة...' : 'الدفع بالبطاقة الائتمانية'}
+                💰 الدفع عند الاستلام
+              </button>
+
+              {/* Bank Transfer */}
+              <button
+                onClick={() => {
+                  alert('سيتم إرسال تفاصيل الحساب البنكي لك قريباً.')
+                  router.push(`/orders/${orderId}?success=true`)
+                }}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center"
+              >
+                🏦 التحويل البنكي
+              </button>
+
+              {/* WhatsApp Contact */}
+              <button
+                onClick={() => {
+                  const message = `مرحباً، أريد استفسار عن طلبي رقم: ${order.orderNumber || orderId}`
+                  const whatsappUrl = `https://wa.me/966543156466?text=${encodeURIComponent(message)}`
+                  window.open(whatsappUrl, '_blank')
+                }}
+                className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center"
+              >
+                📱 التواصل عبر واتساب
               </button>
             </div>
 
             {error && (
               <div className="mt-4 text-red-400 text-sm text-center">{error}</div>
+            )}
+
+            {/* Info about Stripe */}
+            {!stripePromise && (
+              <div className="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <p className="text-blue-300 text-sm text-center">
+                  💡 لإعداد الدفع بالبطاقة الائتمانية، يرجى إضافة مفاتيح Stripe في ملف .env.local
+                </p>
+              </div>
             )}
           </div>
         </div>
