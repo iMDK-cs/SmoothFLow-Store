@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     title: "SmoothFlow - حلول تقنية متطورة",
     description: "خدمات كمبيوتر احترافية في الرس",
     images: ["/images/twitter-image.jpg"],
-    creator: "@smoothflow",
+    creator: "@yourusername",
   },
   
   // Additional metadata

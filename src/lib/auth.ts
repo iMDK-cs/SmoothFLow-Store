@@ -4,12 +4,6 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
 
-interface ExtendedUser {
-  id: string
-  email: string
-  name: string
-  role: string
-}
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
