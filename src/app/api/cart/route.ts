@@ -50,6 +50,8 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json()
     const { serviceId, optionId, quantity } = addToCartSchema.parse(body)
+    
+    console.log('Add to cart request:', { serviceId, optionId, quantity })
 
     // Get or create cart
     let cart = await prisma.cart.findUnique({
@@ -68,11 +70,15 @@ export async function POST(request: NextRequest) {
       select: { available: true, stock: true, title: true }
     })
 
+    console.log('Service found:', service)
+
     if (!service) {
+      console.log('Service not found:', serviceId)
       return NextResponse.json({ error: 'Service not found' }, { status: 404 })
     }
 
     if (!service.available) {
+      console.log('Service not available:', serviceId)
       return NextResponse.json({ error: 'Service is not available' }, { status: 400 })
     }
 
