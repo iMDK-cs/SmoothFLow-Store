@@ -15,7 +15,12 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
     orderNumber: string;
     totalAmount: number;
     status: string;
-    items: any[];
+    items: Array<{
+      id: string;
+      service: { title: string };
+      quantity: number;
+      unitPrice: number;
+    }>;
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
@@ -24,14 +29,6 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
   // Unwrap the params Promise
   const resolvedParams = use(params)
   const orderId = resolvedParams.orderId
-
-  useEffect(() => {
-    if (!session) {
-      router.push('/auth/signin')
-      return
-    }
-    fetchOrder()
-  }, [session, orderId, router])
 
   const fetchOrder = async () => {
     try {
@@ -48,6 +45,14 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+    fetchOrder()
+  }, [session, orderId, router])
 
   const handleStripePayment = async () => {
     setProcessing(true)

@@ -8,7 +8,14 @@ import Link from 'next/link'
 export default function Orders() {
   const { data: session } = useSession()
   const router = useRouter()
-  const [orders, setOrders] = useState<any[]>([])
+  const [orders, setOrders] = useState<Array<{
+    id: string;
+    orderNumber: string;
+    totalAmount: number;
+    status: string;
+    createdAt: string;
+    items: any[];
+  }>>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -18,7 +25,7 @@ export default function Orders() {
       return
     }
     fetchOrders()
-  }, [session])
+  }, [session, router])
 
   const fetchOrders = async () => {
     try {
@@ -28,7 +35,8 @@ export default function Orders() {
       }
       const data = await response.json()
       setOrders(data.orders)
-    } catch (error) {
+    } catch (err) {
+      console.error('Failed to load orders:', err)
       setError('Failed to load orders')
     } finally {
       setLoading(false)
@@ -149,7 +157,7 @@ export default function Orders() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex flex-wrap gap-2">
-                      {order.items.slice(0, 3).map((item: any) => (
+                      {order.items.slice(0, 3).map((item: { service: { title: string } }) => (
                         <span key={item.id} className="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">
                           {item.service.title}
                         </span>

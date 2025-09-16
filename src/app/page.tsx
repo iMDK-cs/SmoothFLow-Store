@@ -16,10 +16,10 @@ import EnhancedSupportChat from '@/components/EnhancedSupportChat';
 
 // Enhanced Error Boundary Component
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: React.ComponentType<any> },
+  { children: React.ReactNode; fallback?: React.ComponentType<{ error?: Error }> },
   { hasError: boolean; error?: Error }
 > {
-  constructor(props: { children: React.ReactNode; fallback?: React.ComponentType<any> }) {
+  constructor(props: { children: React.ReactNode; fallback?: React.ComponentType<{ error?: Error }> }) {
     super(props);
     this.state = { hasError: false };
   }
@@ -351,7 +351,7 @@ const EnhancedImage = memo(({
   fallback: string;
   alt: string;
   className: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => {
   const [imgSrc, setImgSrc] = useState(src);
   const [loading, setLoading] = useState(true);
@@ -467,7 +467,7 @@ const DynamicHeader = memo(({
   scrollDirection: 'up' | 'down'; 
   scrollY: number;
   scrollToSection: (sectionId: string) => void;
-  session: any;
+  session: { user?: { name?: string; email?: string } } | null;
 }) => {
   const getSectionTheme = useCallback((section: string) => {
     switch (section) {
@@ -700,9 +700,6 @@ const ServiceCard = memo(({
   const { data: session } = useSession();
   const router = useRouter();
 
-  // Add safety check for service
-  if (!service) return null;
-
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     // Don't navigate if clicking on the button or options
     if (e.target instanceof HTMLElement) {
@@ -757,6 +754,9 @@ const ServiceCard = memo(({
     e.stopPropagation();
     setShowOptions(!showOptions);
   }, [showOptions]);
+
+  // Add safety check for service
+  if (!service) return null;
 
   return (
     <ErrorBoundary>
@@ -978,7 +978,7 @@ const EnhancedServiceSection = memo(({
   onAddToCart
 }: { 
   sectionKey: string; 
-  category: { title: string; services: any[] }; 
+  category: { title: string; services: Service[] }; 
   activeSection: string;
   onAddToCart: (message: string, type: 'success' | 'error' | 'info') => void;
 }) => {

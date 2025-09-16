@@ -5,7 +5,12 @@ import { useSession } from 'next-auth/react'
 
 interface BookingCalendarProps {
   serviceId: string
-  onBookingConfirmed: (booking: any) => void
+  onBookingConfirmed: (booking: {
+    id: string;
+    date: string;
+    time: string;
+    notes: string;
+  }) => void
 }
 
 export default function BookingCalendar({ serviceId, onBookingConfirmed }: BookingCalendarProps) {

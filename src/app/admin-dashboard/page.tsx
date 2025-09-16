@@ -10,9 +10,24 @@ interface AdminStats {
   totalOrders: number
   totalRevenue: number
   pendingOrders: number
-  recentOrders: any[]
-  topServices: any[]
-  monthlyStats: any[]
+  recentOrders: Array<{
+    id: string;
+    orderNumber: string;
+    totalAmount: number;
+    status: string;
+    createdAt: string;
+  }>
+  topServices: Array<{
+    id: string;
+    title: string;
+    orderCount: number;
+    revenue: number;
+  }>
+  monthlyStats: Array<{
+    month: string;
+    orders: number;
+    revenue: number;
+  }>
 }
 
 export default function AdminDashboard() {

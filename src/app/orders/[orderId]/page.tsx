@@ -9,7 +9,20 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
   const { data: session } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [order, setOrder] = useState<any>(null)
+  const [order, setOrder] = useState<{
+    id: string;
+    orderNumber: string;
+    totalAmount: number;
+    status: string;
+    paymentStatus: string;
+    createdAt: string;
+    items: Array<{
+      id: string;
+      service: { title: string };
+      quantity: number;
+      unitPrice: number;
+    }>;
+  } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const isSuccess = searchParams.get('success') === 'true'
@@ -24,7 +37,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
       return
     }
     fetchOrder()
-  }, [session, orderId])
+  }, [session, orderId, router])
 
   const fetchOrder = async () => {
     try {
@@ -34,7 +47,8 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
       }
       const data = await response.json()
       setOrder(data.order)
-    } catch (error) {
+    } catch (err) {
+      console.error('Failed to load order:', err)
       setError('Failed to load order')
     } finally {
       setLoading(false)
