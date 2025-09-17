@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -244,12 +245,6 @@ model Notification {
   @@map("notifications")
 }
 
-enum Role {
-  USER
-  ADMIN
-  MODERATOR
-}
-
 model SupportTicket {
   id        String   @id @default(cuid())
   userId    String
@@ -278,6 +273,12 @@ model SupportReply {
   ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
   @@map("support_replies")
+}
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
 }
 
 enum OrderStatus {
