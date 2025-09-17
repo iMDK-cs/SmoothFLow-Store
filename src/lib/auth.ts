@@ -68,6 +68,7 @@ export const authOptions = {
     signIn: '/auth/signin',
   },
   callbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async jwt(params: any) {
       const { token, user } = params
       if (user) {
@@ -75,6 +76,7 @@ export const authOptions = {
       }
       return token
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session(params: any) {
       const { session, token } = params
       if (token && session.user) {

@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import { Cairo, Inter } from 'next/font/google';
+
+const cairo = Cairo({ 
+  subsets: ['latin', 'arabic'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-cairo'
+});
+
+const inter = Inter({ 
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-inter'
+});
 
 export const metadata: Metadata = {
   title: "SmoothFlow - حلول تقنية متطورة",
@@ -135,7 +148,7 @@ export default function RootLayout({
         />
       </head>
       <body 
-        className="font-['Cairo',sans-serif] antialiased bg-black text-white overflow-x-hidden" 
+        className={`${cairo.variable} ${inter.variable} font-['Cairo',sans-serif] antialiased bg-black text-white overflow-x-hidden`}
         suppressHydrationWarning
       >
         <Providers>
