@@ -20,7 +20,7 @@ async function migrateData() {
     console.log('نقل المستخدمين...')
     const users = sqliteDb.prepare('SELECT * FROM users').all()
     
-    for (const user of users) {
+    for (const user of users as any[]) {
       await prismaPostgres.user.upsert({
         where: { id: user.id },
         update: {},
@@ -43,7 +43,7 @@ async function migrateData() {
     console.log('نقل الخدمات...')
     const services = sqliteDb.prepare('SELECT * FROM services').all()
     
-    for (const service of services) {
+    for (const service of services as any[]) {
       await prismaPostgres.service.upsert({
         where: { id: service.id },
         update: {},
@@ -71,7 +71,7 @@ async function migrateData() {
     console.log('نقل خيارات الخدمات...')
     const serviceOptions = sqliteDb.prepare('SELECT * FROM service_options').all()
     
-    for (const option of serviceOptions) {
+    for (const option of serviceOptions as any[]) {
       await prismaPostgres.serviceOption.upsert({
         where: { id: option.id },
         update: {},
@@ -91,7 +91,7 @@ async function migrateData() {
     console.log('نقل الطلبات...')
     const orders = sqliteDb.prepare('SELECT * FROM orders').all()
     
-    for (const order of orders) {
+    for (const order of orders as any[]) {
       await prismaPostgres.order.upsert({
         where: { id: order.id },
         update: {},
@@ -117,7 +117,7 @@ async function migrateData() {
     console.log('نقل عناصر الطلبات...')
     const orderItems = sqliteDb.prepare('SELECT * FROM order_items').all()
     
-    for (const item of orderItems) {
+    for (const item of orderItems as any[]) {
       await prismaPostgres.orderItem.upsert({
         where: { id: item.id },
         update: {},
@@ -140,7 +140,7 @@ async function migrateData() {
       const payments = sqliteDb.prepare('SELECT * FROM payments').all()
       console.log('نقل المدفوعات...')
       
-      for (const payment of payments) {
+      for (const payment of payments as any[]) {
         await prismaPostgres.payment.upsert({
           where: { id: payment.id },
           update: {},
@@ -161,7 +161,7 @@ async function migrateData() {
       }
       console.log(`تم نقل ${payments.length} مدفوعة`)
     } catch (error) {
-      console.log('لا توجد مدفوعات للنقل أو حدث خطأ في نقل المدفوعات:', error.message)
+      console.log('لا توجد مدفوعات للنقل أو حدث خطأ في نقل المدفوعات:', error instanceof Error ? error.message : 'Unknown error')
     }
 
     // 7. نقل السلة والعربات (إذا وجدت)
@@ -169,7 +169,7 @@ async function migrateData() {
       const carts = sqliteDb.prepare('SELECT * FROM carts').all()
       console.log('نقل العربات...')
       
-      for (const cart of carts) {
+      for (const cart of carts as any[]) {
         await prismaPostgres.cart.upsert({
           where: { id: cart.id },
           update: {},
@@ -186,7 +186,7 @@ async function migrateData() {
       // نقل عناصر العربات
       const cartItems = sqliteDb.prepare('SELECT * FROM cart_items').all()
       
-      for (const item of cartItems) {
+      for (const item of cartItems as any[]) {
         await prismaPostgres.cartItem.upsert({
           where: { 
             cartId_serviceId_optionId: {
@@ -209,7 +209,7 @@ async function migrateData() {
       }
       console.log(`تم نقل ${cartItems.length} عنصر عربة`)
     } catch (error) {
-      console.log('لا توجد عربات للنقل أو حدث خطأ:', error.message)
+      console.log('لا توجد عربات للنقل أو حدث خطأ:', error instanceof Error ? error.message : 'Unknown error')
     }
 
     console.log('تم النقل بنجاح!')
