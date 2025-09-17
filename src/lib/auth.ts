@@ -63,16 +63,17 @@ export const authOptions = {
     signIn: '/auth/signin',
   },
   callbacks: {
-    async jwt({ token, user }: { token: ExtendedJWT; user?: User }) {
+    async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
-        token.role = user.role
+        (token as ExtendedJWT).role = (user as any).role
       }
       return token
     },
-    async session({ session, token }: { session: Session; token: ExtendedJWT }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (token && session.user) {
-        session.user.id = token.sub || ''
-        session.user.role = token.role || ''
+        const extendedToken = token as ExtendedJWT
+        session.user.id = extendedToken.sub || ''
+        session.user.role = extendedToken.role || ''
       }
       return session
     }
