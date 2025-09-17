@@ -12,6 +12,9 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Test database connection first
+    await prisma.$connect()
+    
     const body = await request.json()
     const { name, email, password, phone } = registerSchema.parse(body)
 
@@ -61,6 +64,8 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
+    console.error('Registration error:', error)
+    
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.issues },
@@ -68,10 +73,32 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.error('Registration error:', error)
+    // More specific error handling
+    if (error instanceof Error) {
+      console.error('Error details:', error.message)
+      
+      // Check for database connection errors
+      if (error.message.includes('connect') || error.message.includes('timeout')) {
+        return NextResponse.json(
+          { error: 'Database connection failed. Please try again later.' },
+          { status: 503 }
+        )
+      }
+      
+      // Check for unique constraint violations
+      if (error.message.includes('Unique constraint')) {
+        return NextResponse.json(
+          { error: 'User already exists with this email' },
+          { status: 400 }
+        )
+      }
+    }
+
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: process.env.NODE_ENV === 'development' ? error : undefined },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
