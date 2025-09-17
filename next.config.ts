@@ -4,12 +4,6 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcryptjs'],
   images: {
     domains: ['localhost', 'vercel.app'],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
   },
   env: {
     DATABASE_URL: process.env.DATABASE_URL,
