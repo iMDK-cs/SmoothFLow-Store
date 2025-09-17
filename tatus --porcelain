@@ -1,0 +1,3 @@
+VERCEL_DEPLOYMENT.md
+src/app/hooks/useAdvancedEffects.ts
+src/lib/auth.ts

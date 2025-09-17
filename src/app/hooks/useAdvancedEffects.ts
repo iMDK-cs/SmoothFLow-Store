@@ -86,6 +86,7 @@ export const useRevealAnimation = (threshold = 0.1) => {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
+    const currentRef = ref.current;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -95,12 +96,11 @@ export const useRevealAnimation = (threshold = 0.1) => {
       { threshold }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      const currentRef = ref.current;
       if (currentRef) {
         observer.unobserve(currentRef);
       }
