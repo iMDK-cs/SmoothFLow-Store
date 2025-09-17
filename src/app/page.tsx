@@ -1645,7 +1645,7 @@ export default function MDKStore() {
                     </svg>
                   </div>
                   <h3 className="text-white font-medium text-sm group-hover:text-sky-300 transition-colors">X</h3>
-                  <p className="text-gray-400 text-xs">تابعنا</p>
+                  <p className="text-gray-400 text-xs">للتواصل</p>
                 </div>
               </a>
               
