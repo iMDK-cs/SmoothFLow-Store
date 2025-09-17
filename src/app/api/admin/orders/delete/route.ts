@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
+    const session = await getServerSession(authOptions as any) as { user?: { email?: string | null } } | null
     const user = await getUserFromSession(session)
     
     if (!user) {
