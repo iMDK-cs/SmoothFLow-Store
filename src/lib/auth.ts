@@ -5,6 +5,12 @@ import bcrypt from 'bcryptjs'
 import type { JWT } from 'next-auth/jwt'
 import type { User, Session } from 'next-auth'
 
+// Extend JWT type to include custom properties
+interface ExtendedJWT extends JWT {
+  sub?: string
+  role?: string
+}
+
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -57,16 +63,16 @@ export const authOptions = {
     signIn: '/auth/signin',
   },
   callbacks: {
-    async jwt({ token, user }: { token: JWT; user?: User }) {
+    async jwt({ token, user }: { token: ExtendedJWT; user?: User }) {
       if (user) {
         token.role = user.role
       }
       return token
     },
-    async session({ session, token }: { session: Session; token: JWT }) {
+    async session({ session, token }: { session: Session; token: ExtendedJWT }) {
       if (token && session.user) {
-        session.user.id = (token as any).sub || ''
-        session.user.role = token.role as string
+        session.user.id = token.sub || ''
+        session.user.role = token.role || ''
       }
       return session
     }
