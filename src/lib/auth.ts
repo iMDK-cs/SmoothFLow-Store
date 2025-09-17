@@ -3,8 +3,7 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
 import type { JWT } from 'next-auth/jwt'
-import type { User, Session } from 'next-auth'
-import type { NextAuthOptions } from 'next-auth'
+import type { User } from 'next-auth'
 
 // Extend JWT type to include custom properties
 interface ExtendedJWT extends JWT {
@@ -18,7 +17,7 @@ interface ExtendedUser extends User {
 }
 
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -69,13 +68,15 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/signin',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt(params: any) {
+      const { token, user } = params
       if (user) {
         (token as ExtendedJWT).role = (user as ExtendedUser).role
       }
       return token
     },
-    async session({ session, token }) {
+    async session(params: any) {
+      const { session, token } = params
       if (token && session.user) {
         const extendedToken = token as ExtendedJWT
         session.user.id = extendedToken.sub || ''
