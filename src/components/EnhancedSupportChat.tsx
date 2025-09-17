@@ -176,7 +176,7 @@ export default function EnhancedSupportChat() {
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-20 right-6 w-96 h-[500px] bg-gray-800 rounded-lg shadow-xl flex flex-col z-50 border border-purple-500" dir="rtl">
+        <div className="fixed bottom-20 right-6 w-96 h-[500px] bg-gray-800 rounded-lg shadow-xl flex flex-col z-50 border border-purple-500 overflow-hidden" dir="rtl">
           {/* Header */}
           <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4 rounded-t-lg text-white">
             <div className="flex justify-between items-center">
@@ -202,7 +202,7 @@ export default function EnhancedSupportChat() {
           <div className="flex-1 flex flex-col">
             {showTicketForm ? (
               /* Ticket Form */
-              <div className="flex-1 p-4">
+              <div className="flex-1 p-4 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-700 hover:scrollbar-thumb-purple-400 transition-colors duration-200 scroll-smooth scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thumb-shadow-lg">
                 <h4 className="text-white font-semibold mb-4">إنشاء تذكرة دعم جديدة</h4>
                 <form onSubmit={handleCreateTicket} className="space-y-4">
                   <div>
@@ -262,7 +262,7 @@ export default function EnhancedSupportChat() {
                 {tickets.length > 0 && (
                   <div className="p-4 border-b border-gray-700">
                     <h4 className="text-white font-semibold mb-2">تذاكر الدعم</h4>
-                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                    <div className="space-y-2 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-700 hover:scrollbar-thumb-purple-400 transition-colors duration-200 scroll-smooth scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thumb-shadow-lg">
                       {tickets.slice(0, 3).map((ticket) => (
                         <div key={ticket.id} className="bg-gray-700 p-2 rounded text-sm">
                           <div className="flex justify-between items-center">
@@ -283,7 +283,7 @@ export default function EnhancedSupportChat() {
                 )}
 
                 {/* Messages */}
-                <div className="flex-1 p-4 overflow-y-auto space-y-4">
+                <div className="flex-1 p-4 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-purple-500 scrollbar-track-gray-700 hover:scrollbar-thumb-purple-400 transition-colors duration-200 scroll-smooth">
                   {messages.map((msg) => (
                     <div
                       key={msg.id}

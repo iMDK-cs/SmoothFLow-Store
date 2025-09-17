@@ -1632,7 +1632,7 @@ export default function MDKStore() {
             <div className="flex justify-center gap-4 max-w-md mx-auto">
               {/* X (Twitter) Link */}
               <a 
-                href="https://x.com/smoothflow" 
+                href="https://x.com/MDK7_" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700/60 hover:border-sky-500/50 transition-all duration-300 group hover:scale-105 hover:shadow-lg hover:shadow-sky-500/20 flex-1"
@@ -1651,7 +1651,7 @@ export default function MDKStore() {
               
               {/* WhatsApp Link */}
               <a 
-                href={`https://wa.me/${(storeConfig.contact.whatsapp || '').replace(/\D/g,'') || '966500000000'}`}
+                href={`https://wa.me/${(storeConfig.contact.whatsapp || '').replace(/\D/g,'') || '966543156466'}`}
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-gray-700/60 hover:border-green-500/50 transition-all duration-300 group hover:scale-105 hover:shadow-lg hover:shadow-green-500/20 flex-1"

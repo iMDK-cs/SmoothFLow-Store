@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
@@ -11,8 +11,7 @@ const updateProfileSchema = z.object({
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    
+    const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
     const user = await getUserFromSession(session)
     
     if (!user) {
@@ -49,8 +48,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
+    const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
     const user = await getUserFromSession(session)
     
     if (!user) {

@@ -28,7 +28,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const isSuccess = searchParams.get('success') === 'true'
+  const isSuccess = searchParams?.get('success') === 'true'
   
   // Unwrap the params Promise
   const resolvedParams = use(params)
