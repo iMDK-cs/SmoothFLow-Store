@@ -4,3 +4,15 @@ warning: in the working copy of 'prisma/schema.prisma', LF will be replaced by C
 package-lock.json
 package.json
 prisma/schema.prisma
+[1mdiff --git a/vercel.json b/vercel.json[m
+[1mindex 792c076..4dc0c2c 100644[m
+[1m--- a/vercel.json[m
+[1m+++ b/vercel.json[m
+[36m@@ -1,5 +1,5 @@[m
+ {[m
+[31m-  "buildCommand": "npm run build && npx prisma generate && npx prisma db push",[m
+[32m+[m[32m  "buildCommand": "npm run build",[m
+   "installCommand": "npm install",[m
+   "framework": "nextjs"[m
+ }[m
+\ No newline at end of file[m

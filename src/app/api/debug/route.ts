@@ -2,17 +2,28 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function GET() {
+  // Restrict to development environment or explicit debug flag
+  const isDevelopment = process.env.NODE_ENV === 'development'
+  const debugAllowed = process.env.DEBUG_ALLOW === 'true'
+  
+  if (!isDevelopment && !debugAllowed) {
+    return NextResponse.json(
+      { error: 'Not Found' },
+      { status: 404 }
+    )
+  }
+
   try {
     const debug = {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
       database: {
-        url: process.env.DATABASE_URL ? 'Set' : 'Not set',
+        url: process.env.DATABASE_URL ? '***' : 'Not set',
         connection: 'Testing...'
       },
       nextauth: {
-        secret: process.env.NEXTAUTH_SECRET ? 'Set' : 'Not set',
-        url: process.env.NEXTAUTH_URL || 'Not set'
+        secret: process.env.NEXTAUTH_SECRET ? '***' : 'Not set',
+        url: process.env.NEXTAUTH_URL ? '***' : 'Not set'
       }
     }
 
