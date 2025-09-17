@@ -12,9 +12,6 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // Test database connection first
-    await prisma.$connect()
-    
     const body = await request.json()
     const { name, email, password, phone } = registerSchema.parse(body)
 
@@ -98,7 +95,5 @@ export async function POST(request: NextRequest) {
       { error: 'Internal server error', details: process.env.NODE_ENV === 'development' ? error : undefined },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }
