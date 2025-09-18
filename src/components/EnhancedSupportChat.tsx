@@ -162,7 +162,7 @@ export default function EnhancedSupportChat() {
   return (
     <>
       <button
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-full shadow-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 z-50 group"
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-sky-500 to-cyan-500 text-white p-4 rounded-full shadow-lg hover:from-sky-600 hover:to-cyan-600 transition-all duration-300 z-50 group sky-blue-glow"
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="relative">
@@ -170,15 +170,15 @@ export default function EnhancedSupportChat() {
             {isOpen ? '✖️' : '💬'}
           </span>
           {!isOpen && (
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-cyan-300 rounded-full animate-pulse"></div>
           )}
         </div>
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-20 right-6 w-96 h-[500px] bg-gray-800 rounded-lg shadow-xl flex flex-col z-50 border border-purple-500 overflow-hidden" dir="rtl">
+        <div className="fixed bottom-20 right-6 w-96 h-[500px] bg-gray-800 rounded-lg shadow-xl flex flex-col z-50 border border-sky-500 overflow-hidden" dir="rtl">
           {/* Header */}
-          <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4 rounded-t-lg text-white">
+          <div className="bg-gradient-to-r from-sky-500 to-cyan-500 p-4 rounded-t-lg text-white">
             <div className="flex justify-between items-center">
               <h3 className="font-bold text-lg">الدعم الفني المباشر</h3>
               <div className="flex space-x-2 space-x-reverse">
@@ -211,7 +211,7 @@ export default function EnhancedSupportChat() {
                       type="text"
                       value={ticketForm.subject}
                       onChange={(e) => setTicketForm(prev => ({ ...prev, subject: e.target.value }))}
-                      className="w-full bg-gray-700 text-white p-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
+                      className="w-full bg-gray-700 text-white p-2 rounded-lg border border-gray-600 focus:outline-none focus:border-sky-500"
                       placeholder="اكتب موضوع التذكرة..."
                       required
                     />
@@ -221,7 +221,7 @@ export default function EnhancedSupportChat() {
                     <select
                       value={ticketForm.priority}
                       onChange={(e) => setTicketForm(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }))}
-                      className="w-full bg-gray-700 text-white p-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
+                      className="w-full bg-gray-700 text-white p-2 rounded-lg border border-gray-600 focus:outline-none focus:border-sky-500"
                     >
                       <option value="low">منخفضة</option>
                       <option value="medium">متوسطة</option>
@@ -233,7 +233,7 @@ export default function EnhancedSupportChat() {
                     <textarea
                       value={ticketForm.message}
                       onChange={(e) => setTicketForm(prev => ({ ...prev, message: e.target.value }))}
-                      className="w-full bg-gray-700 text-white p-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500 h-24 resize-none"
+                      className="w-full bg-gray-700 text-white p-2 rounded-lg border border-gray-600 focus:outline-none focus:border-sky-500 h-24 resize-none"
                       placeholder="اكتب تفاصيل المشكلة..."
                       required
                     />
@@ -241,7 +241,7 @@ export default function EnhancedSupportChat() {
                   <div className="flex space-x-2 space-x-reverse">
                     <button
                       type="submit"
-                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors"
+                      className="flex-1 bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white py-2 px-4 rounded-lg transition-all duration-300"
                     >
                       إنشاء التذكرة
                     </button>
@@ -292,7 +292,7 @@ export default function EnhancedSupportChat() {
                       <div
                         className={`max-w-[70%] p-3 rounded-lg shadow-md ${
                           msg.sender === 'user'
-                            ? 'bg-purple-500 text-white rounded-br-none'
+                            ? 'bg-gradient-to-r from-sky-500 to-cyan-500 text-white rounded-br-none'
                             : 'bg-gray-700 text-white rounded-bl-none'
                         }`}
                       >
@@ -326,13 +326,13 @@ export default function EnhancedSupportChat() {
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    className="flex-1 bg-gray-700 text-white p-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
+                    className="flex-1 bg-gray-700 text-white p-2 rounded-lg border border-gray-600 focus:outline-none focus:border-sky-500"
                     placeholder="اكتب رسالتك..."
                     dir="rtl"
                   />
                   <button
                     type="submit"
-                    className="ml-2 bg-purple-600 text-white p-2 rounded-lg hover:bg-purple-700 transition-colors"
+                    className="ml-2 bg-gradient-to-r from-sky-500 to-cyan-500 text-white p-2 rounded-lg hover:from-sky-600 hover:to-cyan-600 transition-all duration-300"
                   >
                     إرسال
                   </button>
