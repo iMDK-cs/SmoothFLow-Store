@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
-import { getUserFromSession } from '@/lib/auth'
+// Removed getUserFromSession import - using session data directly
 
 export default function UserProfile() {
   const { data: session } = useSession()
@@ -23,13 +23,10 @@ export default function UserProfile() {
   }, [])
 
   useEffect(() => {
-    const checkUserRole = async () => {
-      if (session) {
-        const user = await getUserFromSession(session);
-        setUserRole(user?.role || null);
-      }
-    };
-    checkUserRole();
+    if (session?.user) {
+      // Get role from session data directly (no Prisma call needed)
+      setUserRole((session.user as any)?.role || null);
+    }
   }, [session])
 
   if (!session) {

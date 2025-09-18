@@ -4,16 +4,27 @@ import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from '
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
-import { getUserFromSession } from '@/lib/auth';
+// Removed getUserFromSession import - using session data directly
 import Link from 'next/link';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 
-// Import components with fallbacks
-import EnhancedShoppingCart from '@/components/EnhancedShoppingCart';
-import UserProfile from '@/components/UserProfile';
-import ScrollProgress from '@/components/ScrollProgress';
-import Notification from '@/components/Notification';
-import LiveChat from '@/components/LiveChat';
+// Import components with lazy loading for better performance
+const EnhancedShoppingCart = dynamic(() => import('@/components/EnhancedShoppingCart'), {
+  loading: () => <div className="w-6 h-6 bg-gray-600 rounded animate-pulse" />
+});
+const UserProfile = dynamic(() => import('@/components/UserProfile'), {
+  loading: () => <div className="w-8 h-8 bg-gray-600 rounded-full animate-pulse" />
+});
+const ScrollProgress = dynamic(() => import('@/components/ScrollProgress'), {
+  ssr: false
+});
+const Notification = dynamic(() => import('@/components/Notification'), {
+  ssr: false
+});
+const LiveChat = dynamic(() => import('@/components/LiveChat'), {
+  ssr: false
+});
 
 // Enhanced Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -473,11 +484,10 @@ const DynamicHeader = memo(({
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const checkUserRole = async () => {
-      const user = await getUserFromSession(session);
-      setUserRole(user?.role || null);
-    };
-    checkUserRole();
+    if (session?.user) {
+      // Get role from session data directly (no Prisma call needed)
+      setUserRole((session.user as any)?.role || null);
+    }
   }, [session]);
   const getSectionTheme = useCallback((section: string) => {
     switch (section) {
