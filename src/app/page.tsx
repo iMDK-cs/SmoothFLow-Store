@@ -14,6 +14,7 @@ import UserProfile from '@/components/UserProfile';
 import ScrollProgress from '@/components/ScrollProgress';
 import Notification from '@/components/Notification';
 import LiveChat from '@/components/LiveChat';
+import SupportChat from '@/components/SupportChat';
 
 // Enhanced Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -1687,6 +1688,11 @@ export default function MDKStore() {
           </div>
         </footer>
 
+        {/* Live Chat */}
+        <ErrorBoundary>
+          <LiveChat />
+        </ErrorBoundary>
+
         {/* Notification */}
         {notification && (
           <ErrorBoundary>
@@ -1698,9 +1704,9 @@ export default function MDKStore() {
           </ErrorBoundary>
         )}
 
-        {/* Live Chat */}
+        {/* Support Chat */}
         <ErrorBoundary>
-          <LiveChat />
+          <SupportChat />
         </ErrorBoundary>
       </div>
     </ErrorBoundary>
