@@ -1,21 +1,21 @@
-// migrate-complete.js - السكريبت الكامل للنقل
-import { createClient } from '@supabase/supabase-js'
-import { PrismaClient } from '@prisma/client'
+const { createClient } = require('@supabase/supabase-js')
+const { PrismaClient } = require('@prisma/client')
 
-// القيم الصحيحة من ملف .env
+// استخدام Service Role Key للصلاحيات الكاملة
 const supabaseUrl = 'https://megpayzkgmuoncswuasn.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lZ3BheXprZ211b25jc3d1YXNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMjEyNjksImV4cCI6MjA3MzU5NzI2OX0.eDfDnIUZIzcbgKIXgV8TP8Uwe9DWwqzQv9wDaYpqHgY'
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lZ3BheXprZ211b25jc3d1YXNuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODAyMTI2OSwiZXhwIjoyMDczNTk3MjY5fQ.ztPWUXITEp2pRMQRCVYn-z1PKDAOgY4tIhUqiEitYsA'
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 const prisma = new PrismaClient()
 
 async function migrateAllData() {
-  console.log('🚀 بدء نقل البيانات الكاملة إلى Supabase...\n')
+  console.log('بدء نقل البيانات بصلاحيات المدير...\n')
   
   try {
     // 1. نقل المستخدمين
-    console.log('👥 نقل المستخدمين...')
+    console.log('نقل المستخدمين...')
     const users = await prisma.user.findMany()
+    console.log(`وُجد ${users.length} مستخدم`)
     
     for (const user of users) {
       const { error } = await supabase
@@ -33,15 +33,16 @@ async function migrateAllData() {
         }])
       
       if (error) {
-        console.error(`❌ خطأ في نقل المستخدم ${user.email}:`, error)
+        console.error(`خطأ في نقل المستخدم ${user.email}:`, error.message)
       } else {
-        console.log(`✅ تم نقل المستخدم: ${user.email}`)
+        console.log(`تم نقل المستخدم: ${user.email}`)
       }
     }
     
     // 2. نقل الخدمات
-    console.log('\n🛠️ نقل الخدمات...')
+    console.log('\nنقل الخدمات...')
     const services = await prisma.service.findMany()
+    console.log(`وُجد ${services.length} خدمة`)
     
     for (const service of services) {
       const { error } = await supabase
@@ -64,15 +65,16 @@ async function migrateAllData() {
         }])
       
       if (error) {
-        console.error(`❌ خطأ في نقل الخدمة ${service.title}:`, error)
+        console.error(`خطأ في نقل الخدمة ${service.title}:`, error.message)
       } else {
-        console.log(`✅ تم نقل الخدمة: ${service.title}`)
+        console.log(`تم نقل الخدمة: ${service.title}`)
       }
     }
     
     // 3. نقل خيارات الخدمات
-    console.log('\n⚙️ نقل خيارات الخدمات...')
+    console.log('\nنقل خيارات الخدمات...')
     const serviceOptions = await prisma.serviceOption.findMany()
+    console.log(`وُجد ${serviceOptions.length} خيار`)
     
     for (const option of serviceOptions) {
       const { error } = await supabase
@@ -87,15 +89,16 @@ async function migrateAllData() {
         }])
       
       if (error) {
-        console.error(`❌ خطأ في نقل خيار ${option.title}:`, error)
+        console.error(`خطأ في نقل خيار ${option.title}:`, error.message)
       } else {
-        console.log(`✅ تم نقل خيار: ${option.title}`)
+        console.log(`تم نقل خيار: ${option.title}`)
       }
     }
     
     // 4. نقل الطلبات
-    console.log('\n📋 نقل الطلبات...')
+    console.log('\nنقل الطلبات...')
     const orders = await prisma.order.findMany()
+    console.log(`وُجد ${orders.length} طلب`)
     
     for (const order of orders) {
       const { error } = await supabase
@@ -116,15 +119,16 @@ async function migrateAllData() {
         }])
       
       if (error) {
-        console.error(`❌ خطأ في نقل الطلب ${order.orderNumber}:`, error)
+        console.error(`خطأ في نقل الطلب ${order.orderNumber}:`, error.message)
       } else {
-        console.log(`✅ تم نقل الطلب: ${order.orderNumber}`)
+        console.log(`تم نقل الطلب: ${order.orderNumber}`)
       }
     }
     
     // 5. نقل عناصر الطلبات
-    console.log('\n📦 نقل عناصر الطلبات...')
+    console.log('\nنقل عناصر الطلبات...')
     const orderItems = await prisma.orderItem.findMany()
+    console.log(`وُجد ${orderItems.length} عنصر طلب`)
     
     for (const item of orderItems) {
       const { error } = await supabase
@@ -141,14 +145,14 @@ async function migrateAllData() {
         }])
       
       if (error) {
-        console.error(`❌ خطأ في نقل عنصر الطلب:`, error)
+        console.error(`خطأ في نقل عنصر الطلب:`, error.message)
       } else {
-        console.log(`✅ تم نقل عنصر طلب`)
+        console.log(`تم نقل عنصر طلب`)
       }
     }
     
     // التحقق من النتائج
-    console.log('\n🔍 فحص النتائج...')
+    console.log('\nفحص النتائج النهائية...')
     
     const { count: usersCount } = await supabase
       .from('users')
@@ -162,17 +166,31 @@ async function migrateAllData() {
       .from('orders')
       .select('*', { count: 'exact', head: true })
     
-    console.log(`\n📊 النتائج النهائية:`)
-    console.log(`👥 المستخدمين: ${usersCount}`)
-    console.log(`🛠️ الخدمات: ${servicesCount}`)
-    console.log(`📋 الطلبات: ${ordersCount}`)
+    console.log(`\nالنتائج النهائية:`)
+    console.log(`المستخدمين: ${usersCount}`)
+    console.log(`الخدمات: ${servicesCount}`)
+    console.log(`الطلبات: ${ordersCount}`)
     
-    console.log('\n🎉 تم نقل جميع البيانات بنجاح!')
+    // اختبار خدمة معينة
+    const { data: testService } = await supabase
+      .from('services')
+      .select('*')
+      .eq('id', 'internet-tweak')
+      .single()
+    
+    if (testService) {
+      console.log(`\nاختبار ناجح - تم العثور على خدمة: ${testService.title}`)
+    } else {
+      console.log(`\nخطأ - لم يتم العثور على خدمة internet-tweak`)
+    }
+    
+    console.log('\nتم نقل جميع البيانات بنجاح!')
     
   } catch (error) {
-    console.error('💥 خطأ عام:', error)
+    console.error('خطأ عام:', error)
   } finally {
     await prisma.$disconnect()
+    process.exit(0)
   }
 }
 

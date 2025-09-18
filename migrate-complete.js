@@ -1,6 +1,5 @@
-// migrate-complete.js - السكريبت الكامل للنقل
-import { createClient } from '@supabase/supabase-js'
-import { PrismaClient } from '@prisma/client'
+const { createClient } = require('@supabase/supabase-js')
+const { PrismaClient } = require('@prisma/client')
 
 // القيم الصحيحة من ملف .env
 const supabaseUrl = 'https://megpayzkgmuoncswuasn.supabase.co'
@@ -33,7 +32,7 @@ async function migrateAllData() {
         }])
       
       if (error) {
-        console.error(`❌ خطأ في نقل المستخدم ${user.email}:`, error)
+        console.error(`❌ خطأ في نقل المستخدم ${user.email}:`, error.message)
       } else {
         console.log(`✅ تم نقل المستخدم: ${user.email}`)
       }
@@ -64,7 +63,7 @@ async function migrateAllData() {
         }])
       
       if (error) {
-        console.error(`❌ خطأ في نقل الخدمة ${service.title}:`, error)
+        console.error(`❌ خطأ في نقل الخدمة ${service.title}:`, error.message)
       } else {
         console.log(`✅ تم نقل الخدمة: ${service.title}`)
       }
@@ -87,7 +86,7 @@ async function migrateAllData() {
         }])
       
       if (error) {
-        console.error(`❌ خطأ في نقل خيار ${option.title}:`, error)
+        console.error(`❌ خطأ في نقل خيار ${option.title}:`, error.message)
       } else {
         console.log(`✅ تم نقل خيار: ${option.title}`)
       }
@@ -116,7 +115,7 @@ async function migrateAllData() {
         }])
       
       if (error) {
-        console.error(`❌ خطأ في نقل الطلب ${order.orderNumber}:`, error)
+        console.error(`❌ خطأ في نقل الطلب ${order.orderNumber}:`, error.message)
       } else {
         console.log(`✅ تم نقل الطلب: ${order.orderNumber}`)
       }
@@ -141,7 +140,7 @@ async function migrateAllData() {
         }])
       
       if (error) {
-        console.error(`❌ خطأ في نقل عنصر الطلب:`, error)
+        console.error(`❌ خطأ في نقل عنصر الطلب:`, error.message)
       } else {
         console.log(`✅ تم نقل عنصر طلب`)
       }
@@ -173,6 +172,7 @@ async function migrateAllData() {
     console.error('💥 خطأ عام:', error)
   } finally {
     await prisma.$disconnect()
+    process.exit(0)
   }
 }
 

@@ -32,13 +32,13 @@ export default function LiveChat() {
       setMessages([
         {
           id: '1',
-          text: 'مرحباً! كيف يمكنني مساعدتك اليوم؟',
+          text: `مرحبا ${session?.user?.name || 'user'} كيف اقدر اساعدك`,
           sender: 'admin',
           timestamp: new Date(),
         }
       ])
     }
-  }, [isOpen, messages.length])
+  }, [isOpen, messages.length, session?.user?.name])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,17 +55,17 @@ export default function LiveChat() {
     setNewMessage('')
     setIsTyping(true)
 
-    // Simulate admin response
+    // Auto-reply system
     setTimeout(() => {
       const adminMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'شكراً لك على رسالتك. سأقوم بالرد عليك في أقرب وقت ممكن.',
+        text: 'شكرا على رسالتك بحاول ارد عليك باقرب وقت',
         sender: 'admin',
         timestamp: new Date(),
       }
       setMessages(prev => [...prev, adminMessage])
       setIsTyping(false)
-    }, 2000)
+    }, 1500)
   }
 
   if (!session) return null
