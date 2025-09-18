@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
-import { prisma } from '@/lib/prisma-fast'
+import { prisma } from '@/lib/prisma-optimized'
 import { z } from 'zod'
 
 // Use Node.js runtime for Prisma compatibility
@@ -14,11 +14,11 @@ const addToCartSchema = z.object({
   quantity: z.number().min(1).default(1),
 })
 
-// Global cache for services (shared across requests)
+// In-memory cache for services
 const serviceCache = new Map<string, { data: any; timestamp: number }>()
-const CACHE_TTL = 60000 // 1 minute
+const CACHE_TTL = 300000 // 5 minutes
 
-// Optimized service lookup with caching
+// Optimized service lookup with extended caching
 async function getServiceWithCache(serviceId: string) {
   const cached = serviceCache.get(serviceId)
   const now = Date.now()
@@ -45,66 +45,17 @@ async function getServiceWithCache(serviceId: string) {
   return service
 }
 
-export async function GET() {
-  try {
-    const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
-    const user = await getUserFromSession(session)
-    
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Optimized cart query with minimal data
-    const cart = await prisma.cart.findUnique({
-      where: { userId: user.id },
-      include: {
-        items: {
-          select: {
-            id: true,
-            quantity: true,
-            serviceId: true,
-            optionId: true,
-            service: {
-              select: {
-                id: true,
-                title: true,
-                basePrice: true,
-                image: true
-              }
-            },
-            option: {
-              select: {
-                id: true,
-                title: true,
-                price: true
-              }
-            }
-          }
-        }
-      }
-    })
-
-    return NextResponse.json({ cart })
-  } catch (error) {
-    console.error('Get cart error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
   
   try {
-    // Parse request body first
+    // Parse request body
     const body = await request.json()
     const { serviceId, optionId, quantity } = addToCartSchema.parse(body)
     
     console.log('Add to cart request:', { serviceId, optionId, quantity })
     
-    // Get session first
+    // Get session and user
     const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
     const user = await getUserFromSession(session)
     
@@ -118,16 +69,14 @@ export async function POST(request: NextRequest) {
 
     // Early validation
     if (!service) {
-      console.log('Service not found:', serviceId)
       return NextResponse.json({ error: 'Service not found' }, { status: 404 })
     }
 
     if (!service.available || !service.active) {
-      console.log('Service not available:', serviceId)
       return NextResponse.json({ error: 'Service is not available' }, { status: 400 })
     }
 
-    // Optimized single query approach
+    // Optimized single transaction
     const result = await prisma.$transaction(async (tx) => {
       // Get or create cart
       let cart = await tx.cart.findUnique({
@@ -140,7 +89,7 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      // Check if item already exists in cart
+      // Check existing item
       const existingItem = await tx.cartItem.findFirst({
         where: {
           cartId: cart.id,
@@ -151,12 +100,12 @@ export async function POST(request: NextRequest) {
 
       const totalQuantity = existingItem ? existingItem.quantity + quantity : quantity
 
-      // Check stock if service has limited stock
+      // Check stock
       if (service.stock !== null && totalQuantity > service.stock) {
         throw new Error(`Only ${service.stock} items available for ${service.title}`)
       }
 
-      // Update or create cart item
+      // Update or create item
       if (existingItem) {
         await tx.cartItem.update({
           where: { id: existingItem.id },
@@ -179,7 +128,6 @@ export async function POST(request: NextRequest) {
     const executionTime = Date.now() - startTime
     console.log(`Add to cart completed in ${executionTime}ms`)
 
-    // Return minimal response for better performance
     return NextResponse.json({ 
       success: true,
       message: 'Item added to cart',
@@ -201,48 +149,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function DELETE(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
-    const user = await getUserFromSession(session)
-    
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { searchParams } = new URL(request.url)
-    const itemId = searchParams.get('itemId')
-
-    if (!itemId) {
-      return NextResponse.json({ error: 'Item ID required' }, { status: 400 })
-    }
-
-    // Verify ownership before deletion
-    const cartItem = await prisma.cartItem.findFirst({
-      where: { 
-        id: itemId,
-        cart: { userId: user.id }
-      }
-    })
-
-    if (!cartItem) {
-      return NextResponse.json({ error: 'Item not found' }, { status: 404 })
-    }
-
-    await prisma.cartItem.delete({
-      where: { id: itemId }
-    })
-
-    return NextResponse.json({ message: 'Item removed from cart' })
-  } catch (error) {
-    console.error('Remove from cart error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

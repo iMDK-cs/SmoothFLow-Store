@@ -2,6 +2,14 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "framework": "nextjs",
+  "functions": {
+    "src/app/api/cart/route.ts": {
+      "maxDuration": 10
+    },
+    "src/app/api/services/route.ts": {
+      "maxDuration": 5
+    }
+  },
   "env": {
     "DATABASE_URL": "@database_url",
     "DIRECT_URL": "@direct_url",
