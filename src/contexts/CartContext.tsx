@@ -175,8 +175,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setLastAddedItem(serviceId)
       setTimeout(() => setLastAddedItem(null), 2000)
       
-      // Immediately refresh cart to show updated state
-      await fetchCart()
+      // Immediately refresh cart to show updated state (non-blocking)
+      fetchCart()
     } catch (error) {
       console.error('Add to cart error:', error)
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to add item to cart' })

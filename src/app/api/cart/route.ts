@@ -66,10 +66,15 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Check service availability and stock
+    // Check service availability and stock (optimized query)
     const service = await prisma.service.findUnique({
       where: { id: serviceId },
-      select: { available: true, stock: true, title: true }
+      select: { 
+        available: true, 
+        stock: true, 
+        title: true,
+        active: true
+      }
     })
 
     console.log('Service found:', service)
@@ -79,7 +84,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Service not found' }, { status: 404 })
     }
 
-    if (!service.available) {
+    if (!service.available || !service.active) {
       console.log('Service not available:', serviceId)
       return NextResponse.json({ error: 'Service is not available' }, { status: 400 })
     }
