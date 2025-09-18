@@ -13,7 +13,7 @@ import EnhancedShoppingCart from '@/components/EnhancedShoppingCart';
 import UserProfile from '@/components/UserProfile';
 import ScrollProgress from '@/components/ScrollProgress';
 import Notification from '@/components/Notification';
-import EnhancedSupportChat from '@/components/EnhancedSupportChat';
+import LiveChat from '@/components/LiveChat';
 
 // Enhanced Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -1698,9 +1698,9 @@ export default function MDKStore() {
           </ErrorBoundary>
         )}
 
-        {/* Support Chat */}
+        {/* Live Chat */}
         <ErrorBoundary>
-          <EnhancedSupportChat />
+          <LiveChat />
         </ErrorBoundary>
       </div>
     </ErrorBoundary>
