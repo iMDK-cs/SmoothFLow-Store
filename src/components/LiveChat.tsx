@@ -76,7 +76,7 @@ export default function LiveChat() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 left-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg transition-colors z-40"
+          className="fixed bottom-6 left-6 bg-sky-500 hover:bg-sky-600 text-white p-4 rounded-full shadow-lg transition-colors z-40"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -88,7 +88,7 @@ export default function LiveChat() {
       {isOpen && (
         <div className="fixed bottom-6 left-6 w-80 h-96 bg-gray-800 rounded-lg shadow-xl z-50 flex flex-col" dir="rtl">
           {/* Header */}
-          <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+          <div className="bg-sky-500 text-white p-4 rounded-t-lg flex items-center justify-between">
             <div className="flex items-center">
               <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
               <span className="font-semibold">الدعم الفني</span>
@@ -113,7 +113,7 @@ export default function LiveChat() {
                 <div
                   className={`max-w-xs px-3 py-2 rounded-lg ${
                     message.sender === 'user'
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-sky-500 text-white'
                       : 'bg-gray-700 text-gray-100'
                   }`}
                 >
@@ -150,13 +150,13 @@ export default function LiveChat() {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="اكتب رسالتك..."
-                className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                 dir="rtl"
               />
               <button
                 type="submit"
                 disabled={!newMessage.trim()}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
