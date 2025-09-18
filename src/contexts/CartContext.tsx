@@ -134,52 +134,54 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       throw new Error('User must be logged in to add items to cart')
     }
     
+    // Optimistic update - show loading immediately
+    dispatch({ type: 'SET_LOADING', payload: true })
+    
+    // Set last added item for animation (immediate feedback)
+    setLastAddedItem(serviceId)
+    setTimeout(() => setLastAddedItem(null), 2000)
+    
     try {
-      console.log('Adding to cart:', { serviceId, optionId, quantity }) // Debug log
-      dispatch({ type: 'SET_LOADING', payload: true })
+      const startTime = Date.now()
       
       const response = await fetch('/api/cart', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
         body: JSON.stringify({ serviceId, optionId, quantity }),
       })
       
-      console.log('Add to cart response status:', response.status) // Debug log
+      const executionTime = Date.now() - startTime
+      console.log(`Add to cart API took ${executionTime}ms`)
       
       if (!response.ok) {
-        // Check if response is JSON before trying to parse
-        const contentType = response.headers.get('content-type')
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json()
-          console.error('Add to cart error response:', errorData) // Debug log
-          throw new Error(errorData.error || 'Failed to add item to cart')
-        } else {
-          const text = await response.text()
-          console.error('Non-JSON error response:', text)
-          throw new Error(`Server error: ${response.status}`)
-        }
-      }
-      
-      // Check if response is JSON before parsing
-      const contentType = response.headers.get('content-type')
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text()
-        console.error('Non-JSON success response:', text)
-        throw new Error('Server returned non-JSON response')
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'Failed to add item to cart')
       }
       
       const result = await response.json()
-      console.log('Add to cart success:', result) // Debug log
+      console.log('Add to cart success:', result)
       
-      // Set last added item for animation
-      setLastAddedItem(serviceId)
-      setTimeout(() => setLastAddedItem(null), 2000)
+      // Refresh cart in background (non-blocking)
+      fetchCart().catch(error => {
+        console.error('Background cart refresh failed:', error)
+      })
       
-      // Immediately refresh cart to show updated state (non-blocking)
-      fetchCart()
     } catch (error) {
       console.error('Add to cart error:', error)
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to add item to cart' })
+      
+      // Retry mechanism for network errors
+      if (error instanceof Error && error.message.includes('fetch')) {
+        console.log('Retrying add to cart...')
+        setTimeout(() => {
+          addToCart(serviceId, optionId, quantity)
+        }, 1000)
+      }
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false })
     }
   }
 

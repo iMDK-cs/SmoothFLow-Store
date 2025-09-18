@@ -16,6 +16,7 @@
     "db:migrate-services": "node scripts/migrate-all-services.js",
     "db:update-admin": "node scripts/update-admin-info.js",
     "db:update-role": "node scripts/update-user-role.js",
+    "db:optimize": "node scripts/optimize-database.js",
     "db:deploy": "prisma db push && prisma generate",
     "postinstall": "prisma generate"
   },
