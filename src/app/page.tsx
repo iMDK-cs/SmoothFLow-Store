@@ -13,7 +13,6 @@ import EnhancedShoppingCart from '@/components/EnhancedShoppingCart';
 import UserProfile from '@/components/UserProfile';
 import ScrollProgress from '@/components/ScrollProgress';
 import Notification from '@/components/Notification';
-import LiveChat from '@/components/LiveChat';
 import EnhancedSupportChat from '@/components/EnhancedSupportChat';
 
 // Enhanced Error Boundary Component
@@ -1687,11 +1686,6 @@ export default function MDKStore() {
             </div>
           </div>
         </footer>
-
-        {/* Live Chat */}
-        <ErrorBoundary>
-          <LiveChat />
-        </ErrorBoundary>
 
         {/* Notification */}
         {notification && (
