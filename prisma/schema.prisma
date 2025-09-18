@@ -16,7 +16,7 @@ model User {
   name      String?
   phone     String?
   password  String
-  role      Role     @default(USER)
+  role      String   @default("USER") // Changed from Role enum to String
   verified  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -112,18 +112,18 @@ model ServiceOption {
 }
 
 model Order {
-  id            String      @id @default(cuid())
+  id            String   @id @default(cuid())
   userId        String
-  orderNumber   String      @unique
-  status        OrderStatus @default(PENDING)
+  orderNumber   String   @unique
+  status        String   @default("PENDING") // Changed from OrderStatus enum to String
   totalAmount   Float
-  paymentStatus PaymentStatus @default(PENDING)
+  paymentStatus String   @default("PENDING") // Changed from PaymentStatus enum to String
   paymentMethod String?
   paymentId     String?
   notes         String?
   scheduledDate DateTime?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   // Relations
   user      User        @relation(fields: [userId], references: [id])
@@ -151,17 +151,17 @@ model OrderItem {
 }
 
 model Payment {
-  id            String        @id @default(cuid())
+  id            String   @id @default(cuid())
   orderId       String
   amount        Float
-  currency      String        @default("SAR")
-  status        PaymentStatus @default(PENDING)
+  currency      String   @default("SAR")
+  status        String   @default("PENDING") // Changed from PaymentStatus enum to String
   method        String
   transactionId String?
   gateway       String
   gatewayData   Json?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   order Order @relation(fields: [orderId], references: [id])
 
@@ -217,29 +217,29 @@ model CartItem {
 }
 
 model Booking {
-  id          String        @id @default(cuid())
+  id          String   @id @default(cuid())
   userId      String
   serviceId   String
   orderId     String?
   date        DateTime
   time        String
-  status      BookingStatus @default(PENDING)
+  status      String   @default("PENDING") // Changed from BookingStatus enum to String
   notes       String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("bookings")
 }
 
 model Notification {
-  id        String             @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String?
-  type      NotificationType
+  type      String   // Changed from NotificationType enum to String
   title     String
   message   String
-  read      Boolean            @default(false)
+  read      Boolean  @default(false)
   data      Json?
-  createdAt DateTime           @default(now())
+  createdAt DateTime @default(now())
 
   @@map("notifications")
 }
@@ -249,8 +249,8 @@ model SupportTicket {
   userId    String
   subject   String
   message   String
-  priority  Priority @default(MEDIUM)
-  status    TicketStatus @default(OPEN)
+  priority  String   @default("MEDIUM") // Changed from Priority enum to String
+  status    String   @default("OPEN")   // Changed from TicketStatus enum to String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -274,54 +274,4 @@ model SupportReply {
   @@map("support_replies")
 }
 
-enum Role {
-  USER
-  ADMIN
-  MODERATOR
-}
-
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
-  REFUNDED
-}
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-  CANCELLED
-}
-
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-  NO_SHOW
-}
-
-enum NotificationType {
-  ORDER_UPDATE
-  PAYMENT_UPDATE
-  BOOKING_REMINDER
-  REVIEW_REQUEST
-  GENERAL
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-}
-
-enum TicketStatus {
-  OPEN
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-}
+// Removed all enum declarations - using String instead
