@@ -11,6 +11,9 @@
     "db:push": "prisma db push",
     "db:seed": "node scripts/seed-services.js",
     "db:setup": "node scripts/setup-database.js",
+    "db:setup-vercel": "node scripts/setup-vercel-db.js",
+    "db:test": "node scripts/test-db-connection.js",
+    "db:deploy": "prisma db push && prisma generate",
     "postinstall": "prisma generate"
   },
   "dependencies": {
