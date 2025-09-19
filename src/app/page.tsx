@@ -69,19 +69,16 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Enhanced Background Component
-const EnhancedBackground = memo(() => {
+// Simple Background Component
+const SimpleBackground = memo(() => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black opacity-90" />
-      
-      
+      <div className="absolute inset-0 bg-gray-900" />
     </div>
   );
 });
 
-EnhancedBackground.displayName = 'EnhancedBackground';
+SimpleBackground.displayName = 'SimpleBackground';
 
 
 // Store Configuration
@@ -1234,47 +1231,10 @@ export default function MDKStore() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black relative overflow-x-hidden" dir="rtl">
+      <div className="min-h-screen bg-gray-900 relative overflow-x-hidden" dir="rtl">
         {/* Enhanced Background Effects */}
-        <EnhancedBackground />
+        <SimpleBackground />
         
-        {/* Enhanced Dynamic Background */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          {/* Floating Geometric Shapes */}
-          <div className="absolute inset-0">
-            <div className="floating-element absolute w-20 h-20 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full top-20 left-10 blur-sm"></div>
-            <div className="floating-element absolute w-16 h-16 bg-gradient-to-r from-blue-500/15 to-cyan-500/15 rounded-lg top-40 right-20 blur-sm"></div>
-            <div className="floating-element absolute w-24 h-24 bg-gradient-to-r from-sky-500/10 to-blue-500/10 rounded-full bottom-40 left-1/4 blur-sm"></div>
-            <div className="floating-element absolute w-12 h-12 bg-gradient-to-r from-cyan-400/25 to-blue-400/25 rounded-lg top-60 right-1/3 blur-sm"></div>
-            <div className="floating-element absolute w-18 h-18 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 rounded-full bottom-60 right-10 blur-sm"></div>
-          </div>
-          
-          {/* Drifting Particles */}
-          <div className="absolute inset-0">
-            <div className="drift-element absolute w-2 h-2 bg-cyan-400/30 rounded-full top-10 left-10"></div>
-            <div className="drift-element absolute w-1 h-1 bg-blue-400/40 rounded-full top-20 left-20" style={{animationDelay: '2s'}}></div>
-            <div className="drift-element absolute w-3 h-3 bg-sky-400/20 rounded-full top-30 left-30" style={{animationDelay: '4s'}}></div>
-            <div className="drift-element absolute w-1.5 h-1.5 bg-cyan-300/35 rounded-full top-40 left-40" style={{animationDelay: '6s'}}></div>
-            <div className="drift-element absolute w-2.5 h-2.5 bg-blue-300/25 rounded-full top-50 left-50" style={{animationDelay: '8s'}}></div>
-          </div>
-          
-          {/* Pulse Elements */}
-          <div className="absolute inset-0">
-            <div className="pulse-element absolute w-32 h-32 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 rounded-full top-1/4 left-1/4"></div>
-            <div className="pulse-element absolute w-24 h-24 bg-gradient-to-r from-blue-500/8 to-cyan-500/8 rounded-full bottom-1/4 right-1/4" style={{animationDelay: '2s'}}></div>
-          </div>
-          
-          {/* Shimmer Effect */}
-          <div className="absolute inset-0 shimmer opacity-30"></div>
-        </div>
-        
-        {/* Additional floating elements */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="floating-square floating-square-1"></div>
-          <div className="floating-square floating-square-2"></div>
-          <div className="floating-square floating-square-3"></div>
-          <div className="floating-square floating-square-4"></div>
-        </div>
 
 
         {/* Dynamic Header */}
@@ -1288,72 +1248,29 @@ export default function MDKStore() {
 
         {/* Enhanced Hero Section */}
         <section className="relative min-h-[85vh] flex items-center justify-center pt-20 pb-16 z-10 overflow-hidden">
-          <div className="absolute inset-0">
-            {/* Animated Sky Blue Grid Background */}
-            <div 
-              className="absolute inset-0 opacity-20"
-              style={{
-                backgroundImage: `radial-gradient(circle at 25% 25%, #00BFFF 1px, transparent 1px), radial-gradient(circle at 75% 75%, #87CEEB 1px, transparent 1px)`,
-                backgroundSize: '50px 50px',
-                transform: `translate(${scrollY * 0.1}px, ${scrollY * 0.1}px)`
-              }}
-            ></div>
-            
-            {/* Multi-layer Dark Gradient Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-900/30 via-slate-900/25 to-black/30"></div>
-            <div className="absolute inset-0 bg-gradient-to-tr from-sky-600/8 via-transparent to-blue-600/8"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-sky-500/10 via-transparent to-blue-500/10"></div>
-            
-            {/* Enhanced Animated Mesh Gradient */}
-            <div 
-              className="absolute inset-0 opacity-25"
-              style={{
-                background: `
-                  radial-gradient(at 20% 20%, #00BFFF 0px, transparent 50%),
-                  radial-gradient(at 80% 80%, #87CEEB 0px, transparent 50%),
-                  radial-gradient(at 40% 60%, #87CEFA 0px, transparent 50%),
-                  radial-gradient(at 60% 40%, #00BFFF 0px, transparent 50%)
-                `,
-                transform: `rotate(${scrollY * 0.01}deg) scale(${1 + scrollY * 0.0001})`
-              }}
-            ></div>
-            
-            {/* Subtle Static Elements */}
-            <div className="absolute inset-0">
-              <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl"></div>
-              <div className="absolute bottom-1/4 right-1/4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl"></div>
-            </div>
-          </div>
 
           <div className="container mx-auto px-4 md:px-6 text-center relative z-10 max-w-6xl">
-              {/* Enhanced Badge */}
-              <div className="inline-block px-8 py-4 glass-dark rounded-full border border-sky-500/60 mb-8 enhanced-glow hover:scale-105 transition-all duration-700 group">
-                <div className="flex items-center space-x-3 space-x-reverse">
-                  <div className="w-3 h-3 bg-sky-400 rounded-full animate-pulse neon-glow"></div>
-                  <span className="font-bold text-base sky-blue-gradient-text">
+              {/* Simple Badge */}
+              <div className="inline-block px-6 py-3 bg-gray-800 rounded-full border border-sky-500/60 mb-8">
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full"></div>
+                  <span className="font-bold text-base text-sky-400">
                     خدمات تقنية احترافية
                   </span>
-                  <div className="w-3 h-3 bg-sky-400 rounded-full animate-pulse neon-glow"></div>
+                  <div className="w-2 h-2 bg-sky-400 rounded-full"></div>
                 </div>
               </div>
               
-              {/* Enhanced Main Title - Better Responsive */}
+              {/* Simple Main Title */}
               <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 md:mb-8 leading-tight px-2">
-                <span className="text-gray-100 hover:scale-105 transition-transform duration-500 inline-block" style={{
-                  textShadow: '0 0 15px rgba(0, 191, 255, 0.4), 0 0 30px rgba(0, 191, 255, 0.2)',
-                  filter: 'contrast(1.1) brightness(0.9)'
-                }}>
-                  {storeConfig.storeName}
-                </span>
+                {storeConfig.storeName}
               </h1>
               
-              {/* Enhanced Subtitle - Better Responsive */}
+              {/* Simple Subtitle */}
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-200 mb-6 sm:mb-8 md:mb-12 max-w-5xl mx-auto leading-relaxed font-light px-4">
-                <span className="bg-gradient-to-r from-gray-200 to-gray-400 bg-clip-text text-transparent hover:from-sky-200 hover:to-sky-400 transition-all duration-500">
-                  حلول شاملة وخدمات متخصصة لجميع احتياجاتك التقنية
-                </span>
+                حلول شاملة وخدمات متخصصة لجميع احتياجاتك التقنية
                 <br />
-                <span className="text-lg sm:text-xl md:text-2xl text-gray-400 mt-2 sm:mt-4 block hover:text-sky-300 transition-colors duration-500">
+                <span className="text-lg sm:text-xl md:text-2xl text-gray-400 mt-2 sm:mt-4 block">
                   بأعلى معايير الجودة والاحترافية
                 </span>
               </p>
@@ -1361,35 +1278,10 @@ export default function MDKStore() {
               <div className="flex justify-center items-center mb-6 sm:mb-8 md:mb-12 px-4">
                 <button 
                   onClick={() => scrollToSection('assembly')}
-                  className="group relative bg-gradient-to-r from-sky-500 via-blue-600 to-sky-700 text-white px-3 py-2 rounded-lg font-semibold text-sm sm:text-base w-fit hover:from-sky-600 hover:via-blue-700 hover:to-sky-800 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-sky-500/15 overflow-hidden border border-sky-400/30"
-                  style={{
-                    boxShadow: '0 0 15px rgba(0, 191, 255, 0.15), 0 0 30px rgba(0, 191, 255, 0.08)',
-                    filter: 'contrast(1.05) brightness(0.95)'
-                  }}
+                  className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base transition-colors duration-200"
                   aria-label="استكشف خدماتنا"
                 >
-                  {/* Animated background gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-sky-300 via-blue-400 to-sky-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  
-                  {/* Shimmer effect */}
-                  <div className="absolute inset-0 -top-1 -left-1 bg-gradient-to-r from-transparent via-white/25 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700"></div>
-                  
-                  <span className="relative z-10 flex items-center justify-center space-x-reverse space-x-1" style={{
-                    textShadow: '0 0 3px rgba(255, 255, 255, 0.2)',
-                    filter: 'contrast(1.1) brightness(0.9)'
-                  }}>
-                    <span className="group-hover:scale-105 transition-transform duration-200 font-semibold">استكشف خدماتنا</span>
-                    <div className="relative">
-                      <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                      {/* Animated dot */}
-                      <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-white rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-ping"></div>
-                    </div>
-                  </span>
-                  
-                  {/* Enhanced glow effect on hover */}
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-sky-400/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+                  استكشف خدماتنا
                 </button>
               </div>
           </div>

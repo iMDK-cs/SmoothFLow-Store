@@ -193,6 +193,31 @@ const servicesData = [
     active: true,
     available: true
   },
+  {
+    id: 'windows-tweaking',
+    title: 'تويك الويندوز',
+    description: 'تسريع وتحسين الويندوز',
+    basePrice: 100,
+    category: 'software',
+    image: '/images/services/tweak.jpg',
+    icon: '🪟',
+    color: 'from-sky-500 to-sky-600',
+    popular: true,
+    active: true,
+    available: true,
+    options: [
+      {
+        title: 'بدون فورمات',
+        description: 'تحسين الويندوز الحالي',
+        price: 100
+      },
+      {
+        title: 'مع فورمات',
+        description: 'تحسين + فورمات كامل للنظام',
+        price: 130
+      }
+    ]
+  },
   
   // Network Services
   {
