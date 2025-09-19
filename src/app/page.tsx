@@ -69,87 +69,19 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Enhanced Background Component with Interactive Effects
+// Enhanced Background Component with Light Effects
 const EnhancedBackground = memo(() => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100,
-      });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
       {/* Base gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black" />
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900" />
       
-      {/* Interactive gradient overlay */}
-      <div 
-        className="absolute inset-0 opacity-20"
-        style={{
-          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(0, 191, 255, 0.1) 0%, transparent 50%)`,
-          transition: 'background 0.3s ease-out'
-        }}
-      ></div>
-      
-      {/* Enhanced animated elements */}
+      {/* Minimal static elements */}
       <div className="absolute inset-0">
-        {/* Floating circles with enhanced animations */}
-        <div className="absolute w-32 h-32 bg-sky-500/8 rounded-full top-20 left-20 animate-pulse" style={{animationDuration: '4s'}}></div>
-        <div className="absolute w-24 h-24 bg-blue-500/10 rounded-full top-40 right-32 animate-pulse" style={{animationDuration: '6s', animationDelay: '2s'}}></div>
-        <div className="absolute w-40 h-40 bg-cyan-500/5 rounded-full bottom-32 left-1/4 animate-pulse" style={{animationDuration: '8s', animationDelay: '1s'}}></div>
-        
-        {/* Additional floating elements */}
-        <div className="absolute w-16 h-16 bg-purple-500/6 rounded-full top-60 left-1/3 animate-pulse" style={{animationDuration: '7s', animationDelay: '3s'}}></div>
-        <div className="absolute w-20 h-20 bg-indigo-500/7 rounded-full bottom-20 right-1/3 animate-pulse" style={{animationDuration: '9s', animationDelay: '1.5s'}}></div>
-        
-        {/* Enhanced grid pattern */}
-        <div 
-          className="absolute inset-0 opacity-15"
-          style={{
-            backgroundImage: `radial-gradient(circle at 25% 25%, #00BFFF 1px, transparent 1px), radial-gradient(circle at 75% 75%, #87CEEB 1px, transparent 1px), radial-gradient(circle at 50% 50%, #8B5CF6 1px, transparent 1px)`,
-            backgroundSize: '60px 60px',
-            animation: 'gridMove 20s linear infinite'
-          }}
-        ></div>
+        {/* Simple static circles */}
+        <div className="absolute w-24 h-24 bg-sky-500/3 rounded-full top-20 left-20"></div>
+        <div className="absolute w-16 h-16 bg-blue-500/5 rounded-full top-40 right-32"></div>
       </div>
-      
-      <style jsx>{`
-        @keyframes gridMove {
-          0% { transform: translate(0, 0); }
-          100% { transform: translate(60px, 60px); }
-        }
-        
-        @keyframes floatUp {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(5deg); }
-        }
-        
-        @keyframes glowPulse {
-          0%, 100% { box-shadow: 0 0 20px rgba(0, 191, 255, 0.3); }
-          50% { box-shadow: 0 0 40px rgba(0, 191, 255, 0.6), 0 0 60px rgba(0, 191, 255, 0.3); }
-        }
-        
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-        
-        .floating-element {
-          animation: floatUp 6s ease-in-out infinite;
-        }
-        
-        .glow-element {
-          animation: glowPulse 3s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 });
@@ -1307,7 +1239,7 @@ export default function MDKStore() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black relative overflow-x-hidden" dir="rtl">
+      <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900 relative overflow-x-hidden" dir="rtl">
         {/* Enhanced Background Effects */}
         <EnhancedBackground />
         
@@ -1324,54 +1256,29 @@ export default function MDKStore() {
 
         {/* Enhanced Hero Section */}
         <section className="relative min-h-[85vh] flex items-center justify-center pt-20 pb-16 z-10 overflow-hidden">
-          {/* Enhanced overlay effects */}
-          <div className="absolute inset-0">
-            {/* Primary glow effects */}
-            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-sky-500/8 rounded-full blur-3xl animate-pulse" style={{animationDuration: '8s'}}></div>
-            <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{animationDuration: '10s', animationDelay: '2s'}}></div>
-            
-            {/* Secondary glow effects */}
-            <div className="absolute top-1/2 right-1/3 w-32 h-32 bg-purple-500/6 rounded-full blur-2xl animate-pulse" style={{animationDuration: '12s', animationDelay: '4s'}}></div>
-            <div className="absolute bottom-1/3 left-1/2 w-40 h-40 bg-cyan-500/7 rounded-full blur-2xl animate-pulse" style={{animationDuration: '9s', animationDelay: '1s'}}></div>
-            
-            {/* Floating particles */}
-            <div className="absolute top-20 left-1/4 w-2 h-2 bg-sky-400/40 rounded-full animate-bounce" style={{animationDuration: '3s', animationDelay: '0s'}}></div>
-            <div className="absolute top-40 right-1/4 w-1.5 h-1.5 bg-blue-400/50 rounded-full animate-bounce" style={{animationDuration: '4s', animationDelay: '1s'}}></div>
-            <div className="absolute bottom-32 left-1/3 w-2.5 h-2.5 bg-purple-400/30 rounded-full animate-bounce" style={{animationDuration: '5s', animationDelay: '2s'}}></div>
-            <div className="absolute bottom-20 right-1/3 w-1 h-1 bg-cyan-400/60 rounded-full animate-bounce" style={{animationDuration: '3.5s', animationDelay: '0.5s'}}></div>
-          </div>
 
           <div className="container mx-auto px-4 md:px-6 text-center relative z-10 max-w-6xl">
-              {/* Ultra Enhanced Badge */}
-              <div className="inline-block px-8 py-4 bg-gray-800/60 backdrop-blur-md rounded-full border border-sky-500/70 mb-8 hover:border-sky-400/90 transition-all duration-500 group hover:scale-105 hover:shadow-lg hover:shadow-sky-500/20">
-                <div className="flex items-center space-x-3 space-x-reverse">
-                  <div className="w-3 h-3 bg-gradient-to-r from-sky-400 to-blue-400 rounded-full animate-pulse group-hover:animate-spin" style={{animationDuration: '2s'}}></div>
-                  <span className="font-bold text-base bg-gradient-to-r from-sky-400 via-blue-400 to-sky-400 bg-clip-text text-transparent hover:from-sky-300 hover:via-blue-300 hover:to-sky-300 transition-all duration-500">
+              {/* Simple Badge */}
+              <div className="inline-block px-6 py-3 bg-gray-700/60 rounded-full border border-sky-500/50 mb-8">
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full"></div>
+                  <span className="font-bold text-base text-sky-400">
                     خدمات تقنية احترافية
                   </span>
-                  <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-sky-400 rounded-full animate-pulse group-hover:animate-spin" style={{animationDuration: '2s', animationDirection: 'reverse'}}></div>
+                  <div className="w-2 h-2 bg-sky-400 rounded-full"></div>
                 </div>
-                {/* Glow effect */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-sky-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
               
-              {/* Ultra Enhanced Main Title */}
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 md:mb-8 leading-tight px-2 hover:scale-105 transition-all duration-700 group cursor-pointer" style={{textShadow: '0 0 30px rgba(0, 191, 255, 0.4), 0 0 60px rgba(0, 191, 255, 0.2)'}}>
-                <span className="bg-gradient-to-r from-white via-sky-100 to-white bg-clip-text text-transparent group-hover:from-sky-200 group-hover:via-white group-hover:to-sky-200 transition-all duration-700">
-                  {storeConfig.storeName}
-                </span>
-                {/* Animated underline */}
-                <div className="h-1 bg-gradient-to-r from-transparent via-sky-400 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 transform scale-x-0 group-hover:scale-x-100 mt-2"></div>
+              {/* Simple Main Title */}
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 md:mb-8 leading-tight px-2" style={{textShadow: '0 0 10px rgba(0, 191, 255, 0.2)'}}>
+                {storeConfig.storeName}
               </h1>
               
-              {/* Ultra Enhanced Subtitle */}
+              {/* Simple Subtitle */}
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-200 mb-6 sm:mb-8 md:mb-12 max-w-5xl mx-auto leading-relaxed font-light px-4">
-                <span className="bg-gradient-to-r from-gray-200 via-sky-200 to-gray-400 bg-clip-text text-transparent hover:from-sky-100 hover:via-blue-200 hover:to-sky-300 transition-all duration-700 group cursor-pointer inline-block">
-                  حلول شاملة وخدمات متخصصة لجميع احتياجاتك التقنية
-                  <div className="h-0.5 bg-gradient-to-r from-transparent via-sky-300 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 transform scale-x-0 group-hover:scale-x-100 mt-1"></div>
-                </span>
+                حلول شاملة وخدمات متخصصة لجميع احتياجاتك التقنية
                 <br />
-                <span className="text-lg sm:text-xl md:text-2xl text-gray-400 mt-2 sm:mt-4 block hover:text-sky-200 transition-all duration-700 hover:scale-105 inline-block cursor-pointer">
+                <span className="text-lg sm:text-xl md:text-2xl text-gray-400 mt-2 sm:mt-4 block">
                   بأعلى معايير الجودة والاحترافية
                 </span>
               </p>
@@ -1379,24 +1286,10 @@ export default function MDKStore() {
               <div className="flex justify-center items-center mb-6 sm:mb-8 md:mb-12 px-4">
                 <button 
                   onClick={() => scrollToSection('assembly')}
-                  className="group relative bg-gradient-to-r from-sky-600 via-blue-600 to-sky-700 hover:from-sky-500 hover:via-blue-500 hover:to-sky-600 text-white px-10 py-5 rounded-xl font-bold text-sm sm:text-base transition-all duration-500 transform hover:scale-110 shadow-2xl shadow-sky-500/30 overflow-hidden border border-sky-400/30 hover:border-sky-300/50"
+                  className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base transition-colors duration-200"
                   aria-label="استكشف خدماتنا"
                 >
-                  {/* Enhanced shimmer effect */}
-                  <div className="absolute inset-0 -top-2 -left-2 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-1000"></div>
-                  
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-sky-400/20 to-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
-                  <span className="relative z-10 flex items-center justify-center space-x-reverse space-x-3">
-                    <span className="group-hover:scale-105 transition-transform duration-300">استكشف خدماتنا</span>
-                    <svg className="w-5 h-5 group-hover:translate-x-2 group-hover:rotate-12 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </span>
-                  
-                  {/* Animated border */}
-                  <div className="absolute inset-0 rounded-xl border-2 border-transparent bg-gradient-to-r from-sky-400 to-blue-400 bg-clip-border opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  استكشف خدماتنا
                 </button>
               </div>
           </div>
