@@ -225,7 +225,13 @@ const servicesData = [
   }
 ];
 
-function validateService(service: any) {
+function validateService(service: {
+  id?: unknown;
+  title?: unknown;
+  description?: unknown;
+  basePrice?: unknown;
+  category?: unknown;
+}) {
   const errors: string[] = [];
   
   if (!service.id || typeof service.id !== 'string') {
@@ -250,11 +256,13 @@ function validateService(service: any) {
   
   // Validate UTF-8 encoding for Arabic text
   try {
-    const titleEncoded = Buffer.from(service.title, 'utf8').toString('utf8');
-    const descEncoded = Buffer.from(service.description, 'utf8').toString('utf8');
-    
-    if (titleEncoded !== service.title || descEncoded !== service.description) {
-      errors.push('Text encoding validation failed');
+    if (typeof service.title === 'string' && typeof service.description === 'string') {
+      const titleEncoded = Buffer.from(service.title, 'utf8').toString('utf8');
+      const descEncoded = Buffer.from(service.description, 'utf8').toString('utf8');
+      
+      if (titleEncoded !== service.title || descEncoded !== service.description) {
+        errors.push('Text encoding validation failed');
+      }
     }
   } catch (error) {
     errors.push('Text encoding error: ' + (error as Error).message);

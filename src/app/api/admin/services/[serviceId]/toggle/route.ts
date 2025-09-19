@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { serviceId: string } }
+  { params }: { params: Promise<{ serviceId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
@@ -19,7 +19,7 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }
 
-    const { serviceId } = params
+    const { serviceId } = await params
     const { field } = await request.json()
 
     // Validate field
