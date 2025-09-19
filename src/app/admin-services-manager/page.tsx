@@ -23,7 +23,6 @@ interface Service {
   options: ServiceOption[]
   _count: {
     orderItems: number
-    reviews: number
   }
 }
 
@@ -297,7 +296,6 @@ export default function AdminServicesManager() {
                 <span className="text-2xl font-bold text-cyan-300">{service.basePrice} ريال</span>
                 <div className="text-sm text-gray-400">
                   <div>📦 {service._count.orderItems} طلب</div>
-                  <div>⭐ {service._count.reviews} تقييم</div>
                 </div>
               </div>
 

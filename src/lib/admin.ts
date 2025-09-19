@@ -128,25 +128,6 @@ const admin = new AdminJS({
       },
     },
     {
-      resource: { model: prisma.review, client: prisma },
-      options: {
-        listProperties: ['id', 'userId', 'serviceId', 'rating', 'verified', 'createdAt'],
-        editProperties: ['rating', 'comment', 'verified'],
-        showProperties: ['id', 'userId', 'serviceId', 'rating', 'comment', 'verified', 'createdAt', 'updatedAt'],
-        filterProperties: ['rating', 'verified'],
-        properties: {
-          id: {
-            isVisible: { list: true, filter: false, show: true, edit: false },
-          },
-          rating: {
-            type: 'number',
-            minimum: 1,
-            maximum: 5,
-          },
-        },
-      },
-    },
-    {
       resource: { model: prisma.booking, client: prisma },
       options: {
         listProperties: ['id', 'userId', 'serviceId', 'date', 'time', 'status'],

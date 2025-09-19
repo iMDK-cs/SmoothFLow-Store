@@ -19,8 +19,7 @@ async function showServices() {
         options: true,
         _count: {
           select: {
-            orderItems: true,
-            reviews: true
+            orderItems: true
           }
         }
       },
@@ -60,7 +59,6 @@ async function showServices() {
         console.log(`   Active: ${service.active ? '✅ Yes' : '❌ No'}`);
         console.log(`   Available: ${service.available ? '✅ Yes' : '❌ No'}`);
         console.log(`   Orders: ${service._count.orderItems}`);
-        console.log(`   Reviews: ${service._count.reviews}`);
         
         if (service.options && service.options.length > 0) {
           console.log('   Options:');

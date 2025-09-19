@@ -66,11 +66,6 @@ async function updateServiceIds() {
         data: { serviceId: newId }
       });
       
-      // Update reviews
-      await prisma.review.updateMany({
-        where: { serviceId: oldId },
-        data: { serviceId: newId }
-      });
       
       console.log(`✅ Successfully updated ${oldId} → ${newId}`);
     }
