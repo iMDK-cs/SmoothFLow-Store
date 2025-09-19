@@ -152,15 +152,14 @@ const imageConfig = {
     'custom-build': "/images/services/custom-build.jpg",
     'water-cooling': "/images/services/water-cooling.jpg",
     'air-cooling': "/images/services/air-cooling.jpg",
-    'diagnosis': "/images/services/diagnosis.jpg",
-    'format': "/images/services/format.png",
-    'gpu-drivers': "/images/services/gpu-drivers.jpg",
+    'Pc-check': "/images/services/diagnosis.jpg",
+    'windows-format': "/images/services/format.png",
+    'controller-oc': "/images/services/controller-oc.jpg",
     'thermal-paste': "/images/services/thermal-paste.jpg",
     'bios-update': "/images/services/bios-update.jpg",
-    'ram-oc': "/images/services/bios-tweak.jpg",
+    'bios-tweak': "/images/services/bios-tweak.jpg",
     'windows-tweaking': "/images/services/tweak.jpg",
     'gaming-windows': "/images/services/custom-windows1.jpg",
-    'gpu-oc': "/images/services/controller-oc.jpg",
     'internet-tweak': "/images/services/Network.jpg"
   },
   fallback: {
@@ -229,23 +228,23 @@ const servicesData = {
     color: 'from-sky-500 to-sky-600',
     services: [
       {
-        id: 'diagnosis',
+        id: 'Pc-check',
         title: 'كشف وصيانة PC',
         description: 'فحص شامل وتشخيص دقيق لجميع المكونات',
         price: '50-100',
         image: '⚠️',
-        serviceImage: imageConfig.services['diagnosis'],
+        serviceImage: imageConfig.services['Pc-check'],
         popular: true,
         rating: 4.9,
         color: 'from-sky-500 to-sky-600'
       },
       {
-        id: 'format',
+        id: 'windows-format',
         title: 'فورمات النظام',
         description: 'تهيئة وإعادة تثبيت الويندوز مع التعريفات',
         price: '30',
         image: '🔄',
-        serviceImage: imageConfig.services['format'],
+        serviceImage: imageConfig.services['windows-format'],
         rating: 4.6,
         color: 'from-sky-500 to-sky-600'
       },
@@ -255,7 +254,7 @@ const servicesData = {
         description: 'حذف وتحديث تعريفات كرت الشاشة',
         price: '20',
         image: '🛠️',
-        serviceImage: imageConfig.services['gpu-drivers'],
+        serviceImage: imageConfig.services['controller-oc'],
         rating: 4.8,
         color: 'from-sky-500 to-sky-600'
       },
@@ -272,7 +271,7 @@ const servicesData = {
       {
         id: 'bios-update',
         title: 'تحديث البايوس',
-        description: 'تحديث البايوس لأحدث إصدار بأمان',
+        description: 'تحديث البايوس',
         price: '30',
         image: '⚙️',
         serviceImage: imageConfig.services['bios-update'],
@@ -288,12 +287,12 @@ const servicesData = {
     color: 'from-sky-600 to-sky-700',
     services: [
       {
-        id: 'ram-oc',
+        id: 'bios-tweak',
         title: 'تويك للبايوس',
         description: 'تحسين أداء وفتح سرعة الرامات',
         price: '50',
         image: '📈',
-        serviceImage: imageConfig.services['ram-oc'],
+        serviceImage: imageConfig.services['bios-tweak'],
         rating: 4.8,
         color: 'from-purple-500 to-purple-600'
       },
@@ -335,12 +334,12 @@ const servicesData = {
         color: 'from-purple-500 to-purple-600'
       },
       {
-        id: 'gpu-oc',
+        id: 'controller-oc',
         title: 'كسر سرعة القير',
         description: 'رفع أداء استجابة القير',
         price: '30',
         image: '🎮',
-        serviceImage: imageConfig.services['gpu-oc'],
+        serviceImage: imageConfig.services['controller-oc'],
         rating: 4.6,
         color: 'from-purple-500 to-purple-600'
       }

@@ -160,8 +160,8 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
   
     ]
   },
-  'diagnosis': {
-    id: 'diagnosis',
+  'Pc-check': {
+    id: 'Pc-check',
     title: 'كشف وصيانة PC',
     description: 'فحص شامل وتشخيص دقيق لجميع المكونات',
     fullDescription: 'فحص شامل وتشخيص دقيق لجميع مكونات الكمبيوتر لتحديد المشاكل وإصلاحها بأعلى جودة.',
@@ -182,8 +182,8 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
       '/images/services/diagnosis.jpg'
     ]
   },
-  'format': {
-    id: 'format',
+  'windows-format': {
+    id: 'windows-format',
     title: 'فورمات النظام',
     description: 'تهيئة وإعادة تثبيت الويندوز مع التعريفات',
     fullDescription: 'فورمات كامل للنظام مع إعادة تثبيت الويندوز والتعريفات والبرامج الأساسية.',
@@ -264,8 +264,8 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
       '/images/services/bios-update.jpg'
     ]
   },
-  'ram-oc': {
-    id: 'ram-oc',
+  'bios-tweak': {
+    id: 'bios-tweak',
     title: 'تويك للبايوس',
     description: 'تحسين أداء وفتح سرعة الرامات',
     fullDescription: 'تحسين أداء الرامات عبر ضبط إعدادات البايوس لرفع السرعة والاستقرار.',
@@ -331,8 +331,8 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
       '/images/services/custom-windows1.jpg?v=2'
     ]
   },
-  'gpu-oc': {
-    id: 'gpu-oc',
+  'controller-oc': {
+    id: 'controller-oc',
     title: 'كسر سرعة القير',
     description: 'رفع أداء استجابة القير',
     fullDescription: 'رفع أداء سرعة استجابة القير لتحسين الأداء في الألعاب.',
