@@ -51,7 +51,7 @@ export default function Checkout() {
         notes: '',
       }))
 
-      // Debug log removed
+      console.log('Prepared order items:', orderItems)
 
       // Create order
       const response = await fetch('/api/orders', {

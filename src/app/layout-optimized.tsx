@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata, Viewport } from "next";
+import "./globals-optimized.css";
 import Providers from "@/components/Providers";
 import { Cairo, Inter } from 'next/font/google';
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -7,16 +7,22 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 const cairo = Cairo({ 
   subsets: ['latin', 'arabic'],
   weight: ['300', '400', '500', '600', '700', '800'],
-  variable: '--font-cairo'
+  variable: '--font-cairo',
+  display: 'swap', // OPTIMIZED: Better font loading
+  preload: true
 });
 
 const inter = Inter({ 
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-inter'
+  variable: '--font-inter',
+  display: 'swap', // OPTIMIZED: Better font loading
+  preload: true
 });
 
+// OPTIMIZED: Fixed metadata for Next.js 15
 export const metadata: Metadata = {
+  metadataBase: new URL('https://smoothflow-sa.vercel.app'), // OPTIMIZED: Fixed metadataBase
   title: "SmoothFlow - حلول تقنية",
   description: "خدمات كمبيوتر احترافية في الرس - تركيب، صيانة، وإصلاح جميع أنواع أجهزة الكمبيوتر مع ضمان شامل وخدمة عملاء متميزة",
   keywords: "خدمات كمبيوتر, تركيب حاسوب, صيانة حاسوب, إصلاح حاسوب, الرس, السعودية, SmoothFlow",
@@ -26,8 +32,6 @@ export const metadata: Metadata = {
   
   // PWA metadata
   manifest: "/manifest.json",
-  themeColor: "#0ea5e9",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -37,8 +41,8 @@ export const metadata: Metadata = {
   // Open Graph metadata for social sharing
   openGraph: {
     title: "SmoothFlow - حلول تقنية",
-    description: "خدمات كمبيوتر احترافية في الرس ",
-    url: "https://smoothflow-store-web.vercel.app",
+    description: "خدمات كمبيوتر احترافية في الرس",
+    url: "https://smoothflow-sa.vercel.app",
     siteName: "SmoothFlow",
     images: [
       {
@@ -77,9 +81,6 @@ export const metadata: Metadata = {
   // Verification
   verification: {
     google: "your-google-verification-code",
-    // other: {
-    //   "msvalidate.01": "your-bing-verification-code",
-    // },
   },
   
   // App metadata
@@ -95,15 +96,13 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport = {
+// OPTIMIZED: Fixed viewport export for Next.js 15
+export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5,
-  userScalable: true,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#00BFFF' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' }
-  ],
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#0ea5e9", // OPTIMIZED: Moved themeColor to viewport
 };
 
 export default function RootLayout({
@@ -112,9 +111,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" className={`${cairo.variable} ${inter.variable}`}>
       <head>
-        {/* Preconnect to external domains */}
+        {/* OPTIMIZED: Preload critical fonts */}
+        <link
+          rel="preload"
+          href="/fonts/cairo-variable.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         
         {/* Favicon and app icons */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -128,7 +134,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
         
-        {/* Structured data */}
+        {/* OPTIMIZED: Simplified structured data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -137,7 +143,7 @@ export default function RootLayout({
               "@type": "LocalBusiness",
               "name": "SmoothFlow",
               "description": "خدمات كمبيوتر احترافية في الرس",
-              "url": "https://smoothflow.sa",
+              "url": "https://smoothflow-sa.vercel.app",
               "telephone": "+966543156466",
               "address": {
                 "@type": "PostalAddress",
@@ -146,14 +152,8 @@ export default function RootLayout({
                 "addressRegion": "القصيم",
                 "addressCountry": "SA"
               },
-              "geo": {
-                "@type": "GeoCoordinates",
-                "latitude": 25.8697,
-                "longitude": 43.4951
-              },
               "openingHours": "Mo-Su 09:00-22:00",
-              "priceRange": "$$",
-              "image": "/images/logo/store-logo.png"
+              "priceRange": "$$"
             })
           }}
         />
@@ -166,7 +166,7 @@ export default function RootLayout({
           {children}
         </Providers>
         
-        {/* Performance monitoring script (optional) */}
+        {/* OPTIMIZED: Performance monitoring script */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -175,13 +175,16 @@ export default function RootLayout({
                 window.addEventListener('load', function() {
                   setTimeout(function() {
                     const perfData = performance.getEntriesByType('navigation')[0];
-                    console.log('Page load time:', perfData.loadEventEnd - perfData.fetchStart + 'ms');
+                    if (perfData) {
+                      console.log('Page load time:', perfData.loadEventEnd - perfData.fetchStart + 'ms');
+                    }
                   }, 0);
                 });
               }
             `
           }}
         />
+        
         <SpeedInsights />
       </body>
     </html>
