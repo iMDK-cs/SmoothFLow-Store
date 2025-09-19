@@ -17,7 +17,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SmoothFlow - حلول تقنية متطورة",
+  title: "SmoothFlow - حلول تقنية",
   description: "خدمات كمبيوتر احترافية في الرس - تركيب، صيانة، وإصلاح جميع أنواع أجهزة الكمبيوتر مع ضمان شامل وخدمة عملاء متميزة",
   keywords: "خدمات كمبيوتر, تركيب حاسوب, صيانة حاسوب, إصلاح حاسوب, الرس, السعودية, SmoothFlow",
   authors: [{ name: "SmoothFlow" }],
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   
   // Open Graph metadata for social sharing
   openGraph: {
-    title: "SmoothFlow - حلول تقنية متطورة",
+    title: "SmoothFlow - حلول تقنية",
     description: "خدمات كمبيوتر احترافية في الرس ",
     url: "https://smoothflow-store-web.vercel.app",
     siteName: "SmoothFlow",
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
   // Twitter Card metadata
   twitter: {
     card: "summary_large_image",
-    title: "SmoothFlow - حلول تقنية متطورة",
+    title: "SmoothFlow - حلول تقنية",
     description: "خدمات كمبيوتر احترافية في الرس",
     images: ["/images/twitter-image.jpg"],
     creator: "@MDK7_",
