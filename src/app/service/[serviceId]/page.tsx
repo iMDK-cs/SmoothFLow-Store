@@ -289,7 +289,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     title: 'تويك الويندوز',
     description: 'تسريع وتحسين الويندوز',
     fullDescription: 'تحسين شامل لأداء الويندوز عبر إزالة البرامج غير الضرورية وتحسين الإعدادات.',
-    price: '130',
+    price: '100',
     image: '⚙️',
     serviceImage: '/images/services/tweak.jpg?v=2',
     rating: 4.9,

@@ -8,7 +8,7 @@ import Link from 'next/link'
 export default function EnhancedShoppingCart() {
   const [isOpen, setIsOpen] = useState(false)
   const [isAnimating, setIsAnimating] = useState(false)
-  const { state, removeFromCart, getTotalPrice, getItemCount, lastAddedItem } = useCart()
+  const { state, removeFromCart, updateQuantity, getTotalPrice, getItemCount, lastAddedItem } = useCart()
   const { data: session } = useSession()
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -139,9 +139,36 @@ export default function EnhancedShoppingCart() {
                           <p className="text-xs text-gray-400 mt-1 truncate">{item.option.title}</p>
                         )}
                         <div className="flex items-center justify-between mt-1">
-                          <p className="text-xs text-gray-400">الكمية: {item.quantity}</p>
+                          <div className="flex items-center space-x-2 space-x-reverse">
+                            <span className="text-xs text-gray-400">الكمية:</span>
+                            <div className="flex items-center space-x-1 space-x-reverse">
+                              <button
+                                onClick={() => {
+                                  if (item.quantity > 1) {
+                                    updateQuantity(item.id, item.quantity - 1)
+                                  } else {
+                                    removeFromCart(item.id)
+                                  }
+                                }}
+                                className="w-6 h-6 bg-gray-600 hover:bg-gray-500 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+                                title="تقليل الكمية"
+                              >
+                                -
+                              </button>
+                              <span className="text-xs text-white font-medium px-2 min-w-[20px] text-center">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                className="w-6 h-6 bg-sky-600 hover:bg-sky-500 text-white rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+                                title="زيادة الكمية"
+                              >
+                                +
+                              </button>
+                            </div>
+                          </div>
                           <p className="text-xs text-gray-400">
-                            {item.option ? item.option.price : item.service.basePrice} ريال × {item.quantity}
+                            {item.option ? item.option.price : item.service.basePrice} ريال
                           </p>
                         </div>
                       </div>

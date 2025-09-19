@@ -14,6 +14,11 @@ const addToCartSchema = z.object({
   quantity: z.number().min(1).default(1),
 })
 
+const updateQuantitySchema = z.object({
+  itemId: z.string(),
+  quantity: z.number().min(1),
+})
+
 // Global cache for services (shared across requests)
 const serviceCache = new Map<string, { data: { available: boolean; stock: number | null; title: string; active: boolean; basePrice: number } | null; timestamp: number }>()
 const CACHE_TTL = 60000 // 1 minute
@@ -201,6 +206,48 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
+    const user = await getUserFromSession(session)
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const { itemId, quantity } = updateQuantitySchema.parse(body)
+
+    // Verify ownership before update
+    const cartItem = await prisma.cartItem.findFirst({
+      where: { 
+        id: itemId,
+        cart: { userId: user.id }
+      }
+    })
+
+    if (!cartItem) {
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 })
+    }
+
+    await prisma.cartItem.update({
+      where: { id: itemId },
+      data: { quantity }
+    })
+
+    return NextResponse.json({ message: 'Quantity updated successfully' })
+  } catch (error) {
+    console.error('Update quantity error:', error)
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: 'Invalid request data' }, { status: 400 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

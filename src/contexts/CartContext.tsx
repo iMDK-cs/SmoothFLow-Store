@@ -207,7 +207,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       dispatch({ type: 'UPDATE_QUANTITY', payload: { itemId, quantity } })
       
-      // Implementation for updating quantity
+      const response = await fetch('/api/cart', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ itemId, quantity }),
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to update quantity')
+      }
+      
       await fetchCart()
     } catch {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to update quantity' })
