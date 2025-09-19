@@ -80,12 +80,14 @@ export async function GET() {
             select: { title: true }
           })
           return {
-            ...service,
-            serviceTitle: serviceData?.title || 'Unknown Service'
+            id: service.serviceId,
+            title: serviceData?.title || 'Unknown Service',
+            orderCount: service._count.serviceId || 0,
+            revenue: service._sum.totalPrice || 0
           }
         })
       ),
-      monthlyStats
+      monthlyStats: monthlyStats || []
     }
 
     return NextResponse.json(stats)

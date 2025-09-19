@@ -99,6 +99,24 @@ export default function AdminDashboard() {
     )
   }
 
+  if (!stats) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-8xl mb-6">⚠️</div>
+          <h1 className="text-white text-3xl font-bold mb-4">خطأ في تحميل البيانات</h1>
+          <p className="text-gray-300 text-lg mb-6">لم يتم تحميل البيانات بنجاح</p>
+          <button
+            onClick={fetchAdminStats}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-lg transition-colors text-lg font-medium"
+          >
+            إعادة المحاولة
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
@@ -228,7 +246,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-violet-100 text-xs font-medium mb-1">إجمالي الإيرادات</p>
-                <p className="text-2xl font-bold text-white mb-1">{stats.totalRevenue.toFixed(2)} ريال</p>
+                <p className="text-2xl font-bold text-white mb-1">{(stats.totalRevenue ?? 0).toFixed(2)} ريال</p>
                 <p className="text-violet-200 text-xs">إيرادات مكتملة</p>
               </div>
               <div className="w-10 h-10 bg-violet-400 rounded-xl flex items-center justify-center shadow-lg">
@@ -249,15 +267,15 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
               <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg p-4 text-center">
                 <p className="text-green-100 text-sm mb-1">إيرادات اليوم</p>
-                <p className="text-white text-2xl font-bold">{(stats.totalRevenue * 0.1).toFixed(2)} ريال</p>
+                <p className="text-white text-2xl font-bold">{((stats.totalRevenue ?? 0) * 0.1).toFixed(2)} ريال</p>
               </div>
               <div className="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-lg p-4 text-center">
                 <p className="text-blue-100 text-sm mb-1">إيرادات الأسبوع</p>
-                <p className="text-white text-2xl font-bold">{(stats.totalRevenue * 0.3).toFixed(2)} ريال</p>
+                <p className="text-white text-2xl font-bold">{((stats.totalRevenue ?? 0) * 0.3).toFixed(2)} ريال</p>
               </div>
               <div className="bg-gradient-to-r from-purple-600 to-violet-600 rounded-lg p-4 text-center">
                 <p className="text-purple-100 text-sm mb-1">إيرادات الشهر</p>
-                <p className="text-white text-2xl font-bold">{stats.totalRevenue.toFixed(2)} ريال</p>
+                <p className="text-white text-2xl font-bold">{(stats.totalRevenue ?? 0).toFixed(2)} ريال</p>
               </div>
             </div>
             <div className="h-32 bg-gradient-to-r from-slate-700 to-slate-800 rounded-lg flex items-center justify-center">
@@ -340,7 +358,7 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-violet-100 text-xs font-medium mb-1">إجمالي الإيرادات</p>
-                <p className="text-2xl font-bold text-white mb-1">{stats.totalRevenue.toFixed(2)} ريال</p>
+                <p className="text-2xl font-bold text-white mb-1">{(stats.totalRevenue ?? 0).toFixed(2)} ريال</p>
                 <p className="text-violet-200 text-xs">إيرادات مكتملة</p>
               </div>
               <div className="w-10 h-10 bg-violet-400 rounded-xl flex items-center justify-center shadow-lg">
@@ -381,11 +399,11 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {stats.recentOrders.map((order) => (
+                {(stats.recentOrders || []).map((order) => (
                   <tr key={order.id} className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors">
                     <td className="py-4 text-white font-medium">{order.orderNumber}</td>
                     <td className="py-4 text-gray-300">{order.user.name || order.user.email}</td>
-                    <td className="py-4 text-white font-semibold">{order.totalAmount.toFixed(2)} ريال</td>
+                    <td className="py-4 text-white font-semibold">{(order.totalAmount ?? 0).toFixed(2)} ريال</td>
                     <td className="py-4">
                       <span className={`px-3 py-2 rounded-full text-sm font-medium ${
                         order.status === 'COMPLETED' ? 'bg-green-500 text-white' :
@@ -413,7 +431,7 @@ export default function AdminDashboard() {
             أكثر الخدمات طلباً
           </h2>
           <div className="space-y-2">
-            {stats.topServices.map((service, index) => (
+            {(stats.topServices || []).map((service, index) => (
               <div key={service.id} className="flex items-center justify-between p-2 bg-gradient-to-r from-slate-700 to-slate-800 rounded-lg hover:from-slate-600 hover:to-slate-700 transition-all duration-300 transform hover:scale-105 border border-slate-600">
                 <div className="flex items-center space-x-2 space-x-reverse">
                   <span className="w-6 h-6 bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg">
@@ -423,7 +441,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="text-right">
                   <p className="text-cyan-200 text-xs font-medium">{service.orderCount} طلب</p>
-                  <p className="text-white font-bold text-sm">{service.revenue.toFixed(2)} ريال</p>
+                  <p className="text-white font-bold text-sm">{(service.revenue ?? 0).toFixed(2)} ريال</p>
                 </div>
               </div>
             ))}
