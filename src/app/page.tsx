@@ -76,57 +76,13 @@ const EnhancedBackground = memo(() => {
       {/* Animated gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black opacity-90" />
       
-      {/* Floating geometric shapes */}
-      <div className="absolute inset-0">
-        {Array.from({ length: 8 }, (_, i) => (
-          <div
-            key={i}
-            className="geometric-shape absolute"
-            style={{
-              width: `${60 + i * 10}px`,
-              height: `${60 + i * 10}px`,
-              top: `${10 + i * 10}%`,
-              left: `${5 + i * 12}%`,
-              animationDelay: `${i * 2}s`,
-              animationDuration: `${15 + i * 2}s`
-            }}
-          />
-        ))}
-      </div>
       
-      {/* Animated grid overlay */}
-      <div 
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(0, 191, 255, 0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 191, 255, 0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px'
-        }}
-      />
     </div>
   );
 });
 
 EnhancedBackground.displayName = 'EnhancedBackground';
 
-// useScrollAnimation hook
-const useScrollAnimation = ({ threshold = 0.1 } = {}) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return { ref, isVisible };
-};
 
 // Store Configuration
 const storeConfig = {
@@ -164,7 +120,7 @@ const imageConfig = {
   },
   fallback: {
     category: "/images/categories/pc-biuld.jpg",
-    service: "/images/services/pc-assembly.jpg",
+    service: "/images/services/ready-builds.jpg",
     logo: "/images/logo/store logo.png"
   }
 };
@@ -300,8 +256,8 @@ const servicesData = {
         id: 'windows-tweaking',
         title: 'تويك الويندوز',
         description: 'تسريع وتحسين الويندوز',
-        price: '100',
-        addon: 'مع فورمات +30 ريال',
+        price: '130',
+        addon: 'مع فورمات',
         optional: true,
         image: '🪟',
         serviceImage: imageConfig.services['windows-tweaking'],
@@ -711,7 +667,17 @@ const ServiceCard = memo(({
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showOptions, setShowOptions] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.1 });
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
   const { addToCart } = useCart();
   const { data: session } = useSession();
   const router = useRouter();
@@ -990,25 +956,28 @@ ServiceCard.displayName = 'ServiceCard';
 const EnhancedServiceSection = memo(({ 
   sectionKey, 
   category, 
-  activeSection,
-  onAddToCart
+  onAddToCart 
 }: { 
   sectionKey: string; 
   category: { title: string; icon: string; color: string; image: string; services: Service[] }; 
-  activeSection: string;
   onAddToCart: (message: string, type: 'success' | 'error' | 'info') => void;
 }) => {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.2 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
   
   return (
     <section 
       id={sectionKey} 
       className="py-8 relative z-10"
-      style={{
-        background: activeSection === sectionKey 
-          ? `linear-gradient(135deg, ${sectionKey === 'assembly' ? 'rgba(0, 191, 255, 0.05)' : sectionKey === 'maintenance' ? 'rgba(0, 191, 255, 0.05)' : 'rgba(135, 206, 250, 0.05)'} 0%, transparent 100%)`
-          : 'transparent'
-      }}
       aria-labelledby={`${sectionKey}-heading`}
     >
       <div 
@@ -1038,20 +1007,6 @@ const EnhancedServiceSection = memo(({
         </div>
       </div>
       
-      {/* Section-specific background effects */}
-      <div className="absolute inset-0 pointer-events-none opacity-15">
-        <div 
-          className={`absolute top-1/2 left-1/2 w-80 h-80 rounded-full blur-3xl ${
-            sectionKey === 'assembly' ? 'bg-sky-500' : 
-            sectionKey === 'maintenance' ? 'bg-sky-400' : 
-            'bg-blue-400'
-          }`}
-          style={{
-            transform: `translate(-50%, -50%) scale(${activeSection === sectionKey ? 1 : 0.5})`,
-            transition: 'transform 1s ease-out'
-          }}
-        ></div>
-      </div>
     </section>
   );
 });
@@ -1102,7 +1057,6 @@ const useScrollPosition = () => {
 // Enhanced Section Observer Hook
 const useSectionObserver = () => {
   const [activeSection, setActiveSection] = useState('assembly');
-  const [sectionProgress, setSectionProgress] = useState(0);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -1119,14 +1073,6 @@ const useSectionObserver = () => {
               const sectionId = entry.target.id;
               setActiveSection(sectionId);
               
-              // Calculate progress within the section
-              const rect = entry.boundingClientRect;
-              const windowHeight = window.innerHeight;
-              const sectionHeight = entry.target.clientHeight;
-              const progress = Math.max(0, Math.min(1, 
-                (windowHeight - rect.top) / (windowHeight + sectionHeight)
-              ));
-              setSectionProgress(progress);
             }
           });
         },
@@ -1145,127 +1091,11 @@ const useSectionObserver = () => {
   }, []);
 
   return { 
-    activeSection: isClient ? activeSection : 'assembly',
-    sectionProgress: isClient ? sectionProgress : 0
+    activeSection: isClient ? activeSection : 'assembly'
   };
 };
 
-// Interactive Card Component
-const InteractiveCard = memo(({ 
-  children, 
-  className = '', 
-  hoverEffect = 'glow',
-  ...props 
-}: {
-  children: React.ReactNode;
-  className?: string;
-  hoverEffect?: 'glow' | 'lift' | 'scale';
-  [key: string]: unknown;
-}) => {
-  const [isHovered, setIsHovered] = useState(false);
 
-  const getHoverStyles = () => {
-    if (!isHovered) return {};
-    
-    switch (hoverEffect) {
-      case 'glow':
-        return {
-          boxShadow: '0 0 30px rgba(0, 191, 255, 0.3), 0 0 60px rgba(0, 191, 255, 0.2)'
-        };
-      case 'lift':
-        return {
-          transform: 'translateY(-8px)',
-          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)'
-        };
-      case 'scale':
-        return {
-          transform: 'scale(1.05)'
-        };
-      default:
-        return {};
-    }
-  };
-
-  return (
-    <div
-      className={`interactive-card ${className}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        ...getHoverStyles()
-      }}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-});
-
-InteractiveCard.displayName = 'InteractiveCard';
-
-// Reveal Animation Component
-const RevealAnimation = memo(({
-  children,
-  direction = 'up',
-  delay = 0,
-  duration = 800,
-  className = ''
-}: {
-  children: React.ReactNode;
-  direction?: 'up' | 'down' | 'left' | 'right';
-  delay?: number;
-  duration?: number;
-  className?: string;
-}) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setIsVisible(true), delay);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, [delay]);
-
-  const getTransform = () => {
-    if (isVisible) return 'translate(0, 0)';
-    
-    switch (direction) {
-      case 'up': return 'translate(0, 30px)';
-      case 'down': return 'translate(0, -30px)';
-      case 'left': return 'translate(30px, 0)';
-      case 'right': return 'translate(-30px, 0)';
-      default: return 'translate(0, 30px)';
-    }
-  };
-
-  return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: getTransform(),
-        transition: `all ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`
-      }}
-    >
-      {children}
-    </div>
-  );
-});
-
-RevealAnimation.displayName = 'RevealAnimation';
 
 // FAQ Item Component
 const FAQItem = memo(({ 
@@ -1497,9 +1327,8 @@ export default function MDKStore() {
           </div>
 
           <div className="container mx-auto px-4 md:px-6 text-center relative z-10 max-w-6xl">
-            <RevealAnimation direction="up" delay={200}>
               {/* Enhanced Badge */}
-              <InteractiveCard className="inline-block px-8 py-4 glass-dark rounded-full border border-sky-500/60 mb-8 enhanced-glow hover:scale-105 transition-all duration-700 group" hoverEffect="glow">
+              <div className="inline-block px-8 py-4 glass-dark rounded-full border border-sky-500/60 mb-8 enhanced-glow hover:scale-105 transition-all duration-700 group">
                 <div className="flex items-center space-x-3 space-x-reverse">
                   <div className="w-3 h-3 bg-sky-400 rounded-full animate-pulse neon-glow"></div>
                   <span className="font-bold text-base sky-blue-gradient-text">
@@ -1507,7 +1336,7 @@ export default function MDKStore() {
                   </span>
                   <div className="w-3 h-3 bg-sky-400 rounded-full animate-pulse neon-glow"></div>
                 </div>
-              </InteractiveCard>
+              </div>
               
               {/* Enhanced Main Title - Better Responsive */}
               <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 md:mb-8 leading-tight px-2">
@@ -1564,7 +1393,6 @@ export default function MDKStore() {
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-sky-400/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
                 </button>
               </div>
-            </RevealAnimation>
           </div>
         </section>
 
@@ -1575,7 +1403,6 @@ export default function MDKStore() {
               key={key}
               sectionKey={key}
               category={category}
-              activeSection={activeSection}
               onAddToCart={handleNotification}
             />
           ))}

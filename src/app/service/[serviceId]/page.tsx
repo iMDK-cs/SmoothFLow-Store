@@ -289,7 +289,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     title: 'تويك الويندوز',
     description: 'تسريع وتحسين الويندوز',
     fullDescription: 'تحسين شامل لأداء الويندوز عبر إزالة البرامج غير الضرورية وتحسين الإعدادات.',
-    price: '100',
+    price: '130',
     image: '⚙️',
     serviceImage: '/images/services/tweak.jpg?v=2',
     rating: 4.9,
@@ -511,7 +511,7 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ servic
           <div className="space-y-4">
             <div className="aspect-square bg-gray-800 rounded-lg overflow-hidden">
               <Image
-                src={service.serviceImage || service.images[0] || '/images/fallback/service-default.jpg'}
+                src={service.serviceImage || service.images[0] || '/images/services/ready-builds.jpg'}
                 alt={service.title}
                 width={600}
                 height={600}

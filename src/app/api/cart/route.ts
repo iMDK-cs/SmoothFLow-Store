@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
-import { prisma } from '@/lib/prisma-fast'
+import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 
 // Use Node.js runtime for Prisma compatibility
