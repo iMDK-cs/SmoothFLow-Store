@@ -291,7 +291,7 @@ const servicesData = {
     color: 'from-sky-600 to-sky-700',
     services: [
       {
-        id: 'bios-tweak',
+        id: 'ram-oc',
         title: 'تويك للبايوس',
         description: 'تحسين أداء وفتح سرعة الرامات',
         price: '50',
@@ -301,7 +301,7 @@ const servicesData = {
         color: 'from-purple-500 to-purple-600'
       },
       {
-        id: 'tweak',
+        id: 'windows-tweaking',
         title: 'تويك الويندوز',
         description: 'تسريع وتحسين الويندوز',
         price: '100',
@@ -313,12 +313,12 @@ const servicesData = {
         rating: 4.9,
         color: 'from-purple-500 to-purple-600',
         options: [
-          { id: 'cmfqj2wa20001uafwukjyeb7t', title: 'بدون فورمات', price: '100', description: 'تحسين الويندوز الحالي' },
-          { id: 'cmfqj2wxu0003uafwk43q2um5', title: 'مع فورمات', price: '130', description: 'تحسين + فورمات كامل للنظام' }
+          { id: 'without-format', title: 'بدون فورمات', price: '100', description: 'تحسين الويندوز الحالي' },
+          { id: 'with-format', title: 'مع فورمات', price: '130', description: 'تحسين + فورمات كامل للنظام' }
         ]
       },
       {
-        id: 'custom-windows',
+        id: 'gaming-windows',
         title: 'تثبيت ويندوز مخصص للالعاب',
         description: 'ويندوز محسن خصيصاً للألعاب',
         price: '100',
@@ -328,7 +328,7 @@ const servicesData = {
         color: 'from-purple-500 to-purple-600'
       },
       {
-        id: 'network',
+        id: 'internet-tweak',
         title: 'تويك الانترنت',
         description: 'تحسين أداء الانترنت',
         price: '50',
@@ -338,7 +338,7 @@ const servicesData = {
         color: 'from-purple-500 to-purple-600'
       },
       {
-        id: 'gpu-drivers',
+        id: 'gpu-oc',
         title: 'كسر سرعة القير',
         description: 'رفع أداء استجابة القير',
         price: '30',
