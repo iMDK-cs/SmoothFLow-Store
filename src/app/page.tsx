@@ -69,16 +69,34 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Simple Background Component
-const SimpleBackground = memo(() => {
+// Enhanced Background Component with Light Effects
+const EnhancedBackground = memo(() => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      <div className="absolute inset-0 bg-gray-900" />
+      {/* Base gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black" />
+      
+      {/* Subtle animated elements */}
+      <div className="absolute inset-0">
+        {/* Floating circles - very light */}
+        <div className="absolute w-32 h-32 bg-sky-500/5 rounded-full top-20 left-20 animate-pulse" style={{animationDuration: '4s'}}></div>
+        <div className="absolute w-24 h-24 bg-blue-500/8 rounded-full top-40 right-32 animate-pulse" style={{animationDuration: '6s', animationDelay: '2s'}}></div>
+        <div className="absolute w-40 h-40 bg-cyan-500/3 rounded-full bottom-32 left-1/4 animate-pulse" style={{animationDuration: '8s', animationDelay: '1s'}}></div>
+        
+        {/* Subtle grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `radial-gradient(circle at 25% 25%, #00BFFF 1px, transparent 1px), radial-gradient(circle at 75% 75%, #87CEEB 1px, transparent 1px)`,
+            backgroundSize: '80px 80px',
+          }}
+        ></div>
+      </div>
     </div>
   );
 });
 
-SimpleBackground.displayName = 'SimpleBackground';
+EnhancedBackground.displayName = 'EnhancedBackground';
 
 
 // Store Configuration
@@ -1231,9 +1249,9 @@ export default function MDKStore() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gray-900 relative overflow-x-hidden" dir="rtl">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black relative overflow-x-hidden" dir="rtl">
         {/* Enhanced Background Effects */}
-        <SimpleBackground />
+        <EnhancedBackground />
         
 
 
@@ -1248,29 +1266,36 @@ export default function MDKStore() {
 
         {/* Enhanced Hero Section */}
         <section className="relative min-h-[85vh] flex items-center justify-center pt-20 pb-16 z-10 overflow-hidden">
+          {/* Subtle overlay effects */}
+          <div className="absolute inset-0">
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-sky-500/5 rounded-full blur-3xl animate-pulse" style={{animationDuration: '8s'}}></div>
+            <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-blue-500/8 rounded-full blur-3xl animate-pulse" style={{animationDuration: '10s', animationDelay: '2s'}}></div>
+          </div>
 
           <div className="container mx-auto px-4 md:px-6 text-center relative z-10 max-w-6xl">
-              {/* Simple Badge */}
-              <div className="inline-block px-6 py-3 bg-gray-800 rounded-full border border-sky-500/60 mb-8">
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full"></div>
-                  <span className="font-bold text-base text-sky-400">
+              {/* Enhanced Badge */}
+              <div className="inline-block px-8 py-4 bg-gray-800/50 backdrop-blur-sm rounded-full border border-sky-500/60 mb-8 hover:border-sky-400/80 transition-all duration-300">
+                <div className="flex items-center space-x-3 space-x-reverse">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
+                  <span className="font-bold text-base text-sky-400 hover:text-sky-300 transition-colors duration-300">
                     خدمات تقنية احترافية
                   </span>
-                  <div className="w-2 h-2 bg-sky-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
                 </div>
               </div>
               
-              {/* Simple Main Title */}
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 md:mb-8 leading-tight px-2">
+              {/* Enhanced Main Title */}
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 md:mb-8 leading-tight px-2 hover:scale-105 transition-transform duration-500" style={{textShadow: '0 0 20px rgba(0, 191, 255, 0.3)'}}>
                 {storeConfig.storeName}
               </h1>
               
-              {/* Simple Subtitle */}
+              {/* Enhanced Subtitle */}
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-200 mb-6 sm:mb-8 md:mb-12 max-w-5xl mx-auto leading-relaxed font-light px-4">
-                حلول شاملة وخدمات متخصصة لجميع احتياجاتك التقنية
+                <span className="bg-gradient-to-r from-gray-200 to-gray-400 bg-clip-text text-transparent hover:from-sky-200 hover:to-sky-400 transition-all duration-500">
+                  حلول شاملة وخدمات متخصصة لجميع احتياجاتك التقنية
+                </span>
                 <br />
-                <span className="text-lg sm:text-xl md:text-2xl text-gray-400 mt-2 sm:mt-4 block">
+                <span className="text-lg sm:text-xl md:text-2xl text-gray-400 mt-2 sm:mt-4 block hover:text-sky-300 transition-colors duration-500">
                   بأعلى معايير الجودة والاحترافية
                 </span>
               </p>
@@ -1278,10 +1303,18 @@ export default function MDKStore() {
               <div className="flex justify-center items-center mb-6 sm:mb-8 md:mb-12 px-4">
                 <button 
                   onClick={() => scrollToSection('assembly')}
-                  className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base transition-colors duration-200"
+                  className="group relative bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 shadow-lg shadow-sky-500/20 overflow-hidden"
                   aria-label="استكشف خدماتنا"
                 >
-                  استكشف خدماتنا
+                  {/* Subtle shimmer effect */}
+                  <div className="absolute inset-0 -top-1 -left-1 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700"></div>
+                  
+                  <span className="relative z-10 flex items-center justify-center space-x-reverse space-x-2">
+                    <span>استكشف خدماتنا</span>
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
                 </button>
               </div>
           </div>
