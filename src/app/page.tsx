@@ -309,8 +309,8 @@ const servicesData = {
         rating: 4.9,
         color: 'from-purple-500 to-purple-600',
         options: [
-          { id: 'without-format', title: 'بدون فورمات', price: '100', description: 'تحسين الويندوز الحالي' },
-          { id: 'with-format', title: 'مع فورمات', price: '130', description: 'تحسين + فورمات كامل للنظام' }
+          { id: 'cmfqppnmm0001uajwp8623wcj', title: 'بدون فورمات', price: '100', description: 'تحسين الويندوز الحالي' },
+          { id: 'cmfqppoa90003uajw80tu9k4h', title: 'مع فورمات', price: '130', description: 'تحسين + فورمات كامل للنظام' }
         ]
       },
       {
