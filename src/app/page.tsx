@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
@@ -69,24 +69,43 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Enhanced Background Component with Light Effects
-const EnhancedBackground = memo(() => {
+// Beautiful Animated Background Component
+const AnimatedBackground = memo(() => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
       {/* Base gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900" />
       
-      {/* Minimal static elements */}
+      {/* Animated floating particles */}
       <div className="absolute inset-0">
-        {/* Simple static circles */}
-        <div className="absolute w-24 h-24 bg-sky-500/3 rounded-full top-20 left-20"></div>
-        <div className="absolute w-16 h-16 bg-blue-500/5 rounded-full top-40 right-32"></div>
+        {/* Large floating circles with gentle animation */}
+        <div className="absolute w-32 h-32 bg-sky-500/8 rounded-full top-20 left-20 animate-pulse" style={{animationDuration: '6s'}}></div>
+        <div className="absolute w-24 h-24 bg-blue-500/10 rounded-full top-40 right-32 animate-pulse" style={{animationDuration: '8s', animationDelay: '2s'}}></div>
+        <div className="absolute w-40 h-40 bg-cyan-500/6 rounded-full bottom-32 left-1/4 animate-pulse" style={{animationDuration: '10s', animationDelay: '1s'}}></div>
+        <div className="absolute w-20 h-20 bg-purple-500/8 rounded-full top-60 right-1/3 animate-pulse" style={{animationDuration: '7s', animationDelay: '3s'}}></div>
+        
+        {/* Small drifting particles */}
+        <div className="absolute w-3 h-3 bg-sky-400/20 rounded-full top-10 left-10 animate-bounce" style={{animationDuration: '4s', animationDelay: '0.5s'}}></div>
+        <div className="absolute w-2 h-2 bg-blue-400/30 rounded-full top-30 left-30 animate-bounce" style={{animationDuration: '5s', animationDelay: '1.5s'}}></div>
+        <div className="absolute w-4 h-4 bg-cyan-300/15 rounded-full top-50 left-50 animate-bounce" style={{animationDuration: '6s', animationDelay: '2.5s'}}></div>
+        
+        {/* Subtle grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-5"
+          style={{
+            backgroundImage: `radial-gradient(circle at 25% 25%, #00BFFF 1px, transparent 1px), radial-gradient(circle at 75% 75%, #87CEEB 1px, transparent 1px)`,
+            backgroundSize: '100px 100px',
+          }}
+        ></div>
+        
+        {/* Gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/3 via-transparent to-blue-500/3"></div>
       </div>
     </div>
   );
 });
 
-EnhancedBackground.displayName = 'EnhancedBackground';
+AnimatedBackground.displayName = 'AnimatedBackground';
 
 
 // Store Configuration
@@ -423,18 +442,10 @@ const PopularBadge = memo(({ isHovered }: { isHovered: boolean }) => {
 
 PopularBadge.displayName = 'PopularBadge';
 
-// Dynamic Header Component
-const DynamicHeader = memo(({ 
-  activeSection, 
-  isScrolled, 
-  scrollY,
-  scrollToSection,
+// Simple Header Component
+const SimpleHeader = memo(({ 
   session
 }: { 
-  activeSection: string; 
-  isScrolled: boolean; 
-  scrollY: number;
-  scrollToSection: (sectionId: string) => void;
   session: { user?: { name?: string | null; email?: string | null; image?: string | null } } | null;
 }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -445,59 +456,15 @@ const DynamicHeader = memo(({
       setUserRole((session.user as { role?: string })?.role || null);
     }
   }, [session]);
-  const getSectionTheme = useCallback((section: string) => {
-    switch (section) {
-      case 'assembly':
-        return {
-          bg: 'from-sky-400/20 to-sky-600/20',
-          border: 'border-sky-500/30',
-          text: 'text-sky-400',
-          glow: 'shadow-sky-500/20'
-        };
-      case 'maintenance':
-        return {
-          bg: 'from-blue-500/20 to-blue-700/20',
-          border: 'border-blue-500/30',
-          text: 'text-blue-400',
-          glow: 'shadow-blue-500/20'
-        };
-      case 'tweaking':
-        return {
-          bg: 'from-purple-500/20 to-purple-700/20',
-          border: 'border-purple-500/30',
-          text: 'text-purple-400',
-          glow: 'shadow-purple-500/20'
-        };
-      default:
-        return {
-          bg: 'from-gray-500/20 to-gray-700/20',
-          border: 'border-gray-500/30',
-          text: 'text-gray-400',
-          glow: 'shadow-gray-500/20'
-        };
-    }
-  }, []);
-
-  const theme = getSectionTheme(activeSection);
-  const progressWidth = useMemo(() => {
-    if (typeof document === 'undefined') return 0;
-    return Math.min(100, (scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
-  }, [scrollY]);
 
   return (
-    <nav className={`fixed w-full top-0 z-50 transition-all duration-500 ${
-      isScrolled 
-        ? `bg-gray-900/95 backdrop-blur-xl shadow-2xl ${theme.border} border-b` 
-        : 'bg-transparent'
-    }`}>
+    <nav className="fixed w-full top-0 z-50 bg-gray-900/95 backdrop-blur-xl shadow-2xl border-b border-sky-500/30">
       <div className="container mx-auto px-4 md:px-6 py-3">
         <div className="flex justify-between items-center">
           {/* Left: Enhanced User Account Section */}
           <div className="flex items-center space-x-reverse space-x-6 md:space-x-8">
             <div className="relative group">
-              <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 ${
-                isScrolled ? theme.glow : ''
-              } group-hover:shadow-sky-500/60 group-hover:scale-110 group-hover:rotate-2`}>
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 group-hover:shadow-sky-500/60 group-hover:scale-110 group-hover:rotate-2">
                 <EnhancedImage
                   src={storeConfig.logo}
                   fallback={imageConfig.fallback.logo}
@@ -510,17 +477,13 @@ const DynamicHeader = memo(({
               </div>
             </div>
             <div>
-              <h1 className={`text-2xl md:text-4xl font-bold transition-all duration-700 text-white ${
-                isScrolled ? 'text-sky-300' : 'text-gray-100'
-              } group-hover:scale-105`} style={{
+              <h1 className="text-2xl md:text-4xl font-bold transition-all duration-700 text-white group-hover:scale-105" style={{
                 textShadow: '0 0 10px rgba(0, 191, 255, 0.3), 0 0 20px rgba(0, 191, 255, 0.2)',
                 filter: 'contrast(1.1) brightness(0.9)'
               }}>
                 {storeConfig.storeName}
               </h1>
-              <p className={`text-lg font-semibold transition-all duration-700 ${
-                isScrolled ? 'text-gray-300' : 'text-sky-400'
-              } group-hover:text-sky-300`}>
+              <p className="text-lg font-semibold transition-all duration-700 text-sky-400 group-hover:text-sky-300">
                 {storeConfig.tagline}
               </p>
             </div>
@@ -531,21 +494,14 @@ const DynamicHeader = memo(({
             {Object.entries(servicesData).map(([key, category]) => (
               <button 
                 key={key}
-                onClick={() => scrollToSection(key)}
-                className={`px-8 py-4 rounded-xl font-semibold transition-all duration-500 relative overflow-hidden group ${
-                  activeSection === key
-                    ? `${theme.text} bg-gradient-to-r ${theme.bg} ${theme.border} border enhanced-glow` 
-                    : 'text-gray-300 hover:text-white hover:bg-gray-700/50 hover:scale-105'
-                }`}
+                onClick={() => window.scrollTo({ top: window.innerHeight * 2, behavior: 'smooth' })}
+                className="px-8 py-4 rounded-xl font-semibold transition-all duration-500 relative overflow-hidden group text-gray-300 hover:text-white hover:bg-gray-700/50 hover:scale-105"
                 aria-label={`الانتقال إلى قسم ${category.title}`}
               >
                 <span className="relative z-10 flex items-center space-x-reverse space-x-2">
                   <span className="text-lg" role="img" aria-label={category.title}>{category.icon}</span>
                   <span>{category.title}</span>
                 </span>
-                {activeSection === key && (
-                  <div className={`absolute inset-0 bg-gradient-to-r ${theme.bg}`}></div>
-                )}
               </button>
             ))}
           </div>
@@ -573,16 +529,12 @@ const DynamicHeader = memo(({
           </div>
         </div>
         
-        {/* Progress bar */}
-        <div className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r ${theme.bg} transition-all duration-500 ${
-          isScrolled ? 'opacity-100' : 'opacity-0'
-        }`} style={{ width: `${progressWidth}%` }}></div>
       </div>
     </nav>
   );
 });
 
-DynamicHeader.displayName = 'DynamicHeader';
+SimpleHeader.displayName = 'SimpleHeader';
 
 // Enhanced Section Divider
 const SectionDivider = memo(({ title, icon, color, image }: { 
@@ -1017,87 +969,6 @@ const EnhancedServiceSection = memo(({
 
 EnhancedServiceSection.displayName = 'EnhancedServiceSection';
 
-// Enhanced Custom Hooks
-const useScrollPosition = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
-  // const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('down'); // Removed unused variable
-  const [isClient, setIsClient] = useState(false);
-
-  const handleScroll = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const currentScrollY = window.scrollY;
-      setIsScrolled(currentScrollY > 50);
-      setScrollY(currentScrollY);
-    }
-  }, []);
-
-  useEffect(() => {
-    setIsClient(true);
-    
-    if (typeof window !== 'undefined') {
-      let ticking = false;
-      const throttledHandleScroll = () => {
-        if (!ticking) {
-          requestAnimationFrame(() => {
-            handleScroll();
-            ticking = false;
-          });
-          ticking = true;
-        }
-      };
-
-      window.addEventListener('scroll', throttledHandleScroll, { passive: true });
-      return () => window.removeEventListener('scroll', throttledHandleScroll);
-    }
-  }, [handleScroll]);
-
-  return { 
-    isScrolled: isClient ? isScrolled : false, 
-    scrollY: isClient ? scrollY : 0
-  };
-};
-
-// Enhanced Section Observer Hook
-const useSectionObserver = () => {
-  const [activeSection, setActiveSection] = useState('assembly');
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-    
-    if (typeof window !== 'undefined') {
-      const sections = Object.keys(servicesData);
-      const sectionElements = sections.map(id => document.getElementById(id));
-      
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const sectionId = entry.target.id;
-              setActiveSection(sectionId);
-              
-            }
-          });
-        },
-        { 
-          threshold: [0, 0.25, 0.5, 0.75, 1],
-          rootMargin: '-100px 0px -100px 0px'
-        }
-      );
-
-      sectionElements.forEach(element => {
-        if (element) observer.observe(element);
-      });
-
-      return () => observer.disconnect();
-    }
-  }, []);
-
-  return { 
-    activeSection: isClient ? activeSection : 'assembly'
-  };
-};
 
 
 
@@ -1156,8 +1027,6 @@ FAQItem.displayName = 'FAQItem';
 
 // Main Component
 export default function MDKStore() {
-  const { isScrolled, scrollY } = useScrollPosition();
-  const { activeSection } = useSectionObserver();
   const [isClient, setIsClient] = useState(false);
   const [notification, setNotification] = useState<{
     message: string;
@@ -1167,16 +1036,6 @@ export default function MDKStore() {
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
-
-  const scrollToSection = useCallback((sectionId: string) => {
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }
   }, []);
 
   const handleNotification = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning') => {
@@ -1241,55 +1100,65 @@ export default function MDKStore() {
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900 relative overflow-x-hidden" dir="rtl">
         {/* Enhanced Background Effects */}
-        <EnhancedBackground />
+        <AnimatedBackground />
         
 
 
-        {/* Dynamic Header */}
-        <DynamicHeader 
-          activeSection={activeSection}
-          isScrolled={isScrolled}
-          scrollY={scrollY}
-          scrollToSection={scrollToSection}
-          session={session}
-        />
+        {/* Simple Header */}
+        <SimpleHeader session={session} />
 
         {/* Enhanced Hero Section */}
         <section className="relative min-h-[85vh] flex items-center justify-center pt-20 pb-16 z-10 overflow-hidden">
+          {/* Beautiful overlay effects */}
+          <div className="absolute inset-0">
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-sky-500/8 rounded-full blur-3xl animate-pulse" style={{animationDuration: '8s'}}></div>
+            <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{animationDuration: '10s', animationDelay: '2s'}}></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-cyan-500/6 rounded-full blur-2xl animate-pulse" style={{animationDuration: '12s', animationDelay: '4s'}}></div>
+          </div>
 
           <div className="container mx-auto px-4 md:px-6 text-center relative z-10 max-w-6xl">
-              {/* Simple Badge */}
-              <div className="inline-block px-6 py-3 bg-gray-700/60 rounded-full border border-sky-500/50 mb-8">
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full"></div>
-                  <span className="font-bold text-base text-sky-400">
+              {/* Enhanced Badge */}
+              <div className="inline-block px-8 py-4 bg-gray-700/50 backdrop-blur-sm rounded-full border border-sky-500/60 mb-8 hover:border-sky-400/80 transition-all duration-300">
+                <div className="flex items-center space-x-3 space-x-reverse">
+                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
+                  <span className="font-bold text-base text-sky-400 hover:text-sky-300 transition-colors duration-300">
                     خدمات تقنية احترافية
                   </span>
-                  <div className="w-2 h-2 bg-sky-400 rounded-full"></div>
+                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
                 </div>
               </div>
               
-              {/* Simple Main Title */}
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 md:mb-8 leading-tight px-2" style={{textShadow: '0 0 10px rgba(0, 191, 255, 0.2)'}}>
+              {/* Enhanced Main Title */}
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 md:mb-8 leading-tight px-2 hover:scale-105 transition-transform duration-500" style={{textShadow: '0 0 20px rgba(0, 191, 255, 0.3)'}}>
                 {storeConfig.storeName}
               </h1>
               
-              {/* Simple Subtitle */}
+              {/* Enhanced Subtitle */}
               <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-200 mb-6 sm:mb-8 md:mb-12 max-w-5xl mx-auto leading-relaxed font-light px-4">
-                حلول شاملة وخدمات متخصصة لجميع احتياجاتك التقنية
+                <span className="bg-gradient-to-r from-gray-200 to-gray-400 bg-clip-text text-transparent hover:from-sky-200 hover:to-sky-400 transition-all duration-500">
+                  حلول شاملة وخدمات متخصصة لجميع احتياجاتك التقنية
+                </span>
                 <br />
-                <span className="text-lg sm:text-xl md:text-2xl text-gray-400 mt-2 sm:mt-4 block">
+                <span className="text-lg sm:text-xl md:text-2xl text-gray-400 mt-2 sm:mt-4 block hover:text-sky-300 transition-colors duration-500">
                   بأعلى معايير الجودة والاحترافية
                 </span>
               </p>
 
               <div className="flex justify-center items-center mb-6 sm:mb-8 md:mb-12 px-4">
                 <button 
-                  onClick={() => scrollToSection('assembly')}
-                  className="bg-sky-600 hover:bg-sky-700 text-white px-6 py-3 rounded-lg font-semibold text-sm sm:text-base transition-colors duration-200"
+                  onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+                  className="group relative bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 shadow-lg shadow-sky-500/20 overflow-hidden"
                   aria-label="استكشف خدماتنا"
                 >
-                  استكشف خدماتنا
+                  {/* Subtle shimmer effect */}
+                  <div className="absolute inset-0 -top-1 -left-1 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700"></div>
+                  
+                  <span className="relative z-10 flex items-center justify-center space-x-reverse space-x-2">
+                    <span>استكشف خدماتنا</span>
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
                 </button>
               </div>
           </div>
