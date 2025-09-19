@@ -291,7 +291,7 @@ const servicesData = {
     color: 'from-sky-600 to-sky-700',
     services: [
       {
-        id: 'ram-oc',
+        id: 'bios-tweak',
         title: 'تويك للبايوس',
         description: 'تحسين أداء وفتح سرعة الرامات',
         price: '50',
@@ -301,7 +301,7 @@ const servicesData = {
         color: 'from-purple-500 to-purple-600'
       },
       {
-        id: 'windows-tweaking',
+        id: 'tweak',
         title: 'تويك الويندوز',
         description: 'تسريع وتحسين الويندوز',
         price: '100',
@@ -318,7 +318,7 @@ const servicesData = {
         ]
       },
       {
-        id: 'gaming-windows',
+        id: 'custom-windows',
         title: 'تثبيت ويندوز مخصص للالعاب',
         description: 'ويندوز محسن خصيصاً للألعاب',
         price: '100',
@@ -328,7 +328,7 @@ const servicesData = {
         color: 'from-purple-500 to-purple-600'
       },
       {
-        id: 'internet-tweak',
+        id: 'network',
         title: 'تويك الانترنت',
         description: 'تحسين أداء الانترنت',
         price: '50',
@@ -338,7 +338,7 @@ const servicesData = {
         color: 'from-purple-500 to-purple-600'
       },
       {
-        id: 'gpu-oc',
+        id: 'gpu-drivers',
         title: 'كسر سرعة القير',
         description: 'رفع أداء استجابة القير',
         price: '30',
