@@ -55,21 +55,34 @@ export default function AdminDashboard() {
   const fetchAdminStats = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/admin')
+      setError('')
+      
+      const response = await fetch('/api/admin', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
       
       if (!response.ok) {
-        if (response.status === 403) {
-          setError('ليس لديك صلاحية للوصول إلى لوحة الإدارة')
+        if (response.status === 401) {
+          setError('يجب تسجيل الدخول أولاً')
+          router.push('/auth/signin')
           return
         }
-        throw new Error('Failed to fetch admin data')
+        if (response.status === 403) {
+          setError('ليس لديك صلاحية للوصول إلى لوحة الإدارة. يجب أن تكون مديراً.')
+          return
+        }
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to fetch admin data')
       }
 
       const data = await response.json()
       setStats(data)
     } catch (error) {
       console.error('Error fetching admin stats:', error)
-      setError('حدث خطأ أثناء تحميل البيانات')
+      setError(`حدث خطأ أثناء تحميل البيانات: ${error instanceof Error ? error.message : 'خطأ غير معروف'}`)
     } finally {
       setLoading(false)
     }
