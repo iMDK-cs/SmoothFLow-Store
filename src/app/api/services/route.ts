@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// Enable Edge Runtime for better performance
-export const runtime = 'edge'
+// Use Node.js runtime for Prisma compatibility
+export const runtime = 'nodejs'
 
 // Cache for services data
 const servicesCache = new Map<string, { data: unknown; timestamp: number }>()
