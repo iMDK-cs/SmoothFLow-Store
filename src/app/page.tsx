@@ -347,7 +347,7 @@ const servicesData = {
   }
 };
 
-// Enhanced Image Component
+// Simplified Image Component
 const EnhancedImage = memo(({ 
   src, 
   fallback, 
@@ -362,29 +362,7 @@ const EnhancedImage = memo(({
   [key: string]: unknown;
 }) => {
   const [imgSrc, setImgSrc] = useState(src);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [isInView, setIsInView] = useState(false);
-  const imgRef = useRef<HTMLDivElement>(null);
-
-  // Intersection Observer for lazy loading
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1, rootMargin: '50px' }
-    );
-
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   const handleError = useCallback(() => {
     if (imgSrc !== fallback) {
@@ -393,13 +371,7 @@ const EnhancedImage = memo(({
     } else {
       setError(true);
     }
-    setLoading(false);
   }, [imgSrc, fallback]);
-
-  const handleLoad = useCallback(() => {
-    setLoading(false);
-    setError(false);
-  }, []);
 
   if (error && imgSrc === fallback) {
     return (
@@ -410,52 +382,29 @@ const EnhancedImage = memo(({
   }
 
   return (
-    <div ref={imgRef} className="relative">
-      {loading && (
-        <div className={`${className} bg-gray-700 animate-pulse flex items-center justify-center absolute inset-0`}>
-          <div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
-      )}
-      {isInView && (
-        <Image
-          src={imgSrc}
-          alt={alt}
-          width={500}
-          height={300}
-          className={`${className} ${loading ? 'opacity-0' : 'opacity-100 transition-opacity duration-300'}`}
-          onError={handleError}
-          onLoad={handleLoad}
-          loading="lazy"
-          {...props}
-        />
-      )}
-    </div>
+    <Image
+      src={imgSrc}
+      alt={alt}
+      width={500}
+      height={300}
+      className={className}
+      onError={handleError}
+      loading="lazy"
+      {...props}
+    />
   );
 });
 
 EnhancedImage.displayName = 'EnhancedImage';
 
-// Enhanced Popular Badge
+// Simplified Popular Badge
 const PopularBadge = memo(({ isHovered }: { isHovered: boolean }) => {
   return (
     <div className="absolute -top-3 -right-3 z-20">
-      <div className="relative">
-        <div className={`bg-gradient-to-r from-pink-500 via-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg transform transition-all duration-500 ${
-          isHovered ? 'scale-125 rotate-6 shadow-pink-500/50' : 'scale-100 rotate-0'
-        }`}>
-          <span className="relative z-10 animate-pulse">الأكثر مبيعاً</span>
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-red-500 rounded-full animate-ping opacity-20"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse opacity-30"></div>
-        <div className="absolute -inset-1 bg-gradient-to-r from-pink-400 to-red-400 rounded-full animate-spin opacity-10" style={{ animationDuration: '3s' }}></div>
-        
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"></div>
-        <div className="absolute -bottom-1 -left-1 w-1 h-1 bg-white rounded-full animate-ping"></div>
-        <div className="absolute top-0 left-0 w-1 h-1 bg-blue-400 rounded-full animate-pulse delay-300"></div>
-        
-        <div className={`absolute inset-0 rounded-full transition-all duration-500 ${
-          isHovered ? 'bg-gradient-to-r from-pink-400 to-red-400 opacity-30 blur-sm scale-150' : 'opacity-0'
-        }`}></div>
+      <div className={`bg-gradient-to-r from-pink-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg transition-transform duration-300 ${
+        isHovered ? 'scale-110' : 'scale-100'
+      }`}>
+        <span>الأكثر مبيعاً</span>
       </div>
     </div>
   );
@@ -519,10 +468,8 @@ const DynamicHeader = memo(({
   }, []);
 
   const theme = getSectionTheme(activeSection);
-  const progressWidth = useMemo(() => {
-    if (typeof document === 'undefined') return 0;
-    return Math.min(100, (scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
-  }, [scrollY]);
+  // Simplified progress calculation
+  const progressWidth = Math.min(100, (scrollY / 2000) * 100);
 
   return (
     <nav className={`fixed w-full top-0 z-50 transition-all duration-500 ${
@@ -535,9 +482,9 @@ const DynamicHeader = memo(({
           {/* Left: Enhanced User Account Section */}
           <div className="flex items-center space-x-reverse space-x-6 md:space-x-8">
             <div className="relative group">
-              <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 ${
+              <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 ${
                 isScrolled ? theme.glow : ''
-              } group-hover:shadow-sky-500/60 group-hover:scale-110 group-hover:rotate-2`}>
+              } group-hover:scale-105`}>
                 <EnhancedImage
                   src={storeConfig.logo}
                   fallback={imageConfig.fallback.logo}
@@ -545,22 +492,19 @@ const DynamicHeader = memo(({
                   className="w-full h-full object-contain bg-transparent"
                 />
               </div>
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center border-3 border-gray-900 shadow-lg animate-pulse">
-                <span className="text-sm">⚡</span>
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center border-2 border-gray-900 shadow-lg">
+                <span className="text-xs">⚡</span>
               </div>
             </div>
             <div>
-              <h1 className={`text-2xl md:text-4xl font-bold transition-all duration-700 text-white ${
+              <h1 className={`text-2xl md:text-4xl font-bold transition-all duration-300 text-white ${
                 isScrolled ? 'text-sky-300' : 'text-gray-100'
-              } group-hover:scale-105`} style={{
-                textShadow: '0 0 10px rgba(0, 191, 255, 0.3), 0 0 20px rgba(0, 191, 255, 0.2)',
-                filter: 'contrast(1.1) brightness(0.9)'
-              }}>
+              }`}>
                 {storeConfig.storeName}
               </h1>
-              <p className={`text-lg font-semibold transition-all duration-700 ${
+              <p className={`text-lg font-semibold transition-all duration-300 ${
                 isScrolled ? 'text-gray-300' : 'text-sky-400'
-              } group-hover:text-sky-300`}>
+              }`}>
                 {storeConfig.tagline}
               </p>
             </div>

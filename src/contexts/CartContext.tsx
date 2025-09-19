@@ -110,7 +110,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       
       const data = await response.json()
-      console.log('Fetched cart data:', data) // Debug log
+      // Debug log removed for performance
       dispatch({ type: 'SET_CART', payload: data.cart })
     } catch (error) {
       console.error('Fetch cart error:', error) // Debug log
@@ -154,7 +154,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       })
       
       const executionTime = Date.now() - startTime
-      console.log(`Add to cart API took ${executionTime}ms`)
+      // Performance log removed
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
@@ -162,7 +162,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       
       const result = await response.json()
-      console.log('Add to cart success:', result)
+      // Success log removed
       
       // Refresh cart in background (non-blocking)
       fetchCart().catch(error => {
@@ -175,7 +175,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       
       // Retry mechanism for network errors
       if (error instanceof Error && error.message.includes('fetch')) {
-        console.log('Retrying add to cart...')
+        // Retry log removed
         setTimeout(() => {
           addToCart(serviceId, optionId, quantity)
         }, 1000)

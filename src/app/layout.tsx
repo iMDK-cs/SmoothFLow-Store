@@ -175,7 +175,7 @@ export default function RootLayout({
                 window.addEventListener('load', function() {
                   setTimeout(function() {
                     const perfData = performance.getEntriesByType('navigation')[0];
-                    console.log('Page load time:', perfData.loadEventEnd - perfData.fetchStart + 'ms');
+                    // Performance log removed
                   }, 0);
                 });
               }
