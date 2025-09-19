@@ -12,13 +12,6 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
       url: process.env.DATABASE_URL,
     },
   },
-  // Connection pooling configuration
-  __internal: {
-    engine: {
-      connectTimeout: 10000, // 10 seconds
-      queryTimeout: 30000,   // 30 seconds
-    },
-  },
 })
 
 // Prevent multiple instances in development

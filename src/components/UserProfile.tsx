@@ -25,7 +25,7 @@ export default function UserProfile() {
   useEffect(() => {
     if (session?.user) {
       // Get role from session data directly (no Prisma call needed)
-      setUserRole((session.user as any)?.role || null);
+      setUserRole((session.user as { role?: string })?.role || null);
     }
   }, [session])
 

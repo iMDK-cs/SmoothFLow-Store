@@ -20,7 +20,8 @@ export default function OptimizedAddToCartButton({
   children,
   disabled = false
 }: OptimizedAddToCartButtonProps) {
-  const { addToCart, loading } = useCart()
+  const { addToCart, state } = useCart()
+  const { loading } = state
   const [isAdding, setIsAdding] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
   const maxRetries = 3
@@ -46,7 +47,7 @@ export default function OptimizedAddToCartButton({
     } finally {
       setIsAdding(false)
     }
-  }, [serviceId, optionId, quantity, addToCart, loading, disabled, retryCount])
+  }, [serviceId, optionId, quantity, addToCart, loading, disabled, retryCount, isAdding])
 
   const isLoading = isAdding || loading
 

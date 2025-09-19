@@ -15,7 +15,7 @@ const addToCartSchema = z.object({
 })
 
 // In-memory cache for services
-const serviceCache = new Map<string, { data: any; timestamp: number }>()
+const serviceCache = new Map<string, { data: { available: boolean; stock: number | null; title: string; active: boolean; basePrice: number } | null; timestamp: number }>()
 const CACHE_TTL = 300000 // 5 minutes
 
 // Optimized service lookup with extended caching
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Optimized single transaction
-    const result = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       // Get or create cart
       let cart = await tx.cart.findUnique({
         where: { userId: user.id }

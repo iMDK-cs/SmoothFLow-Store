@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma'
 export const runtime = 'edge'
 
 // Cache for services data
-const servicesCache = new Map<string, { data: any; timestamp: number }>()
+const servicesCache = new Map<string, { data: unknown; timestamp: number }>()
 const CACHE_TTL = 60000 // 1 minute
 
 export async function GET(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Build query conditions
-    const where: any = {
+    const where: Record<string, unknown> = {
       active: true,
       available: true
     }
