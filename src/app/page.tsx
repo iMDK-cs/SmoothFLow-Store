@@ -16,9 +16,6 @@ const EnhancedShoppingCart = dynamic(() => import('@/components/EnhancedShopping
 const UserProfile = dynamic(() => import('@/components/UserProfile'), {
   loading: () => <div className="w-8 h-8 bg-gray-600 rounded-full animate-pulse" />
 });
-const ScrollProgress = dynamic(() => import('@/components/ScrollProgress'), {
-  ssr: false
-});
 const Notification = dynamic(() => import('@/components/Notification'), {
   ssr: false
 });
@@ -1451,10 +1448,6 @@ export default function MDKStore() {
           <div className="floating-square floating-square-4"></div>
         </div>
 
-        {/* Scroll Progress Indicator */}
-        <ErrorBoundary>
-          <ScrollProgress />
-        </ErrorBoundary>
 
         {/* Dynamic Header */}
         <DynamicHeader 
