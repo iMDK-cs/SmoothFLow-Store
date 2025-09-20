@@ -206,6 +206,14 @@ export default function AdminServices() {
           : s
       ))
       
+      // Force refresh of main site data
+      setTimeout(() => {
+        fetchServices()
+      }, 1000)
+      
+      // Notify main site of changes
+      localStorage.setItem('serviceStatusChanged', Date.now().toString())
+      
       showNotification(
         `تم ${newActiveStatus ? 'تفعيل' : 'إلغاء تفعيل'} الخدمة بنجاح`, 
         'success'
