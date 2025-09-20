@@ -26,7 +26,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Prepare update data
-    const updateData: any = { active }
+    const updateData: {
+      active: boolean;
+      available?: boolean;
+      availabilityStatus?: string;
+      availabilityUpdatedAt?: Date;
+    } = { active }
     
     // If availability is provided, update it too
     if (available !== undefined) {

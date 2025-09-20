@@ -44,7 +44,6 @@ export default function AdminServices() {
   const [updating, setUpdating] = useState<string | null>(null)
   const [notification, setNotification] = useState<Notification | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
-  const [editingService, setEditingService] = useState<Service | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterAvailability, setFilterAvailability] = useState('all')
