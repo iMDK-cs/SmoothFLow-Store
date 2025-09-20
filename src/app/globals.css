@@ -3,11 +3,11 @@
 :root {
   --background: #000000;
   --foreground: #ffffff;
-  --primary: #00BFFF; /* Sky Blue */
-  --primary-dark: #87CEEB; /* Light Sky Blue */
-  --primary-light: #87CEFA; /* Light Sky Blue */
-  --accent: #000000; /* Deep Black */
-  --secondary: #1a1a1a; /* Darker Black Tone */
+  --primary: #00BFFF;
+  --primary-dark: #87CEEB;
+  --primary-light: #87CEFA;
+  --accent: #000000;
+  --secondary: #1a1a1a;
   --gradient-start: #00BFFF;
   --gradient-middle: #87CEEB;
   --gradient-end: #87CEFA;
@@ -42,6 +42,14 @@ body {
   background: linear-gradient(135deg, #1e293b 0%, #1e3a8a 50%, #0e7490 100%);
   color: var(--foreground);
   font-family: 'Cairo', Arial, Helvetica, sans-serif;
+  /* Performance optimizations */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 /* Enhanced Sky blue effects */

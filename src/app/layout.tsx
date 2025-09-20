@@ -6,14 +6,18 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const cairo = Cairo({ 
   subsets: ['latin', 'arabic'],
-  weight: ['300', '400', '500', '600', '700', '800'],
-  variable: '--font-cairo'
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-cairo',
+  display: 'swap',
+  preload: true,
 });
 
 const inter = Inter({ 
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-inter'
+  weight: ['400', '500', '600'],
+  variable: '--font-inter',
+  display: 'swap',
+  preload: false,
 });
 
 export const metadata: Metadata = {
