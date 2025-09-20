@@ -28,7 +28,6 @@ model User {
   accounts  Account[]
   cart      Cart?
   supportTickets SupportTicket[]
-  availabilityHistory AvailabilityHistory[]
 
   @@map("users")
 }
@@ -95,7 +94,6 @@ model Service {
   orderItems  OrderItem[]
   cartItems   CartItem[]
   reviews     Review[]
-  availabilityHistory AvailabilityHistory[]
 
   @@map("services")
 }
@@ -276,22 +274,6 @@ model SupportReply {
   ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
 
   @@map("support_replies")
-}
-
-model AvailabilityHistory {
-  id          String   @id @default(cuid())
-  serviceId   String
-  userId      String
-  oldStatus   String
-  newStatus   String
-  reason      String?
-  createdAt   DateTime @default(now())
-
-  // Relations
-  service     Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("availability_history")
 }
 
 // Removed all enum declarations - using String instead

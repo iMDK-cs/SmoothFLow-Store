@@ -1,63 +1,36 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require('@prisma/client')
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 async function updateAvailabilitySchema() {
   try {
-    console.log('🔄 Updating availability schema...');
-
-    // Add availabilityStatus column with default value
-    await prisma.$executeRaw`
-      ALTER TABLE services 
-      ADD COLUMN IF NOT EXISTS "availabilityStatus" TEXT DEFAULT 'available'
-    `;
-
-    // Add availabilityUpdatedAt column
-    await prisma.$executeRaw`
-      ALTER TABLE services 
-      ADD COLUMN IF NOT EXISTS "availabilityUpdatedAt" TIMESTAMP
-    `;
-
-    // Create availability_history table
-    await prisma.$executeRaw`
-      CREATE TABLE IF NOT EXISTS "availability_history" (
-        "id" TEXT NOT NULL PRIMARY KEY,
-        "serviceId" TEXT NOT NULL,
-        "userId" TEXT NOT NULL,
-        "oldStatus" TEXT NOT NULL,
-        "newStatus" TEXT NOT NULL,
-        "reason" TEXT,
-        "createdAt" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY ("serviceId") REFERENCES "services"("id") ON DELETE CASCADE,
-        FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE
-      )
-    `;
-
-    // Create index for better performance
-    await prisma.$executeRaw`
-      CREATE INDEX IF NOT EXISTS "availability_history_serviceId_idx" 
-      ON "availability_history"("serviceId")
-    `;
-
-    await prisma.$executeRaw`
-      CREATE INDEX IF NOT EXISTS "availability_history_userId_idx" 
-      ON "availability_history"("userId")
-    `;
-
-    // Set Ready PC Builds as unavailable by default
-    const readyBuildsServices = await prisma.service.findMany({
-      where: {
-        OR: [
-          { title: { contains: 'تجميعات PC جاهزة' } },
-          { title: { contains: 'Ready PC Builds' } },
-          { id: 'ready-builds' }
-        ]
+    console.log('🔄 Updating database schema for availability management...')
+    
+    // First, let's check if the new fields exist
+    const services = await prisma.service.findMany({
+      select: {
+        id: true,
+        title: true,
+        category: true,
+        available: true,
+        availabilityStatus: true
       }
-    });
+    })
 
-    console.log(`📦 Found ${readyBuildsServices.length} Ready PC Build services`);
+    console.log(`📊 Found ${services.length} services`)
 
-    for (const service of readyBuildsServices) {
+    // Set ready-pc products as unavailable by default
+    const readyPcServices = services.filter(service => 
+      service.title.includes('تجميعات PC جاهزة') || 
+      service.title.includes('Ready PC') ||
+      service.title.includes('ready-pc') ||
+      service.category === 'ready-pc'
+    )
+
+    console.log(`🎯 Found ${readyPcServices.length} ready PC services`)
+
+    // Update ready-pc services to be unavailable
+    for (const service of readyPcServices) {
       await prisma.service.update({
         where: { id: service.id },
         data: {
@@ -65,40 +38,49 @@ async function updateAvailabilitySchema() {
           availabilityStatus: 'out_of_stock',
           availabilityUpdatedAt: new Date()
         }
-      });
-      console.log(`✅ Updated ${service.title} to unavailable`);
+      })
+      console.log(`✅ Updated: ${service.title} - Set as unavailable`)
     }
 
-    // Update all other services to have proper availability status using raw SQL
-    await prisma.$executeRaw`
-      UPDATE services 
-      SET "availabilityStatus" = 'available' 
-      WHERE "availabilityStatus" IS NULL OR "availabilityStatus" = ''
-    `;
+    // Update all other services to have proper availability status
+    const otherServices = services.filter(service => 
+      !service.title.includes('تجميعات PC جاهزة') && 
+      !service.title.includes('Ready PC') &&
+      !service.title.includes('ready-pc') &&
+      service.category !== 'ready-pc'
+    )
 
-    console.log('✅ Availability schema updated successfully!');
-    console.log('📊 Summary:');
-    console.log('   - Added availabilityStatus column');
-    console.log('   - Added availabilityUpdatedAt column');
-    console.log('   - Created availability_history table');
-    console.log('   - Set Ready PC Builds as unavailable');
-    console.log('   - Updated all services with proper status');
+    for (const service of otherServices) {
+      const availabilityStatus = service.available ? 'available' : 'out_of_stock'
+      
+      await prisma.service.update({
+        where: { id: service.id },
+        data: {
+          availabilityStatus: availabilityStatus,
+          availabilityUpdatedAt: new Date()
+        }
+      })
+    }
 
+    console.log(`✅ Updated ${otherServices.length} other services with availability status`)
+
+    console.log('🎉 Database schema update completed successfully!')
+    
   } catch (error) {
-    console.error('❌ Error updating availability schema:', error);
-    throw error;
+    console.error('❌ Error updating database schema:', error)
+    throw error
   } finally {
-    await prisma.$disconnect();
+    await prisma.$disconnect()
   }
 }
 
 // Run the migration
 updateAvailabilitySchema()
   .then(() => {
-    console.log('🎉 Migration completed successfully!');
-    process.exit(0);
+    console.log('✅ Migration completed successfully')
+    process.exit(0)
   })
   .catch((error) => {
-    console.error('💥 Migration failed:', error);
-    process.exit(1);
-  });
+    console.error('❌ Migration failed:', error)
+    process.exit(1)
+  })

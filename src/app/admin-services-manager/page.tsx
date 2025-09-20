@@ -18,8 +18,8 @@ interface Service {
   active: boolean
   available: boolean
   availabilityStatus: string
-  availabilityUpdatedAt?: string
   stock?: number
+  availabilityUpdatedAt?: string
   createdAt: string
   updatedAt: string
   options: ServiceOption[]
@@ -54,22 +54,9 @@ export default function AdminServicesManager() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [bulkAvailabilityStatus, setBulkAvailabilityStatus] = useState<string>('available')
-  const [bulkReason, setBulkReason] = useState<string>('')
   const [showBulkModal, setShowBulkModal] = useState(false)
-  const [availabilityHistory, setAvailabilityHistory] = useState<Array<{
-    id: string;
-    serviceId: string;
-    userId: string;
-    oldStatus: string;
-    newStatus: string;
-    reason: string | null;
-    createdAt: string;
-    user: {
-      name: string | null;
-      email: string | null;
-    };
-  }>>([])
-  const [showHistoryModal, setShowHistoryModal] = useState(false)
+  const [editingService, setEditingService] = useState<Service | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -161,73 +148,91 @@ export default function AdminServicesManager() {
     }
   }
 
-  const updateServiceAvailability = async (serviceId: string, availabilityStatus: string, reason?: string) => {
+  const updateServiceAvailability = async (serviceId: string, available: boolean, availabilityStatus: string) => {
     try {
-      const response = await fetch('/api/admin/services/availability', {
-        method: 'POST',
+      const response = await fetch(`/api/admin/services?serviceId=${serviceId}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ serviceId, availabilityStatus, reason })
+        body: JSON.stringify({ available, availabilityStatus })
       })
       
       if (!response.ok) {
-        throw new Error('Failed to update availability')
+        throw new Error('Failed to update service availability')
       }
 
-      await response.json()
-      
       // Update local state
       setServices(services.map(service => 
         service.id === serviceId 
           ? { 
               ...service, 
+              available, 
               availabilityStatus,
-              available: availabilityStatus === 'available',
               availabilityUpdatedAt: new Date().toISOString()
             }
           : service
       ))
-
-      setError('') // Clear any previous errors
     } catch (error) {
-      console.error('Error updating availability:', error)
-      setError('حدث خطأ أثناء تحديث حالة التوفر')
+      console.error('Error updating service availability:', error)
+      setError('حدث خطأ أثناء تحديث توفر الخدمة')
+    }
+  }
+
+  const updateServicePrice = async (serviceId: string, basePrice: number) => {
+    try {
+      const response = await fetch(`/api/admin/services?serviceId=${serviceId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ basePrice })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to update service price')
+      }
+
+      // Update local state
+      setServices(services.map(service => 
+        service.id === serviceId 
+          ? { ...service, basePrice }
+          : service
+      ))
+    } catch (error) {
+      console.error('Error updating service price:', error)
+      setError('حدث خطأ أثناء تحديث سعر الخدمة')
     }
   }
 
   const handleBulkAvailabilityUpdate = async () => {
-    if (selectedServices.length === 0) {
-      setError('يرجى اختيار خدمة واحدة على الأقل')
-      return
-    }
+    if (selectedServices.length === 0) return
 
     try {
-      const response = await fetch('/api/admin/services/availability', {
-        method: 'PUT',
+      const available = bulkAvailabilityStatus === 'available'
+      const response = await fetch('/api/admin/services/bulk-availability', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
           serviceIds: selectedServices, 
-          availabilityStatus: bulkAvailabilityStatus,
-          reason: bulkReason 
+          available,
+          availabilityStatus: bulkAvailabilityStatus
         })
       })
       
       if (!response.ok) {
-        throw new Error('Failed to bulk update availability')
+        throw new Error('Failed to update services availability')
       }
 
-      await response.json()
-      
       // Update local state
       setServices(services.map(service => 
         selectedServices.includes(service.id)
           ? { 
               ...service, 
+              available,
               availabilityStatus: bulkAvailabilityStatus,
-              available: bulkAvailabilityStatus === 'available',
               availabilityUpdatedAt: new Date().toISOString()
             }
           : service
@@ -235,32 +240,13 @@ export default function AdminServicesManager() {
 
       setSelectedServices([])
       setShowBulkModal(false)
-      setBulkReason('')
-      setError('') // Clear any previous errors
     } catch (error) {
-      console.error('Error bulk updating availability:', error)
-      setError('حدث خطأ أثناء التحديث الجماعي')
+      console.error('Error updating bulk availability:', error)
+      setError('حدث خطأ أثناء تحديث توفر الخدمات')
     }
   }
 
-  const fetchAvailabilityHistory = async (serviceId: string) => {
-    try {
-      const response = await fetch(`/api/admin/services/availability?serviceId=${serviceId}`)
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch history')
-      }
-
-      const data = await response.json()
-      setAvailabilityHistory(data.history)
-      setShowHistoryModal(true)
-    } catch (error) {
-      console.error('Error fetching history:', error)
-      setError('حدث خطأ أثناء تحميل التاريخ')
-    }
-  }
-
-  const toggleServiceSelection = (serviceId: string) => {
+  const handleServiceSelect = (serviceId: string) => {
     setSelectedServices(prev => 
       prev.includes(serviceId) 
         ? prev.filter(id => id !== serviceId)
@@ -268,26 +254,11 @@ export default function AdminServicesManager() {
     )
   }
 
-  const selectAllServices = () => {
-    setSelectedServices(filteredServices.map(service => service.id))
-  }
-
-  const clearSelection = () => {
-    setSelectedServices([])
-  }
-
-  const getAvailabilityStatusInfo = (status: string) => {
-    switch (status) {
-      case 'available':
-        return { text: 'متوفر', color: 'text-green-400', bgColor: 'bg-green-600', icon: '✅' }
-      case 'out_of_stock':
-        return { text: 'غير متوفر', color: 'text-red-400', bgColor: 'bg-red-600', icon: '❌' }
-      case 'discontinued':
-        return { text: 'متوقف', color: 'text-gray-400', bgColor: 'bg-gray-600', icon: '⏹️' }
-      case 'coming_soon':
-        return { text: 'قريباً', color: 'text-yellow-400', bgColor: 'bg-yellow-600', icon: '⏳' }
-      default:
-        return { text: 'غير محدد', color: 'text-gray-400', bgColor: 'bg-gray-600', icon: '❓' }
+  const handleSelectAll = () => {
+    if (selectedServices.length === filteredServices.length) {
+      setSelectedServices([])
+    } else {
+      setSelectedServices(filteredServices.map(service => service.id))
     }
   }
 
@@ -374,44 +345,6 @@ export default function AdminServicesManager() {
             </button>
           </div>
 
-          {/* Bulk Availability Management */}
-          <div className="border-t border-slate-600 pt-6">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center">
-              <span className="text-xl mr-3">⚡</span>
-              إدارة التوفر الجماعي
-            </h3>
-            
-            <div className="flex flex-wrap gap-4 mb-4">
-              <button
-                onClick={selectAllServices}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all duration-300"
-              >
-                ✅ اختيار الكل
-              </button>
-              
-              <button
-                onClick={clearSelection}
-                className="bg-gradient-to-r from-gray-600 to-slate-600 hover:from-gray-700 hover:to-slate-700 text-white px-4 py-2 rounded-lg transition-all duration-300"
-              >
-                ❌ إلغاء الاختيار
-              </button>
-              
-              <button
-                onClick={() => setShowBulkModal(true)}
-                disabled={selectedServices.length === 0}
-                className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-600 disabled:to-gray-700 text-white px-4 py-2 rounded-lg transition-all duration-300 disabled:cursor-not-allowed"
-              >
-                🔧 تحديث جماعي ({selectedServices.length})
-              </button>
-            </div>
-            
-            {selectedServices.length > 0 && (
-              <div className="text-cyan-300 text-sm">
-                تم اختيار {selectedServices.length} خدمة
-              </div>
-            )}
-          </div>
-
           {uploadStats && (
             <div className="bg-gradient-to-r from-green-900 to-emerald-900 p-4 rounded-lg border border-green-600">
               <h3 className="text-green-300 font-bold mb-2">✅ نتائج المزامنة:</h3>
@@ -437,9 +370,46 @@ export default function AdminServicesManager() {
           )}
         </div>
 
+        {/* Bulk Management Section */}
+        {selectedServices.length > 0 && (
+          <div className="bg-gradient-to-br from-blue-800 to-cyan-800 rounded-xl p-6 border border-blue-600 shadow-lg mb-6">
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+              <span className="text-2xl mr-3">⚡</span>
+              إدارة جماعية ({selectedServices.length} خدمة مختارة)
+            </h3>
+            
+            <div className="flex flex-wrap gap-4">
+              <select
+                value={bulkAvailabilityStatus}
+                onChange={(e) => setBulkAvailabilityStatus(e.target.value)}
+                className="bg-slate-700 text-white px-4 py-2 rounded-lg border border-slate-600 focus:border-cyan-400 focus:outline-none"
+              >
+                <option value="available">متوفر</option>
+                <option value="out_of_stock">غير متوفر</option>
+                <option value="discontinued">متوقف</option>
+                <option value="coming_soon">قريباً</option>
+              </select>
+              
+              <button
+                onClick={handleBulkAvailabilityUpdate}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                ✅ تحديث الحالة
+              </button>
+              
+              <button
+                onClick={() => setSelectedServices([])}
+                className="bg-gradient-to-r from-gray-600 to-slate-600 hover:from-gray-700 hover:to-slate-700 text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                ❌ إلغاء التحديد
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Category Filter */}
         <div className="mb-6">
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 mb-4">
             {categories.map(category => (
               <button
                 key={category}
@@ -459,25 +429,39 @@ export default function AdminServicesManager() {
               </button>
             ))}
           </div>
+          
+          {/* Select All Button */}
+          <div className="flex justify-between items-center">
+            <button
+              onClick={handleSelectAll}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              {selectedServices.length === filteredServices.length ? '❌ إلغاء تحديد الكل' : '✅ تحديد الكل'}
+            </button>
+            
+            <span className="text-gray-300 text-sm">
+              {selectedServices.length} من {filteredServices.length} مختار
+            </span>
+          </div>
         </div>
 
         {/* Services Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredServices.map((service) => {
-            const statusInfo = getAvailabilityStatusInfo(service.availabilityStatus)
-            return (
+          {filteredServices.map((service) => (
             <div key={service.id} className={`bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border shadow-lg hover:shadow-xl transition-all duration-300 ${
               selectedServices.includes(service.id) 
-                ? 'border-cyan-500 ring-2 ring-cyan-500/50' 
+                ? 'border-cyan-400 ring-2 ring-cyan-400/50' 
                 : 'border-slate-600'
-            }`}>
+            } ${!service.available ? 'opacity-75' : ''}`}>
+              
+              {/* Selection Checkbox */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center space-x-3 space-x-reverse">
                   <input
                     type="checkbox"
                     checked={selectedServices.includes(service.id)}
-                    onChange={() => toggleServiceSelection(service.id)}
-                    className="w-4 h-4 text-cyan-600 bg-gray-700 border-gray-600 rounded focus:ring-cyan-500"
+                    onChange={() => handleServiceSelect(service.id)}
+                    className="w-4 h-4 text-cyan-600 bg-slate-700 border-slate-600 rounded focus:ring-cyan-500 focus:ring-2"
                   />
                   <span className="text-2xl">{service.icon}</span>
                   <div>
@@ -485,20 +469,42 @@ export default function AdminServicesManager() {
                     <p className="text-sm text-gray-400">{service.category}</p>
                   </div>
                 </div>
-                <div className="flex flex-col items-end space-y-2">
+                <div className="flex flex-col items-end space-y-1">
                   {service.popular && (
                     <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs font-bold">⭐ شائع</span>
                   )}
-                  <div className={`px-2 py-1 rounded text-xs font-bold ${statusInfo.bgColor} text-white`}>
-                    {statusInfo.icon} {statusInfo.text}
-                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${
+                    service.availabilityStatus === 'available' ? 'bg-green-600 text-white' :
+                    service.availabilityStatus === 'out_of_stock' ? 'bg-red-600 text-white' :
+                    service.availabilityStatus === 'discontinued' ? 'bg-gray-600 text-white' :
+                    service.availabilityStatus === 'coming_soon' ? 'bg-blue-600 text-white' :
+                    'bg-gray-600 text-white'
+                  }`}>
+                    {service.availabilityStatus === 'available' ? '✅ متوفر' :
+                     service.availabilityStatus === 'out_of_stock' ? '❌ غير متوفر' :
+                     service.availabilityStatus === 'discontinued' ? '⛔ متوقف' :
+                     service.availabilityStatus === 'coming_soon' ? '⏳ قريباً' :
+                     '❓ غير محدد'}
+                  </span>
                 </div>
               </div>
 
               <p className="text-gray-300 text-sm mb-4 line-clamp-2">{service.description}</p>
 
+              {/* Price Section with Edit */}
               <div className="flex items-center justify-between mb-4">
-                <span className="text-2xl font-bold text-cyan-300">{service.basePrice} ريال</span>
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <span className="text-2xl font-bold text-cyan-300">{service.basePrice} ريال</span>
+                  <button
+                    onClick={() => {
+                      setEditingService(service)
+                      setShowEditModal(true)
+                    }}
+                    className="text-xs bg-slate-600 hover:bg-slate-700 text-white px-2 py-1 rounded transition-colors"
+                  >
+                    ✏️ تعديل
+                  </button>
+                </div>
                 <div className="text-sm text-gray-400">
                   <div>📦 {service._count.orderItems} طلب</div>
                 </div>
@@ -515,21 +521,24 @@ export default function AdminServicesManager() {
                 </div>
               )}
 
-              {/* Availability Status Dropdown */}
+              {/* Availability Management */}
               <div className="mb-4">
-                <label className="block text-xs text-gray-400 mb-2">حالة التوفر:</label>
-                <select
-                  value={service.availabilityStatus}
-                  onChange={(e) => updateServiceAvailability(service.id, e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 text-white text-xs rounded px-3 py-2 focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
-                >
-                  <option value="available">✅ متوفر</option>
-                  <option value="out_of_stock">❌ غير متوفر</option>
-                  <option value="discontinued">⏹️ متوقف</option>
-                  <option value="coming_soon">⏳ قريباً</option>
-                </select>
+                <h4 className="text-sm font-bold text-cyan-300 mb-2">حالة التوفر:</h4>
+                <div className="flex flex-wrap gap-2">
+                  <select
+                    value={service.availabilityStatus}
+                    onChange={(e) => updateServiceAvailability(service.id, e.target.value === 'available', e.target.value)}
+                    className="bg-slate-700 text-white px-2 py-1 rounded text-xs border border-slate-600 focus:border-cyan-400 focus:outline-none"
+                  >
+                    <option value="available">متوفر</option>
+                    <option value="out_of_stock">غير متوفر</option>
+                    <option value="discontinued">متوقف</option>
+                    <option value="coming_soon">قريباً</option>
+                  </select>
+                </div>
               </div>
 
+              {/* Action Buttons */}
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => toggleServiceStatus(service.id, 'active')}
@@ -552,17 +561,16 @@ export default function AdminServicesManager() {
                 >
                   {service.popular ? '⭐ شائع' : '⭐ عادي'}
                 </button>
-
-                <button
-                  onClick={() => fetchAvailabilityHistory(service.id)}
-                  className="px-3 py-1 rounded text-xs font-medium transition-colors bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  📊 التاريخ
-                </button>
               </div>
+
+              {/* Last Updated Info */}
+              {service.availabilityUpdatedAt && (
+                <div className="mt-3 text-xs text-gray-500">
+                  آخر تحديث: {new Date(service.availabilityUpdatedAt).toLocaleDateString('ar-SA')}
+                </div>
+              )}
             </div>
-            )
-          })}
+          ))}
         </div>
 
         {filteredServices.length === 0 && (
@@ -578,107 +586,82 @@ export default function AdminServicesManager() {
         )}
       </main>
 
-      {/* Bulk Update Modal */}
-      {showBulkModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-600 shadow-2xl max-w-md w-full">
-            <h3 className="text-xl font-bold text-white mb-4">تحديث التوفر الجماعي</h3>
+      {/* Edit Service Modal */}
+      {showEditModal && editingService && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 w-full max-w-md border border-slate-600 shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+              <span className="text-2xl mr-3">✏️</span>
+              تعديل الخدمة
+            </h3>
             
-            <div className="mb-4">
-              <label className="block text-sm text-gray-300 mb-2">حالة التوفر الجديدة:</label>
-              <select
-                value={bulkAvailabilityStatus}
-                onChange={(e) => setBulkAvailabilityStatus(e.target.value)}
-                className="w-full bg-gray-700 border border-gray-600 text-white rounded px-3 py-2 focus:ring-2 focus:ring-cyan-500"
-              >
-                <option value="available">✅ متوفر</option>
-                <option value="out_of_stock">❌ غير متوفر</option>
-                <option value="discontinued">⏹️ متوقف</option>
-                <option value="coming_soon">⏳ قريباً</option>
-              </select>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  اسم الخدمة
+                </label>
+                <input
+                  type="text"
+                  value={editingService.title}
+                  disabled
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded-lg border border-slate-600 focus:border-cyan-400 focus:outline-none"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  السعر الأساسي (ريال)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={editingService.basePrice}
+                  onChange={(e) => setEditingService({
+                    ...editingService,
+                    basePrice: parseFloat(e.target.value) || 0
+                  })}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded-lg border border-slate-600 focus:border-cyan-400 focus:outline-none"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  حالة التوفر
+                </label>
+                <select
+                  value={editingService.availabilityStatus}
+                  onChange={(e) => setEditingService({
+                    ...editingService,
+                    availabilityStatus: e.target.value,
+                    available: e.target.value === 'available'
+                  })}
+                  className="w-full bg-slate-700 text-white px-3 py-2 rounded-lg border border-slate-600 focus:border-cyan-400 focus:outline-none"
+                >
+                  <option value="available">متوفر</option>
+                  <option value="out_of_stock">غير متوفر</option>
+                  <option value="discontinued">متوقف</option>
+                  <option value="coming_soon">قريباً</option>
+                </select>
+              </div>
             </div>
-
-            <div className="mb-4">
-              <label className="block text-sm text-gray-300 mb-2">السبب (اختياري):</label>
-              <textarea
-                value={bulkReason}
-                onChange={(e) => setBulkReason(e.target.value)}
-                placeholder="أدخل سبب التغيير..."
-                className="w-full bg-gray-700 border border-gray-600 text-white rounded px-3 py-2 focus:ring-2 focus:ring-cyan-500 h-20 resize-none"
-              />
-            </div>
-
-            <div className="text-sm text-gray-400 mb-4">
-              سيتم تحديث {selectedServices.length} خدمة
-            </div>
-
-            <div className="flex gap-3">
+            
+            <div className="flex justify-end space-x-3 space-x-reverse mt-6">
               <button
-                onClick={handleBulkAvailabilityUpdate}
-                className="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-4 py-2 rounded-lg transition-all duration-300"
-              >
-                تأكيد التحديث
-              </button>
-              <button
-                onClick={() => setShowBulkModal(false)}
-                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-all duration-300"
+                onClick={() => setShowEditModal(false)}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
                 إلغاء
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* History Modal */}
-      {showHistoryModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-600 shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            <h3 className="text-xl font-bold text-white mb-4">تاريخ تغييرات التوفر</h3>
-            
-            <div className="overflow-y-auto max-h-96">
-              {availabilityHistory.length === 0 ? (
-                <div className="text-center text-gray-400 py-8">
-                  لا يوجد تاريخ متاح
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {availabilityHistory.map((entry) => (
-                    <div key={entry.id} className="bg-gray-700/50 rounded-lg p-4 border border-gray-600">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center space-x-2 space-x-reverse">
-                          <span className="text-sm font-bold text-white">
-                            {getAvailabilityStatusInfo(entry.oldStatus).icon} → {getAvailabilityStatusInfo(entry.newStatus).icon}
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            {new Date(entry.createdAt).toLocaleString('ar-SA')}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-300">
-                        من: <span className="text-gray-400">{getAvailabilityStatusInfo(entry.oldStatus).text}</span>
-                        {' '}إلى: <span className="text-gray-400">{getAvailabilityStatusInfo(entry.newStatus).text}</span>
-                      </div>
-                      {entry.reason && (
-                        <div className="text-xs text-gray-400 mt-1">
-                          السبب: {entry.reason}
-                        </div>
-                      )}
-                      <div className="text-xs text-gray-500 mt-1">
-                        بواسطة: {entry.user.name || entry.user.email}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end mt-4">
               <button
-                onClick={() => setShowHistoryModal(false)}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-all duration-300"
+                onClick={async () => {
+                  await updateServicePrice(editingService.id, editingService.basePrice)
+                  await updateServiceAvailability(editingService.id, editingService.available, editingService.availabilityStatus)
+                  setShowEditModal(false)
+                }}
+                className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                إغلاق
+                حفظ التغييرات
               </button>
             </div>
           </div>

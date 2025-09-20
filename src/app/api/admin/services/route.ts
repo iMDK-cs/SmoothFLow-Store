@@ -41,6 +41,7 @@ export async function GET() {
 const updateServiceSchema = z.object({
   basePrice: z.number().min(0).optional(),
   available: z.boolean().optional(),
+  availabilityStatus: z.enum(['available', 'out_of_stock', 'discontinued', 'coming_soon']).optional(),
   stock: z.number().min(0).optional(),
 })
 
@@ -65,15 +66,24 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { basePrice, available, stock } = updateServiceSchema.parse(body)
+    const { basePrice, available, availabilityStatus, stock } = updateServiceSchema.parse(body)
+
+    // Prepare update data
+    const updateData = {
+      ...(basePrice !== undefined && { basePrice }),
+      ...(available !== undefined && { available }),
+      ...(availabilityStatus !== undefined && { availabilityStatus }),
+      ...(stock !== undefined && { stock }),
+    }
+
+    // If availability status is being updated, also update the timestamp
+    if (availabilityStatus !== undefined || available !== undefined) {
+      updateData.availabilityUpdatedAt = new Date()
+    }
 
     const updatedService = await prisma.service.update({
       where: { id: serviceId },
-      data: {
-        ...(basePrice !== undefined && { basePrice }),
-        ...(available !== undefined && { available }),
-        ...(stock !== undefined && { stock }),
-      }
+      data: updateData
     })
 
     return NextResponse.json({ service: updatedService })
