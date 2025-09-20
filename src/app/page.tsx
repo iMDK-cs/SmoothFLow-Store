@@ -135,6 +135,7 @@ const imageConfig = {
     'Pc-check': "/images/services/diagnosis.jpg",
     'windows-format': "/images/services/format.png",
     'controller-oc': "/images/services/controller-oc.jpg",
+    'gpu-drivers': "/images/services/gpu-drivers.jpg",
     'thermal-paste': "/images/services/thermal-paste.jpg",
     'bios-update': "/images/services/bios-update.jpg",
     'bios-tweak': "/images/services/bios-tweak.jpg",
@@ -142,11 +143,6 @@ const imageConfig = {
     'gaming-windows': "/images/services/custom-windows1.jpg",
     'internet-tweak': "/images/services/Network.jpg"
   },
-  fallback: {
-    category: "/images/categories/pc-biuld.jpg",
-    service: "/images/services/ready-builds.jpg",
-    logo: "/images/logo/store logo.png"
-  }
 };
 
 // Services Data
@@ -234,7 +230,7 @@ const servicesData = {
         description: 'حذف وتحديث تعريفات كرت الشاشة',
         price: '20',
         image: '🛠️',
-        serviceImage: imageConfig.services['controller-oc'],
+        serviceImage: imageConfig.services['gpu-drivers'],
         rating: 4.8,
         color: 'from-sky-500 to-sky-600'
       },
@@ -467,7 +463,7 @@ const SimpleHeader = memo(({
               <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 group-hover:shadow-sky-500/60 group-hover:scale-110 group-hover:rotate-2">
                 <EnhancedImage
                   src={storeConfig.logo}
-                  fallback={imageConfig.fallback.logo}
+                  fallback="/images/logo/store logo.png"
                   alt="SmoothFlow Logo"
                   className="w-full h-full object-contain bg-transparent"
                 />
@@ -557,7 +553,7 @@ const SectionDivider = memo(({ title, icon, color, image }: {
             <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-2xl border-4 border-gray-900">
               <EnhancedImage 
                 src={image}
-                fallback={imageConfig.fallback.category}
+                  fallback="/images/categories/pc-biuld.jpg"
                 alt={title}
                 className="w-full h-full object-cover"
               />
@@ -724,7 +720,7 @@ const ServiceCard = memo(({
             {service.serviceImage ? (
               <EnhancedImage
                 src={service.serviceImage}
-                fallback={imageConfig.fallback.service}
+                  fallback="/images/services/ready-builds.jpg"
                 alt={service.title}
                 className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-all duration-500 group-hover:scale-110"
               />
