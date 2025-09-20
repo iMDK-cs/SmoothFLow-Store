@@ -64,6 +64,10 @@ export default function AdminServicesManager() {
     newStatus: string;
     reason: string | null;
     createdAt: string;
+    user: {
+      name: string | null;
+      email: string | null;
+    };
   }>>([])
   const [showHistoryModal, setShowHistoryModal] = useState(false)
 
