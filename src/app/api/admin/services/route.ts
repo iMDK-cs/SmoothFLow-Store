@@ -69,7 +69,13 @@ export async function PUT(request: NextRequest) {
     const { basePrice, available, availabilityStatus, stock } = updateServiceSchema.parse(body)
 
     // Prepare update data
-    const updateData: any = {
+    const updateData: {
+      basePrice?: number;
+      available?: boolean;
+      availabilityStatus?: string;
+      stock?: number;
+      availabilityUpdatedAt?: Date;
+    } = {
       ...(basePrice !== undefined && { basePrice }),
       ...(available !== undefined && { available }),
       ...(availabilityStatus !== undefined && { availabilityStatus }),
