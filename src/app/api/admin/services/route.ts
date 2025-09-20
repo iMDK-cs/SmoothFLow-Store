@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         icon: icon || null,
         available: available !== false,
         availabilityStatus: available !== false ? 'available' : 'out_of_stock',
-        stock: stock ? parseInt(stock) : null,
+        stock: stock && !isNaN(parseInt(stock)) ? parseInt(stock) : null,
         active: true,
         popular: false
       }

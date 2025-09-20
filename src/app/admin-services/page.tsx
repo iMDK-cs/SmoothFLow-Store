@@ -238,6 +238,12 @@ export default function AdminServices() {
 
   const addNewService = async () => {
     try {
+      // Validate required fields
+      if (!newService.title || !newService.description || !newService.category || newService.basePrice <= 0) {
+        showNotification('يرجى ملء جميع الحقول المطلوبة', 'error')
+        return
+      }
+
       setUpdating('new')
       const response = await fetch('/api/admin/services', {
         method: 'POST',
@@ -246,7 +252,8 @@ export default function AdminServices() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create service')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create service')
       }
 
       const data = await response.json()
@@ -265,7 +272,10 @@ export default function AdminServices() {
       showNotification('تم إضافة الخدمة بنجاح', 'success')
     } catch (error) {
       console.error('Error creating service:', error)
-      showNotification('حدث خطأ أثناء إضافة الخدمة', 'error')
+      showNotification(
+        error instanceof Error ? error.message : 'حدث خطأ أثناء إضافة الخدمة', 
+        'error'
+      )
     } finally {
       setUpdating(null)
     }
@@ -584,7 +594,10 @@ export default function AdminServices() {
                 <input
                   type="number"
                   value={newService.stock || ''}
-                  onChange={(e) => setNewService({...newService, stock: e.target.value ? parseInt(e.target.value) : null})}
+                  onChange={(e) => {
+                    const value = e.target.value
+                    setNewService({...newService, stock: value ? parseInt(value) || null : null})
+                  }}
                   className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
                   placeholder="اترك فارغ للكمية غير المحدودة"
                   min="0"
@@ -612,7 +625,7 @@ export default function AdminServices() {
               </button>
               <button
                 onClick={addNewService}
-                disabled={updating === 'new' || !newService.title || !newService.description || !newService.category}
+                disabled={updating === 'new' || !newService.title || !newService.description || !newService.category || newService.basePrice <= 0}
                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {updating === 'new' ? 'جاري الإضافة...' : 'إضافة الخدمة'}
