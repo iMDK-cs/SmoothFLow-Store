@@ -6,9 +6,7 @@ const nextConfig: NextConfig = {
     domains: ['localhost', 'vercel.app'],
     // OPTIMIZED: Image optimization
     formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 31536000, // 1 year
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
   },
   env: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -29,8 +27,7 @@ const nextConfig: NextConfig = {
   }),
   // OPTIMIZED: Performance optimizations
   experimental: {
-    optimizePackageImports: ['@next/font', 'next-auth', 'react', 'react-dom'],
-    scrollRestoration: true,
+    optimizePackageImports: ['@next/font', 'next-auth'],
   },
   // OPTIMIZED: Compression
   compress: true,
@@ -38,28 +35,6 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // OPTIMIZED: React strict mode for development only
   reactStrictMode: process.env.NODE_ENV === 'development',
-  // OPTIMIZED: Output optimization
-  output: 'standalone',
-  // OPTIMIZED: SWC minification (enabled by default in Next.js 15)
-  // OPTIMIZED: Bundle optimization
-  webpack: (config: any, { isServer }: { isServer: boolean }) => {
-    if (!isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              chunks: 'all',
-            },
-          },
-        },
-      };
-    }
-    return config;
-  },
 };
 
 export default nextConfig;

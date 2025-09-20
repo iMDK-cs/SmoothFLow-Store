@@ -1,6 +1,6 @@
-// Cache management for services data with better performance
+// Cache management for services data
 const servicesCache = new Map<string, { data: unknown; timestamp: number }>()
-const CACHE_TTL = 300000 // 5 minutes for better performance
+const CACHE_TTL = 60000 // 1 minute
 
 // Function to clear cache
 export function clearServicesCache() {

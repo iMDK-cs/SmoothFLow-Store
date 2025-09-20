@@ -11,12 +11,10 @@ import dynamic from 'next/dynamic';
 
 // Import components with lazy loading for better performance
 const EnhancedShoppingCart = dynamic(() => import('@/components/EnhancedShoppingCart'), {
-  loading: () => <div className="w-6 h-6 bg-gray-600 rounded animate-pulse" />,
-  ssr: false
+  loading: () => <div className="w-6 h-6 bg-gray-600 rounded animate-pulse" />
 });
 const UserProfile = dynamic(() => import('@/components/UserProfile'), {
-  loading: () => <div className="w-8 h-8 bg-gray-600 rounded-full animate-pulse" />,
-  ssr: false
+  loading: () => <div className="w-8 h-8 bg-gray-600 rounded-full animate-pulse" />
 });
 const Notification = dynamic(() => import('@/components/Notification'), {
   ssr: false
@@ -360,10 +358,8 @@ const EnhancedImage = memo(({
   const [isInView, setIsInView] = useState(false);
   const imgRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer for lazy loading with better performance
+  // Intersection Observer for lazy loading
   useEffect(() => {
-    if (!imgRef.current) return;
-    
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -371,14 +367,13 @@ const EnhancedImage = memo(({
           observer.disconnect();
         }
       },
-      { 
-        threshold: 0.1, 
-        rootMargin: '100px',
-        root: null // Use viewport as root for better performance
-      }
+      { threshold: 0.1, rootMargin: '50px' }
     );
 
-    observer.observe(imgRef.current);
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+    }
+
     return () => observer.disconnect();
   }, []);
 
@@ -630,7 +625,7 @@ interface Service {
   }>;
 }
 
-// Enhanced Service Card with optimized memo
+// Enhanced Service Card
 const ServiceCard = memo(({ 
   service, 
   index, 
@@ -955,15 +950,6 @@ const ServiceCard = memo(({
       </div>
     </ErrorBoundary>
   );
-}, (prevProps, nextProps) => {
-  // Custom comparison for better performance
-  return (
-    prevProps.service.id === nextProps.service.id &&
-    prevProps.service.available === nextProps.service.available &&
-    prevProps.service.active === nextProps.service.active &&
-    prevProps.service.basePrice === nextProps.service.basePrice &&
-    prevProps.index === nextProps.index
-  );
 });
 
 ServiceCard.displayName = 'ServiceCard';
@@ -1100,24 +1086,18 @@ export default function MDKStore() {
     setIsClient(true);
   }, []);
 
-  // Fetch services from API with better caching and error handling
+  // Fetch services from API
   useEffect(() => {
     const fetchServices = async () => {
       try {
         setLoadingServices(true);
-        
-        // Add cache control headers for better performance
-        const response = await fetch('/api/services', {
-          headers: {
-            'Cache-Control': 'max-age=300', // 5 minutes cache
-          },
-        });
-        
+        const response = await fetch('/api/services');
         if (response.ok) {
           const data = await response.json();
           setServices(Array.isArray(data.services) ? data.services : []);
         } else {
           console.error('Failed to fetch services');
+          // Fallback to empty array if API fails
           setServices([]);
         }
       } catch (error) {
@@ -1128,11 +1108,8 @@ export default function MDKStore() {
       }
     };
 
-    // Only fetch if not already loaded
-    if (services.length === 0) {
-      fetchServices();
-    }
-  }, [services.length]);
+    fetchServices();
+  }, []);
 
   const handleNotification = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning') => {
     setNotification({ message, type });
