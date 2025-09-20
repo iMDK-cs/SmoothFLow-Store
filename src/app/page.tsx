@@ -616,6 +616,7 @@ interface Service {
   available?: boolean;
   availabilityStatus?: string;
   active?: boolean;
+  basePrice?: number;
   options?: Array<{
     id: string;
     title: string;
@@ -732,7 +733,20 @@ const ServiceCard = memo(({
 
         <div className={`modern-card hover:shadow-sky-500/30 transition-all duration-700 overflow-hidden group border border-sky-500/20 ${
           isHovered ? 'transform -translate-y-3 scale-105 enhanced-glow border-sky-400/40' : ''
-        } ${service.available === false ? 'opacity-60 grayscale' : ''}`}>
+        } ${(service.available === false || service.active === false) ? 'opacity-60 grayscale-[0.3] relative' : ''}`}>
+          
+          {/* Unavailable overlay effect */}
+          {(service.available === false || service.active === false) && (
+            <>
+              <div className="absolute inset-0 bg-red-500/10 rounded-lg z-10"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-gray-500/10 rounded-lg z-10"></div>
+              <div className="absolute top-2 left-2 z-20">
+                <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse shadow-lg">
+                  غير متوفر
+                </div>
+              </div>
+            </>
+          )}
           
           {/* Service Image Section */}
           <div className="relative bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 h-24 flex items-center justify-center overflow-hidden group-hover:from-sky-900/20 group-hover:via-gray-800 group-hover:to-blue-900/20 transition-all duration-500">
@@ -878,7 +892,7 @@ const ServiceCard = memo(({
             <button 
               className={`w-full py-3 rounded-lg font-bold transition-all duration-300 transform text-sm relative overflow-hidden ${
                 (service.available === false || service.active === false)
-                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-60' 
+                  ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 cursor-not-allowed border border-gray-500/50 shadow-inner' 
                   : `sky-blue-gradient text-white ${
                       isHovered ? 'scale-105 shadow-lg shadow-sky-500/50' : 'shadow-md'
                     } hover:shadow-lg group-hover:shadow-sky-500/30`
@@ -901,8 +915,8 @@ const ServiceCard = memo(({
               <span className="flex items-center justify-center relative z-10">
                 {(service.available === false || service.active === false) ? (
                   <>
-                    <span className="text-lg mr-2">❌</span>
-                    <span className="font-bold">غير متوفر حالياً</span>
+                    <span className="text-lg mr-2 animate-pulse">❌</span>
+                    <span className="font-bold text-gray-200">غير متوفر حالياً</span>
                   </>
                 ) : (
                   <>
@@ -1064,10 +1078,37 @@ export default function MDKStore() {
     message: string;
     type: 'success' | 'error' | 'info' | 'warning';
   } | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loadingServices, setLoadingServices] = useState(true);
   const { data: session } = useSession();
 
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  // Fetch services from API
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        setLoadingServices(true);
+        const response = await fetch('/api/services');
+        if (response.ok) {
+          const data = await response.json();
+          setServices(data.services || []);
+        } else {
+          console.error('Failed to fetch services');
+          // Fallback to static data if API fails
+          setServices([]);
+        }
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        setServices([]);
+      } finally {
+        setLoadingServices(false);
+      }
+    };
+
+    fetchServices();
   }, []);
 
   const handleNotification = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning') => {
@@ -1198,14 +1239,40 @@ export default function MDKStore() {
 
         {/* Enhanced Services Sections with Scroll Animations */}
         <main className="space-y-12 md:space-y-16">
-          {Object.entries(servicesData).map(([key, category]) => (
-            <EnhancedServiceSection 
-              key={key}
-              sectionKey={key}
-              category={category}
-              onAddToCart={handleNotification}
-            />
-          ))}
+          {loadingServices ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-white text-lg">جاري تحميل الخدمات...</p>
+              </div>
+            </div>
+          ) : (
+            Object.entries(servicesData).map(([key, category]) => {
+              // Merge API data with static data
+              const enhancedCategory = {
+                ...category,
+                services: category.services.map(staticService => {
+                  const apiService = services.find(s => s.id === staticService.id);
+                  return apiService ? {
+                    ...staticService,
+                    available: apiService.available,
+                    availabilityStatus: apiService.availabilityStatus,
+                    active: apiService.active,
+                    price: apiService.basePrice?.toString() || staticService.price
+                  } : staticService;
+                })
+              };
+              
+              return (
+                <EnhancedServiceSection 
+                  key={key}
+                  sectionKey={key}
+                  category={enhancedCategory}
+                  onAddToCart={handleNotification}
+                />
+              );
+            })
+          )}
         </main>
 
         {/* FAQ Section */}
