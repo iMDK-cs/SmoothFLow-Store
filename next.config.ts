@@ -30,7 +30,6 @@ const nextConfig: NextConfig = {
   // OPTIMIZED: Performance optimizations
   experimental: {
     optimizePackageImports: ['@next/font', 'next-auth', 'react', 'react-dom'],
-    optimizeCss: true,
     scrollRestoration: true,
   },
   // OPTIMIZED: Compression
@@ -41,23 +40,24 @@ const nextConfig: NextConfig = {
   reactStrictMode: process.env.NODE_ENV === 'development',
   // OPTIMIZED: Output optimization
   output: 'standalone',
-  // OPTIMIZED: SWC minification
-  swcMinify: true,
+  // OPTIMIZED: SWC minification (enabled by default in Next.js 15)
   // OPTIMIZED: Bundle optimization
-  webpack: (config: any) => {
-    config.optimization = {
-      ...config.optimization,
-      splitChunks: {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
+  webpack: (config: any, { isServer }: { isServer: boolean }) => {
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+            },
           },
         },
-      },
-    };
+      };
+    }
     return config;
   },
 };
