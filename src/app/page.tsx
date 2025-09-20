@@ -506,7 +506,12 @@ const SimpleHeader = memo(({
             {Object.entries(servicesData).map(([key, category]) => (
               <button 
                 key={key}
-                onClick={() => window.scrollTo({ top: window.innerHeight * 2, behavior: 'smooth' })}
+                onClick={() => {
+                  const element = document.getElementById(key);
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
                 className="px-8 py-4 rounded-xl font-semibold transition-all duration-500 relative overflow-hidden group text-gray-300 hover:text-white hover:bg-gray-700/50 hover:scale-105"
                 aria-label={`الانتقال إلى قسم ${category.title}`}
               >
@@ -1219,7 +1224,12 @@ export default function MDKStore() {
 
               <div className="flex justify-center items-center mb-6 sm:mb-8 md:mb-12 px-4">
                 <button 
-                  onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+                  onClick={() => {
+                    const element = document.getElementById('assembly');
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }}
                   className="group relative bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 shadow-lg shadow-sky-500/20 overflow-hidden"
                   aria-label="استكشف خدماتنا"
                 >
