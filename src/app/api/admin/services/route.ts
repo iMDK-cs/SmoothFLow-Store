@@ -45,6 +45,52 @@ const updateServiceSchema = z.object({
   stock: z.number().min(0).optional(),
 })
 
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
+    const user = await getUserFromSession(session)
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+    }
+
+    const body = await request.json()
+    const { title, description, basePrice, category, image, icon, available, stock } = body
+
+    if (!title || !description || !category || basePrice === undefined) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    const newService = await prisma.service.create({
+      data: {
+        title,
+        description,
+        basePrice: parseFloat(basePrice),
+        category,
+        image: image || null,
+        icon: icon || null,
+        available: available !== false,
+        availabilityStatus: available !== false ? 'available' : 'out_of_stock',
+        stock: stock ? parseInt(stock) : null,
+        active: true,
+        popular: false
+      }
+    })
+
+    return NextResponse.json({ service: newService })
+  } catch (error) {
+    console.error('Create service error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
