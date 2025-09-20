@@ -1094,10 +1094,10 @@ export default function MDKStore() {
         const response = await fetch('/api/services');
         if (response.ok) {
           const data = await response.json();
-          setServices(data.services || []);
+          setServices(Array.isArray(data.services) ? data.services : []);
         } else {
           console.error('Failed to fetch services');
-          // Fallback to static data if API fails
+          // Fallback to empty array if API fails
           setServices([]);
         }
       } catch (error) {
@@ -1239,7 +1239,7 @@ export default function MDKStore() {
 
         {/* Enhanced Services Sections with Scroll Animations */}
         <main className="space-y-12 md:space-y-16">
-          {loadingServices ? (
+          {loadingServices || !services ? (
             <div className="flex justify-center items-center py-20">
               <div className="text-center">
                 <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -1251,8 +1251,8 @@ export default function MDKStore() {
               // Merge API data with static data
               const enhancedCategory = {
                 ...category,
-                services: category.services.map(staticService => {
-                  const apiService = services.find(s => s.id === staticService.id);
+                services: (category.services || []).map(staticService => {
+                  const apiService = services?.find(s => s.id === staticService.id);
                   return apiService ? {
                     ...staticService,
                     available: apiService.available,
