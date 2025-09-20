@@ -56,9 +56,16 @@ export default function AdminServicesManager() {
   const [bulkAvailabilityStatus, setBulkAvailabilityStatus] = useState<string>('available')
   const [bulkReason, setBulkReason] = useState<string>('')
   const [showBulkModal, setShowBulkModal] = useState(false)
-  const [availabilityHistory, setAvailabilityHistory] = useState<any[]>([])
+  const [availabilityHistory, setAvailabilityHistory] = useState<Array<{
+    id: string;
+    serviceId: string;
+    userId: string;
+    oldStatus: string;
+    newStatus: string;
+    reason: string | null;
+    createdAt: string;
+  }>>([])
   const [showHistoryModal, setShowHistoryModal] = useState(false)
-  const [selectedServiceForHistory, setSelectedServiceForHistory] = useState<string>('')
 
   useEffect(() => {
     if (status === 'loading') return
@@ -84,7 +91,7 @@ export default function AdminServicesManager() {
         throw new Error('Failed to fetch services')
       }
 
-      const data = await response.json()
+      await response.json()
       setServices(data.services || [])
     } catch (error) {
       console.error('Error fetching services:', error)
@@ -110,7 +117,7 @@ export default function AdminServicesManager() {
         throw new Error('Failed to sync services')
       }
 
-      const data = await response.json()
+      await response.json()
       setUploadStats(data.stats)
       
       // Refresh services list
@@ -164,7 +171,7 @@ export default function AdminServicesManager() {
         throw new Error('Failed to update availability')
       }
 
-      const data = await response.json()
+      await response.json()
       
       // Update local state
       setServices(services.map(service => 
@@ -208,7 +215,7 @@ export default function AdminServicesManager() {
         throw new Error('Failed to bulk update availability')
       }
 
-      const data = await response.json()
+      await response.json()
       
       // Update local state
       setServices(services.map(service => 
@@ -240,7 +247,7 @@ export default function AdminServicesManager() {
         throw new Error('Failed to fetch history')
       }
 
-      const data = await response.json()
+      await response.json()
       setAvailabilityHistory(data.history)
       setSelectedServiceForHistory(serviceId)
       setShowHistoryModal(true)
@@ -633,7 +640,7 @@ export default function AdminServicesManager() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {availabilityHistory.map((entry, index) => (
+                  {availabilityHistory.map((entry) => (
                     <div key={entry.id} className="bg-gray-700/50 rounded-lg p-4 border border-gray-600">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex items-center space-x-2 space-x-reverse">

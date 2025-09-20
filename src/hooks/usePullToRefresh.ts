@@ -19,7 +19,7 @@ export const usePullToRefresh = (options: PullToRefreshOptions) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const [startY, setStartY] = useState(0);
-  const [currentY, setCurrentY] = useState(0);
+  const [, setCurrentY] = useState(0);
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
     if (!enabled || window.scrollY > 0) return;
