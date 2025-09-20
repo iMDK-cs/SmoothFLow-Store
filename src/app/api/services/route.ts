@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { clearServicesCache, getCachedServices, setCachedServices, createServicesCacheKey } from '@/lib/cache'
+import { getCachedServices, setCachedServices, createServicesCacheKey } from '@/lib/cache'
 
 // Use Node.js runtime for Prisma compatibility
 export const runtime = 'nodejs'

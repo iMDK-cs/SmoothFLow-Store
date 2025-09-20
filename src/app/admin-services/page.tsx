@@ -620,7 +620,7 @@ export default function AdminServices() {
                   onChange={(e) => setNewService({...newService, icon: e.target.value})}
                   className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
                   placeholder="🖥️"
-                  maxLength="2"
+                  maxLength={2}
                 />
                 <p className="text-xs text-gray-400 mt-1">استخدم emoji واحد أو رمز</p>
               </div>
