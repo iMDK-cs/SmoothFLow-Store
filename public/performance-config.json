@@ -1,0 +1,19 @@
+{
+  "metrics": {
+    "coreWebVitals": true,
+    "firstContentfulPaint": true,
+    "largestContentfulPaint": true,
+    "firstInputDelay": true,
+    "cumulativeLayoutShift": true
+  },
+  "thresholds": {
+    "fcp": 1800,
+    "lcp": 2500,
+    "fid": 100,
+    "cls": 0.1
+  },
+  "reporting": {
+    "enabled": true,
+    "endpoint": "/api/performance"
+  }
+}

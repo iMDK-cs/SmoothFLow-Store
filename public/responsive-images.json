@@ -1,0 +1,31 @@
+{
+  "breakpoints": {
+    "mobile": {
+      "width": 320,
+      "height": 240,
+      "quality": 80
+    },
+    "tablet": {
+      "width": 768,
+      "height": 576,
+      "quality": 85
+    },
+    "desktop": {
+      "width": 1024,
+      "height": 768,
+      "quality": 90
+    },
+    "large": {
+      "width": 1440,
+      "height": 1080,
+      "quality": 95
+    }
+  },
+  "formats": [
+    "webp",
+    "jpeg",
+    "png"
+  ],
+  "lazyLoading": true,
+  "placeholder": "blur"
+}

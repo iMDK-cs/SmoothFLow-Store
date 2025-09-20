@@ -30,8 +30,7 @@ export async function GET(request: NextRequest) {
     
     // Build query conditions
     const where: Record<string, unknown> = {
-      active: true,
-      available: true
+      active: true
     }
     
     if (category) {
@@ -42,7 +41,7 @@ export async function GET(request: NextRequest) {
       where.popular = true
     }
     
-    // Optimized query with minimal data
+    // Optimized query with availability information
     const services = await prisma.service.findMany({
       where,
       select: {
@@ -55,7 +54,10 @@ export async function GET(request: NextRequest) {
         icon: true,
         color: true,
         popular: true,
-        stock: true
+        stock: true,
+        available: true,
+        availabilityStatus: true,
+        availabilityUpdatedAt: true
       },
       orderBy: [
         { popular: 'desc' },

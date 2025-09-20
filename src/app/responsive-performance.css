@@ -1,0 +1,59 @@
+
+/* Responsive Performance Optimizations */
+@media (max-width: 768px) {
+  .modern-card {
+    contain: layout style paint;
+    will-change: transform;
+  }
+  
+  .hero-title {
+    contain: layout style;
+    will-change: transform;
+  }
+  
+  .animate-pulse {
+    animation-duration: 2s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Critical CSS for mobile */
+@media (max-width: 768px) {
+  .hero-section {
+    background: linear-gradient(135deg, #1f2937 0%, #111827 50%, #0f172a 100%);
+  }
+  
+  .service-card {
+    background: rgba(31, 41, 55, 0.8);
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* Lazy loading optimizations */
+.lazy-load {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.lazy-load.loaded {
+  opacity: 1;
+}
+
+/* Touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .modern-card:active {
+    transform: scale(0.98);
+  }
+}

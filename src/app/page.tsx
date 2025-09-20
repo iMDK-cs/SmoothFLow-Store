@@ -8,6 +8,8 @@ import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import useSwipeGestures from '@/hooks/useSwipeGestures';
+import usePullToRefresh from '@/hooks/usePullToRefresh';
 
 // Import components with lazy loading for better performance
 const EnhancedShoppingCart = dynamic(() => import('@/components/EnhancedShoppingCart'), {
@@ -162,7 +164,9 @@ const servicesData = {
         serviceImage: imageConfig.services['ready-builds'],
         popular: true,
         rating: 5,
-        color: 'from-sky-400 to-sky-500'
+        color: 'from-sky-400 to-sky-500',
+        available: false,
+        availabilityStatus: 'out_of_stock'
       },
       
       {
@@ -438,95 +442,234 @@ const PopularBadge = memo(({ isHovered }: { isHovered: boolean }) => {
 
 PopularBadge.displayName = 'PopularBadge';
 
-// Simple Header Component
+// Mobile Navigation Hook
+const useMobileNav = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const toggleNav = useCallback(() => {
+    setIsOpen(!isOpen);
+  }, [isOpen]);
+
+  const closeNav = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  return { isOpen, isScrolled, toggleNav, closeNav };
+};
+
+// Mobile Navigation Component
+const MobileNavigation = memo(({ 
+  isOpen, 
+  closeNav 
+}: { 
+  isOpen: boolean; 
+  closeNav: () => void;
+}) => {
+  return (
+    <div className={`fixed inset-0 z-40 transition-all duration-300 ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={closeNav}
+      />
+      
+      {/* Navigation Panel */}
+      <div className={`absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-gray-900/95 backdrop-blur-xl border-l border-sky-500/30 transform transition-transform duration-300 ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <div className="p-6">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-xl font-bold text-white">القائمة</h2>
+            <button
+              onClick={closeNav}
+              className="p-2 text-gray-400 hover:text-white transition-colors"
+              aria-label="إغلاق القائمة"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Navigation Items */}
+          <nav className="space-y-4">
+            {Object.entries(servicesData).map(([key, category]) => (
+              <button
+                key={key}
+                onClick={() => {
+                  window.scrollTo({ top: window.innerHeight * 2, behavior: 'smooth' });
+                  closeNav();
+                }}
+                className="w-full flex items-center space-x-reverse space-x-4 p-4 rounded-xl text-right hover:bg-gray-700/50 transition-all duration-300 group"
+                aria-label={`الانتقال إلى قسم ${category.title}`}
+              >
+                <span className="text-2xl" role="img" aria-label={category.title}>{category.icon}</span>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-white group-hover:text-sky-300 transition-colors">
+                    {category.title}
+                  </h3>
+                  <p className="text-sm text-gray-400">استكشف خدمات {category.title}</p>
+                </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-sky-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            ))}
+          </nav>
+
+          {/* Contact Info */}
+          <div className="mt-8 pt-6 border-t border-gray-700">
+            <h3 className="text-lg font-semibold text-white mb-4">تواصل معنا</h3>
+            <div className="space-y-3">
+              <a 
+                href={`https://wa.me/${(storeConfig.contact.whatsapp || '').replace(/\D/g,'') || '966543156466'}`}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center space-x-reverse space-x-3 p-3 rounded-lg bg-green-600/20 hover:bg-green-600/30 transition-colors"
+              >
+                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white font-medium">واتساب</p>
+                  <p className="text-sm text-gray-400">راسلنا مباشرة</p>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+MobileNavigation.displayName = 'MobileNavigation';
+
+// Enhanced Responsive Header Component
 const SimpleHeader = memo(({ 
   session
 }: { 
   session: { user?: { name?: string | null; email?: string | null; image?: string | null } } | null;
 }) => {
   const [userRole, setUserRole] = useState<string | null>(null);
+  const { isOpen, isScrolled, toggleNav, closeNav } = useMobileNav();
 
   useEffect(() => {
     if (session?.user) {
-      // Get role from session data directly (no Prisma call needed)
       setUserRole((session.user as { role?: string })?.role || null);
     }
   }, [session]);
 
   return (
-    <nav className="fixed w-full top-0 z-50 bg-gray-900/95 backdrop-blur-xl shadow-2xl border-b border-sky-500/30">
-      <div className="container mx-auto px-4 md:px-6 py-3">
-        <div className="flex justify-between items-center">
-          {/* Left: Enhanced User Account Section */}
-          <div className="flex items-center space-x-reverse space-x-6 md:space-x-8">
-            <div className="relative group">
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 group-hover:shadow-sky-500/60 group-hover:scale-110 group-hover:rotate-2">
-                <EnhancedImage
-                  src={storeConfig.logo}
-                  fallback="/images/logo/store logo.png"
-                  alt="SmoothFlow Logo"
-                  className="w-full h-full object-contain bg-transparent"
-                />
+    <>
+      <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-gray-900/98 backdrop-blur-xl shadow-2xl border-b border-sky-500/50' 
+          : 'bg-gray-900/95 backdrop-blur-xl shadow-xl border-b border-sky-500/30'
+      }`}>
+        <div className="container mx-auto px-3 sm:px-4 md:px-6 py-2 sm:py-3">
+          <div className="flex justify-between items-center">
+            {/* Left: Logo and Brand */}
+            <div className="flex items-center space-x-reverse space-x-3 sm:space-x-4 md:space-x-6 lg:space-x-8">
+              <div className="relative group">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl sm:shadow-2xl transition-all duration-700 group-hover:shadow-sky-500/60 group-hover:scale-110 group-hover:rotate-2">
+                  <EnhancedImage
+                    src={storeConfig.logo}
+                    fallback="/images/logo/store logo.png"
+                    alt="SmoothFlow Logo"
+                    className="w-full h-full object-contain bg-transparent"
+                  />
+                </div>
+                <div className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center border-2 sm:border-3 border-gray-900 shadow-lg animate-pulse">
+                  <span className="text-xs sm:text-sm">⚡</span>
+                </div>
               </div>
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center border-3 border-gray-900 shadow-lg animate-pulse">
-                <span className="text-sm">⚡</span>
+              <div className="hidden sm:block">
+                <h1 className="text-lg sm:text-xl md:text-2xl lg:text-4xl font-bold transition-all duration-700 text-white group-hover:scale-105" style={{
+                  textShadow: '0 0 10px rgba(0, 191, 255, 0.3), 0 0 20px rgba(0, 191, 255, 0.2)',
+                  filter: 'contrast(1.1) brightness(0.9)'
+                }}>
+                  {storeConfig.storeName}
+                </h1>
+                <p className="text-sm sm:text-base md:text-lg font-semibold transition-all duration-700 text-sky-400 group-hover:text-sky-300">
+                  {storeConfig.tagline}
+                </p>
               </div>
             </div>
-            <div>
-              <h1 className="text-2xl md:text-4xl font-bold transition-all duration-700 text-white group-hover:scale-105" style={{
-                textShadow: '0 0 10px rgba(0, 191, 255, 0.3), 0 0 20px rgba(0, 191, 255, 0.2)',
-                filter: 'contrast(1.1) brightness(0.9)'
-              }}>
-                {storeConfig.storeName}
-              </h1>
-              <p className="text-lg font-semibold transition-all duration-700 text-sky-400 group-hover:text-sky-300">
-                {storeConfig.tagline}
-              </p>
-            </div>
-          </div>
-          
-          {/* Center: Navigation Items */}
-          <div className="hidden md:flex items-center space-x-reverse space-x-8">
-            {Object.entries(servicesData).map(([key, category]) => (
-              <button 
-                key={key}
-                onClick={() => window.scrollTo({ top: window.innerHeight * 2, behavior: 'smooth' })}
-                className="px-8 py-4 rounded-xl font-semibold transition-all duration-500 relative overflow-hidden group text-gray-300 hover:text-white hover:bg-gray-700/50 hover:scale-105"
-                aria-label={`الانتقال إلى قسم ${category.title}`}
-              >
-                <span className="relative z-10 flex items-center space-x-reverse space-x-2">
-                  <span className="text-lg" role="img" aria-label={category.title}>{category.icon}</span>
-                  <span>{category.title}</span>
-                </span>
-              </button>
-            ))}
-          </div>
-          
-          {/* Right: Shopping Cart */}
-          <div className="flex items-center space-x-reverse space-x-4">
-            <ErrorBoundary>
-              <UserProfile />
-            </ErrorBoundary>
-            <div className="w-px h-6 bg-gray-600"></div>
-            <ErrorBoundary>
-              <EnhancedShoppingCart />
-            </ErrorBoundary>
-            {userRole === 'ADMIN' && (
-              <>
-                <div className="w-px h-6 bg-gray-600"></div>
-                <Link
-                  href="/admin-dashboard"
-                  className="text-gray-300 hover:text-sky-300 transition-colors text-sm font-medium"
+            
+            {/* Center: Desktop Navigation */}
+            <div className="hidden lg:flex items-center space-x-reverse space-x-6 xl:space-x-8">
+              {Object.entries(servicesData).map(([key, category]) => (
+                <button 
+                  key={key}
+                  onClick={() => window.scrollTo({ top: window.innerHeight * 2, behavior: 'smooth' })}
+                  className="px-4 xl:px-8 py-3 xl:py-4 rounded-xl font-semibold transition-all duration-500 relative overflow-hidden group text-gray-300 hover:text-white hover:bg-gray-700/50 hover:scale-105"
+                  aria-label={`الانتقال إلى قسم ${category.title}`}
                 >
-                  لوحة الإدارة
-                </Link>
-              </>
-            )}
+                  <span className="relative z-10 flex items-center space-x-reverse space-x-2">
+                    <span className="text-base xl:text-lg" role="img" aria-label={category.title}>{category.icon}</span>
+                    <span className="text-sm xl:text-base">{category.title}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+            
+            {/* Right: Actions */}
+            <div className="flex items-center space-x-reverse space-x-2 sm:space-x-3 md:space-x-4">
+              {/* Mobile Menu Button */}
+              <button
+                onClick={toggleNav}
+                className="lg:hidden p-2 text-gray-300 hover:text-white transition-colors"
+                aria-label="فتح القائمة"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
+
+              {/* User Profile */}
+              <ErrorBoundary>
+                <UserProfile />
+              </ErrorBoundary>
+              
+              {/* Separator */}
+              <div className="hidden sm:block w-px h-6 bg-gray-600"></div>
+              
+              {/* Shopping Cart */}
+              <ErrorBoundary>
+                <EnhancedShoppingCart />
+              </ErrorBoundary>
+              
+              {/* Admin Link */}
+              {userRole === 'ADMIN' && (
+                <>
+                  <div className="hidden sm:block w-px h-6 bg-gray-600"></div>
+                  <Link
+                    href="/admin-dashboard"
+                    className="hidden sm:block text-gray-300 hover:text-sky-300 transition-colors text-xs sm:text-sm font-medium"
+                  >
+                    لوحة الإدارة
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
-        
-      </div>
-    </nav>
+      </nav>
+
+      {/* Mobile Navigation */}
+      <MobileNavigation isOpen={isOpen} closeNav={closeNav} />
+    </>
   );
 });
 
@@ -597,6 +740,8 @@ interface Service {
   color: string;
   addon?: string;
   optional?: boolean;
+  available?: boolean;
+  availabilityStatus?: string;
   options?: Array<{
     id: string;
     title: string;
@@ -650,6 +795,12 @@ const ServiceCard = memo(({
   }, [router, service.id]);
 
   const handleAddToCart = useCallback(async () => {
+    // Check if service is available
+    if (service.available === false || service.availabilityStatus !== 'available') {
+      onAddToCart('هذه الخدمة غير متوفرة حالياً', 'error');
+      return;
+    }
+
     if (session) {
       // For services with options, use the first option if none selected
       const optionToUse = service.options && service.options.length > 0 
@@ -692,13 +843,32 @@ const ServiceCard = memo(({
   // Add safety check for service
   if (!service) return null;
 
+  // Availability status helper
+  const getAvailabilityInfo = (status?: string) => {
+    switch (status) {
+      case 'available':
+        return { text: 'متوفر', color: 'text-green-400', bgColor: 'bg-green-600', icon: '✅' }
+      case 'out_of_stock':
+        return { text: 'غير متوفر', color: 'text-red-400', bgColor: 'bg-red-600', icon: '❌' }
+      case 'discontinued':
+        return { text: 'متوقف', color: 'text-gray-400', bgColor: 'bg-gray-600', icon: '⏹️' }
+      case 'coming_soon':
+        return { text: 'قريباً', color: 'text-yellow-400', bgColor: 'bg-yellow-600', icon: '⏳' }
+      default:
+        return { text: 'متوفر', color: 'text-green-400', bgColor: 'bg-green-600', icon: '✅' }
+    }
+  }
+
+  const isAvailable = service.available !== false && service.availabilityStatus === 'available'
+  const availabilityInfo = getAvailabilityInfo(service.availabilityStatus)
+
   return (
     <ErrorBoundary>
       <div
         ref={ref}
         className={`group relative transform transition-all duration-700 cursor-pointer ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-        }`}
+        } ${!isAvailable ? 'opacity-60 grayscale' : ''}`}
         style={{ transitionDelay: `${index * 100}ms` }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -712,11 +882,11 @@ const ServiceCard = memo(({
         {service.popular && <PopularBadge isHovered={isHovered} />}
 
         <div className={`modern-card hover:shadow-sky-500/30 transition-all duration-700 overflow-hidden group border border-sky-500/20 ${
-          isHovered ? 'transform -translate-y-3 scale-105 enhanced-glow border-sky-400/40' : ''
+          isHovered ? 'transform -translate-y-1 sm:-translate-y-2 lg:-translate-y-3 scale-102 sm:scale-105 enhanced-glow border-sky-400/40' : ''
         }`}>
           
           {/* Service Image Section */}
-          <div className="relative bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 h-24 flex items-center justify-center overflow-hidden group-hover:from-sky-900/20 group-hover:via-gray-800 group-hover:to-blue-900/20 transition-all duration-500">
+          <div className="relative bg-gradient-to-br from-gray-700 via-gray-800 to-gray-900 h-20 sm:h-24 md:h-28 flex items-center justify-center overflow-hidden group-hover:from-sky-900/20 group-hover:via-gray-800 group-hover:to-blue-900/20 transition-all duration-500">
             {service.serviceImage ? (
               <EnhancedImage
                 src={service.serviceImage}
@@ -725,7 +895,7 @@ const ServiceCard = memo(({
                 className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-all duration-500 group-hover:scale-110"
               />
             ) : (
-              <div className={`text-3xl transform transition-all duration-500 ${
+              <div className={`text-2xl sm:text-3xl md:text-4xl transform transition-all duration-500 ${
                 isHovered ? 'scale-110 rotate-3 drop-shadow-2xl' : 'drop-shadow-lg'
               }`} role="img" aria-label={service.title}>
                 {service.image}
@@ -736,8 +906,13 @@ const ServiceCard = memo(({
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent group-hover:from-black/20 transition-all duration-500"></div>
             
             {/* Enhanced Service Tag */}
-            <div className="absolute top-2 right-2 bg-gradient-to-r from-sky-600/90 to-blue-600/90 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-white/20">
+            <div className="absolute top-1 right-1 sm:top-2 sm:right-2 bg-gradient-to-r from-sky-600/90 to-blue-600/90 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-white/20">
               خدمة تقنية
+            </div>
+            
+            {/* Availability Status Badge */}
+            <div className={`absolute top-1 left-1 sm:top-2 sm:left-2 ${availabilityInfo.bgColor} backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg border border-white/20`}>
+              {availabilityInfo.icon} {availabilityInfo.text}
             </div>
             
             {/* Hover Effect Overlay */}
@@ -745,10 +920,10 @@ const ServiceCard = memo(({
           </div>
 
           {/* Service Details */}
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-10 h-10 bg-gradient-to-r ${service.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-xl`}>
-                <span className="text-lg" role="img" aria-label={service.title}>{service.image}</span>
+          <div className="p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r ${service.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-all duration-300 shadow-lg group-hover:shadow-xl`}>
+                <span className="text-sm sm:text-lg" role="img" aria-label={service.title}>{service.image}</span>
               </div>
               
               <div className="flex items-center space-x-reverse space-x-1 bg-gray-700/50 px-2 py-1 rounded-full">
@@ -757,14 +932,14 @@ const ServiceCard = memo(({
               </div>
             </div>
 
-            <h3 className="text-sm font-semibold text-gray-200 mb-2 line-clamp-1 group-hover:text-sky-200 transition-colors duration-300" style={{
+            <h3 className="text-sm sm:text-base font-semibold text-gray-200 mb-2 line-clamp-1 group-hover:text-sky-200 transition-colors duration-300" style={{
               textShadow: '0 0 5px rgba(0, 191, 255, 0.2)',
               filter: 'contrast(1.05) brightness(0.9)'
             }}>
               {service.title}
             </h3>
 
-            <p className="text-gray-400 text-xs mb-3 line-clamp-2 leading-relaxed group-hover:text-gray-300 transition-colors duration-300" style={{
+            <p className="text-gray-400 text-xs sm:text-sm mb-3 line-clamp-2 leading-relaxed group-hover:text-gray-300 transition-colors duration-300" style={{
               filter: 'contrast(1.05) brightness(0.9)'
             }}>
               {service.description}
@@ -828,10 +1003,10 @@ const ServiceCard = memo(({
               </div>
             )}
 
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 space-y-2 sm:space-y-0">
               <div className="flex flex-col">
                 <div className="flex items-center">
-                  <span className="text-base font-semibold text-sky-300" style={{
+                  <span className="text-sm sm:text-base font-semibold text-sky-300" style={{
                     textShadow: '0 0 5px rgba(0, 191, 255, 0.3)',
                     filter: 'contrast(1.05) brightness(0.9)'
                   }}>
@@ -850,23 +1025,25 @@ const ServiceCard = memo(({
               </div>
               
               {service.discount && (
-                <div className="text-green-400 text-xs font-bold bg-gradient-to-r from-green-500/20 to-emerald-500/20 px-3 py-1 rounded-full border border-green-400/50 shadow-lg">
+                <div className="text-green-400 text-xs font-bold bg-gradient-to-r from-green-500/20 to-emerald-500/20 px-2 sm:px-3 py-1 rounded-full border border-green-400/50 shadow-lg self-start sm:self-auto">
                   وفر %{service.discount}
                 </div>
               )}
             </div>
 
             <button 
-              className={`w-full sky-blue-gradient text-white py-3 rounded-lg font-bold transition-all duration-300 transform ${
-                isHovered ? 'scale-105 shadow-lg shadow-sky-500/50' : 'shadow-md'
-              } hover:shadow-lg text-sm ${isAdding ? 'animate-pulse' : ''} group-hover:shadow-sky-500/30 relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed`}
-              disabled={isAdding}
+              className={`w-full py-3 sm:py-4 rounded-lg font-bold transition-all duration-300 transform ${
+                isAvailable 
+                  ? `sky-blue-gradient text-white ${isHovered ? 'scale-102 sm:scale-105 shadow-lg shadow-sky-500/50' : 'shadow-md'} hover:shadow-lg group-hover:shadow-sky-500/30`
+                  : 'bg-gray-600 text-gray-300 cursor-not-allowed'
+              } text-sm sm:text-base ${isAdding ? 'animate-pulse' : ''} relative overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] touch-manipulation`}
+              disabled={isAdding || !isAvailable}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 handleAddToCart();
               }}
-              aria-label={`إضافة ${service.title} إلى السلة`}
+              aria-label={isAvailable ? `إضافة ${service.title} إلى السلة` : `${service.title} غير متوفر`}
             >
               {/* Animated background effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-sky-400/20 to-sky-600/20 animate-pulse-slow"></div>
@@ -881,6 +1058,8 @@ const ServiceCard = memo(({
                 }}>
                   {isAdding ? 
                     'جاري الإضافة...' :
+                    !isAvailable ?
+                      'غير متوفر حالياً' :
                     !session ? 
                       'تسجيل الدخول مطلوب' : 
                       'إضافة للسلة'
@@ -946,8 +1125,8 @@ const EnhancedServiceSection = memo(({
         />
       </div>
       
-      <div className="container mx-auto px-4 mt-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 mt-6 sm:mt-8">
+        <div className="grid grid-cols-1 xs:grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-6">
           {category.services.map((service: Service, index: number) => (
             <ServiceCard 
               key={service.id} 
@@ -989,17 +1168,17 @@ const FAQItem = memo(({
   return (
     <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700/50 hover:border-sky-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-sky-500/10 overflow-hidden">
       <button 
-        className="w-full text-right p-4 flex items-center justify-between cursor-pointer group"
+        className="w-full text-right p-3 sm:p-4 flex items-center justify-between cursor-pointer group min-h-[44px] touch-manipulation"
         onClick={toggleOpen}
         aria-expanded={isOpen}
         aria-controls={`faq-answer-${id}`}
       >
-        <h3 className="text-base font-semibold text-white flex items-center">
-          <span className="text-sky-400 mr-2" role="img" aria-label="نجمة">{icon}</span>
+        <h3 className="text-sm sm:text-base font-semibold text-white flex items-center">
+          <span className="text-sky-400 mr-2 text-sm sm:text-base" role="img" aria-label="نجمة">{icon}</span>
           {question}
         </h3>
         <svg 
-          className={`h-5 w-5 text-sky-400 transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
+          className={`h-4 w-4 sm:h-5 sm:w-5 text-sky-400 transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} 
           fill="none" 
           viewBox="0 0 24 24" 
           stroke="currentColor"
@@ -1011,8 +1190,8 @@ const FAQItem = memo(({
         id={`faq-answer-${id}`}
         className={`transition-all duration-300 overflow-hidden ${isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
       >
-        <div className="px-4 pb-4 pt-0">
-          <p className="text-gray-300 text-sm">{answer}</p>
+        <div className="px-3 sm:px-4 pb-3 sm:pb-4 pt-0">
+          <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">{answer}</p>
         </div>
       </div>
     </div>
@@ -1029,6 +1208,36 @@ export default function MDKStore() {
     type: 'success' | 'error' | 'info' | 'warning';
   } | null>(null);
   const { data: session } = useSession();
+
+  // Mobile features
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
+  const categories = Object.keys(servicesData);
+
+  // Swipe gestures for category navigation
+  const swipeGestures = useSwipeGestures({
+    onSwipeLeft: () => {
+      setCurrentCategoryIndex(prev => 
+        prev < categories.length - 1 ? prev + 1 : 0
+      );
+    },
+    onSwipeRight: () => {
+      setCurrentCategoryIndex(prev => 
+        prev > 0 ? prev - 1 : categories.length - 1
+      );
+    },
+    threshold: 50
+  });
+
+  // Pull to refresh
+  const { isPulling, isRefreshing, pullDistance, pullProgress } = usePullToRefresh({
+    onRefresh: async () => {
+      // Simulate refresh
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      window.location.reload();
+    },
+    threshold: 80,
+    enabled: true
+  });
 
   useEffect(() => {
     setIsClient(true);
@@ -1094,56 +1303,76 @@ export default function MDKStore() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900 relative overflow-x-hidden" dir="rtl">
+      <div 
+        className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900 relative overflow-x-hidden" 
+        dir="rtl"
+        {...swipeGestures.touchHandlers}
+      >
         {/* Enhanced Background Effects */}
         <AnimatedBackground />
-        
 
+        {/* Pull to Refresh Indicator */}
+        {isPulling && (
+          <div 
+            className="fixed top-0 left-0 right-0 z-50 bg-sky-500/20 backdrop-blur-sm border-b border-sky-500/30 flex items-center justify-center py-2"
+            style={{ 
+              transform: `translateY(${Math.min(pullDistance - 20, 60)}px)`,
+              opacity: pullProgress
+            }}
+          >
+            <div className="flex items-center space-x-reverse space-x-2 text-sky-300">
+              <div className={`w-5 h-5 border-2 border-sky-300 border-t-transparent rounded-full animate-spin ${isRefreshing ? 'opacity-100' : 'opacity-0'}`}></div>
+              <span className="text-sm font-medium">
+                {isRefreshing ? 'جاري التحديث...' : 'اسحب للتحديث'}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Simple Header */}
         <SimpleHeader session={session} />
 
         {/* Enhanced Hero Section */}
-        <section className="relative min-h-[85vh] flex items-center justify-center pt-20 pb-16 z-10 overflow-hidden">
+        <section className="relative min-h-[80vh] sm:min-h-[85vh] flex items-center justify-center pt-16 sm:pt-20 pb-12 sm:pb-16 z-10 overflow-hidden">
           {/* Beautiful overlay effects */}
           <div className="absolute inset-0">
-            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-sky-500/8 rounded-full blur-3xl animate-pulse" style={{animationDuration: '8s'}}></div>
-            <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{animationDuration: '10s', animationDelay: '2s'}}></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-cyan-500/6 rounded-full blur-2xl animate-pulse" style={{animationDuration: '12s', animationDelay: '4s'}}></div>
+            <div className="absolute top-1/4 left-1/4 w-32 h-32 sm:w-48 sm:h-48 md:w-64 md:h-64 bg-sky-500/8 rounded-full blur-3xl animate-pulse" style={{animationDuration: '8s'}}></div>
+            <div className="absolute bottom-1/4 right-1/4 w-24 h-24 sm:w-36 sm:h-36 md:w-48 md:h-48 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{animationDuration: '10s', animationDelay: '2s'}}></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-cyan-500/6 rounded-full blur-2xl animate-pulse" style={{animationDuration: '12s', animationDelay: '4s'}}></div>
           </div>
 
-          <div className="container mx-auto px-4 md:px-6 text-center relative z-10 max-w-6xl">
+          <div className="container mx-auto px-3 sm:px-4 md:px-6 text-center relative z-10 max-w-6xl">
               {/* Enhanced Badge */}
-              <div className="inline-block px-8 py-4 bg-gray-700/50 backdrop-blur-sm rounded-full border border-sky-500/60 mb-8 hover:border-sky-400/80 transition-all duration-300">
-                <div className="flex items-center space-x-3 space-x-reverse">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
-                  <span className="font-bold text-base text-sky-400 hover:text-sky-300 transition-colors duration-300">
+              <div className="inline-block px-4 sm:px-6 md:px-8 py-3 sm:py-4 bg-gray-700/50 backdrop-blur-sm rounded-full border border-sky-500/60 mb-6 sm:mb-8 hover:border-sky-400/80 transition-all duration-300">
+                <div className="flex items-center space-x-2 sm:space-x-3 space-x-reverse">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-sky-400 rounded-full animate-pulse"></div>
+                  <span className="font-bold text-sm sm:text-base text-sky-400 hover:text-sky-300 transition-colors duration-300">
                     خدمات تقنية احترافية
                   </span>
-                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-sky-400 rounded-full animate-pulse"></div>
                 </div>
               </div>
               
               {/* Enhanced Main Title */}
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 md:mb-8 leading-tight px-2 hover:scale-105 transition-transform duration-500" style={{textShadow: '0 0 20px rgba(0, 191, 255, 0.3)'}}>
+              <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-bold text-white mb-3 sm:mb-4 md:mb-6 lg:mb-8 leading-tight px-2 hover:scale-105 transition-transform duration-500" style={{textShadow: '0 0 20px rgba(0, 191, 255, 0.3)'}}>
                 {storeConfig.storeName}
               </h1>
               
               {/* Enhanced Subtitle */}
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-200 mb-6 sm:mb-8 md:mb-12 max-w-5xl mx-auto leading-relaxed font-light px-4">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl text-gray-200 mb-4 sm:mb-6 md:mb-8 lg:mb-12 max-w-5xl mx-auto leading-relaxed font-light px-2 sm:px-4">
                 <span className="bg-gradient-to-r from-gray-200 to-gray-400 bg-clip-text text-transparent hover:from-sky-200 hover:to-sky-400 transition-all duration-500">
                   حلول شاملة وخدمات متخصصة لجميع احتياجاتك التقنية
                 </span>
                 <br />
-                <span className="text-lg sm:text-xl md:text-2xl text-gray-400 mt-2 sm:mt-4 block hover:text-sky-300 transition-colors duration-500">
+                <span className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-400 mt-1 sm:mt-2 md:mt-4 block hover:text-sky-300 transition-colors duration-500">
                   بأعلى معايير الجودة والاحترافية
                 </span>
               </p>
 
-              <div className="flex justify-center items-center mb-6 sm:mb-8 md:mb-12 px-4">
+              <div className="flex justify-center items-center mb-4 sm:mb-6 md:mb-8 lg:mb-12 px-2 sm:px-4">
                 <button 
                   onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
-                  className="group relative bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 shadow-lg shadow-sky-500/20 overflow-hidden"
+                  className="group relative bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 shadow-lg shadow-sky-500/20 overflow-hidden min-h-[44px] touch-manipulation"
                   aria-label="استكشف خدماتنا"
                 >
                   {/* Subtle shimmer effect */}
@@ -1160,6 +1389,29 @@ export default function MDKStore() {
           </div>
         </section>
 
+        {/* Mobile Category Indicator */}
+        <div className="lg:hidden fixed bottom-20 left-4 right-4 z-40">
+          <div className="bg-gray-900/90 backdrop-blur-sm rounded-full px-4 py-2 border border-sky-500/30">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-300">
+                {Object.values(servicesData)[currentCategoryIndex]?.title}
+              </span>
+              <div className="flex space-x-reverse space-x-2">
+                {categories.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      index === currentCategoryIndex 
+                        ? 'bg-sky-400 w-6' 
+                        : 'bg-gray-600'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Enhanced Services Sections with Scroll Animations */}
         <main className="space-y-12 md:space-y-16">
           {Object.entries(servicesData).map(([key, category]) => (
@@ -1173,20 +1425,20 @@ export default function MDKStore() {
         </main>
 
         {/* FAQ Section */}
-        <section className="py-10 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden z-10" aria-labelledby="faq-heading">
+        <section className="py-8 sm:py-10 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden z-10" aria-labelledby="faq-heading">
           <div className="absolute inset-0 bg-gradient-to-r from-sky-500/3 to-sky-700/3"></div>
           
-          <div className="container mx-auto px-4 md:px-6 relative z-10">
-            <div className="text-center mb-8">
-              <h2 id="faq-heading" className="text-2xl md:text-3xl font-bold text-white mb-3">
+          <div className="container mx-auto px-3 sm:px-4 md:px-6 relative z-10">
+            <div className="text-center mb-6 sm:mb-8">
+              <h2 id="faq-heading" className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 sm:mb-3">
                 الأسئلة الشائعة
               </h2>
-              <p className="text-gray-300 text-base max-w-2xl mx-auto">
+              <p className="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto">
                 إجابات على الأسئلة الأكثر شيوعاً حول خدماتنا
               </p>
             </div>
 
-            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {faqData.map((faq) => (
                 <FAQItem
                   key={faq.id}

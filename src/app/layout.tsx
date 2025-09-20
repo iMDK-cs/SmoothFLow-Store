@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./responsive.css";
 import Providers from "@/components/Providers";
 import { Cairo, Inter } from 'next/font/google';
 import { SpeedInsights } from '@vercel/speed-insights/next'
