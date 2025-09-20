@@ -54,7 +54,6 @@ export default function AdminServicesManager() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [selectedServices, setSelectedServices] = useState<string[]>([])
   const [bulkAvailabilityStatus, setBulkAvailabilityStatus] = useState<string>('available')
-  const [showBulkModal, setShowBulkModal] = useState(false)
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
 
@@ -239,7 +238,6 @@ export default function AdminServicesManager() {
       ))
 
       setSelectedServices([])
-      setShowBulkModal(false)
     } catch (error) {
       console.error('Error updating bulk availability:', error)
       setError('حدث خطأ أثناء تحديث توفر الخدمات')
