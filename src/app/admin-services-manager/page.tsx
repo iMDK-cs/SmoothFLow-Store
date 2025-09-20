@@ -91,7 +91,7 @@ export default function AdminServicesManager() {
         throw new Error('Failed to fetch services')
       }
 
-      await response.json()
+      const data = await response.json()
       setServices(data.services || [])
     } catch (error) {
       console.error('Error fetching services:', error)
@@ -117,7 +117,7 @@ export default function AdminServicesManager() {
         throw new Error('Failed to sync services')
       }
 
-      await response.json()
+      const data = await response.json()
       setUploadStats(data.stats)
       
       // Refresh services list
@@ -247,9 +247,8 @@ export default function AdminServicesManager() {
         throw new Error('Failed to fetch history')
       }
 
-      await response.json()
+      const data = await response.json()
       setAvailabilityHistory(data.history)
-      setSelectedServiceForHistory(serviceId)
       setShowHistoryModal(true)
     } catch (error) {
       console.error('Error fetching history:', error)
