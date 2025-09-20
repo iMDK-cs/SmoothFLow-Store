@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { clearServicesCache } from '../../services/route'
 
 export async function GET() {
   try {
@@ -77,9 +78,13 @@ export async function POST(request: NextRequest) {
         availabilityStatus: available !== false ? 'available' : 'out_of_stock',
         stock: stock && !isNaN(parseInt(stock)) ? parseInt(stock) : null,
         active: true,
-        popular: false
+        popular: false,
+        color: 'from-sky-500 to-sky-600' // Default color as requested
       }
     })
+
+    // Clear services cache to ensure fresh data
+    clearServicesCache()
 
     return NextResponse.json({ service: newService })
   } catch (error) {
@@ -137,6 +142,9 @@ export async function PUT(request: NextRequest) {
       where: { id: serviceId },
       data: updateData
     })
+
+    // Clear services cache to ensure fresh data
+    clearServicesCache()
 
     return NextResponse.json({ service: updatedService })
   } catch (error) {

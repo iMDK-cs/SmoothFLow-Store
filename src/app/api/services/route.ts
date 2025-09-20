@@ -8,6 +8,11 @@ export const runtime = 'nodejs'
 const servicesCache = new Map<string, { data: unknown; timestamp: number }>()
 const CACHE_TTL = 60000 // 1 minute
 
+// Function to clear cache
+export function clearServicesCache() {
+  servicesCache.clear()
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -28,10 +33,9 @@ export async function GET(request: NextRequest) {
       })
     }
     
-    // Build query conditions
+    // Build query conditions - return all services regardless of availability
     const where: Record<string, unknown> = {
-      active: true,
-      available: true
+      active: true
     }
     
     if (category) {
@@ -55,7 +59,10 @@ export async function GET(request: NextRequest) {
         icon: true,
         color: true,
         popular: true,
-        stock: true
+        stock: true,
+        available: true,
+        availabilityStatus: true,
+        active: true
       },
       orderBy: [
         { popular: 'desc' },

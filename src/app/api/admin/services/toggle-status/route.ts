@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { clearServicesCache } from '../../services/route'
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,6 +55,9 @@ export async function POST(request: NextRequest) {
         }
       }
     })
+
+    // Clear services cache to ensure fresh data
+    clearServicesCache()
 
     return NextResponse.json({
       message: `Service ${active ? 'activated' : 'deactivated'} successfully`,

@@ -602,6 +602,30 @@ export default function AdminServices() {
               </div>
               
               <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">رابط الصورة</label>
+                <input
+                  type="url"
+                  value={newService.image}
+                  onChange={(e) => setNewService({...newService, image: e.target.value})}
+                  className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">الأيقونة (Emoji)</label>
+                <input
+                  type="text"
+                  value={newService.icon}
+                  onChange={(e) => setNewService({...newService, icon: e.target.value})}
+                  className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                  placeholder="🖥️"
+                  maxLength="2"
+                />
+                <p className="text-xs text-gray-400 mt-1">استخدم emoji واحد أو رمز</p>
+              </div>
+              
+              <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">الكمية المتوفرة</label>
                 <input
                   type="number"
