@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { clearServicesCache } from '../../services/route'
+import { clearServicesCache } from '@/lib/cache'
 
 export async function POST(request: NextRequest) {
   try {

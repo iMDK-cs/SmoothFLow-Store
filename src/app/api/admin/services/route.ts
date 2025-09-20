@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { clearServicesCache } from '../../services/route'
+import { clearServicesCache } from '@/lib/cache'
 
 export async function GET() {
   try {

@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { clearServicesCache, getCachedServices, setCachedServices, createServicesCacheKey } from '@/lib/cache'
 
 // Use Node.js runtime for Prisma compatibility
 export const runtime = 'nodejs'
-
-// Cache for services data
-const servicesCache = new Map<string, { data: unknown; timestamp: number }>()
-const CACHE_TTL = 60000 // 1 minute
-
-// Function to clear cache
-export function clearServicesCache() {
-  servicesCache.clear()
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,16 +12,15 @@ export async function GET(request: NextRequest) {
     const popular = searchParams.get('popular')
     
     // Create cache key
-    const cacheKey = `services-${category || 'all'}-${popular || 'all'}`
-    const cached = servicesCache.get(cacheKey)
-    const now = Date.now()
+    const cacheKey = createServicesCacheKey(category, popular)
+    const cached = getCachedServices(cacheKey)
     
     // Return cached data if still valid
-    if (cached && (now - cached.timestamp) < CACHE_TTL) {
+    if (cached) {
       return NextResponse.json({ 
-        services: cached.data,
+        services: cached,
         cached: true,
-        timestamp: cached.timestamp
+        timestamp: Date.now()
       })
     }
     
@@ -71,12 +62,12 @@ export async function GET(request: NextRequest) {
     })
     
     // Cache the result
-    servicesCache.set(cacheKey, { data: services, timestamp: now })
+    setCachedServices(cacheKey, services)
     
     return NextResponse.json({ 
       services,
       cached: false,
-      timestamp: now
+      timestamp: Date.now()
     })
     
   } catch (error) {
