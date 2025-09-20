@@ -860,16 +860,6 @@ const ServiceCard = memo(({
               )}
             </div>
 
-            {/* Availability Status Badge */}
-            {service.available === false && (
-              <div className="mb-3 p-2 bg-red-500/20 border border-red-500/50 rounded-lg">
-                <div className="flex items-center justify-center text-red-400 text-sm font-bold">
-                  <span className="text-lg mr-2">❌</span>
-                  غير متوفر حالياً
-                </div>
-              </div>
-            )}
-
             <button 
               className={`w-full py-3 rounded-lg font-bold transition-all duration-300 transform text-sm relative overflow-hidden ${
                 service.available === false 
