@@ -551,7 +551,8 @@ export default function AdminServicesManager() {
                 </button>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
 
         {filteredServices.length === 0 && (
