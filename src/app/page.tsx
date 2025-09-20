@@ -733,24 +733,16 @@ const ServiceCard = memo(({
 
         <div className={`modern-card hover:shadow-sky-500/30 transition-all duration-700 overflow-hidden group border border-sky-500/20 ${
           isHovered ? 'transform -translate-y-3 scale-105 enhanced-glow border-sky-400/40' : ''
-        } ${(service.available === false || service.active === false) ? 'opacity-60 grayscale-[0.3] relative border-red-500/50' : ''}`}>
+        } ${(service.available === false || service.active === false) ? 'opacity-60 grayscale-[0.3] relative' : ''}`}>
           
           {/* Unavailable overlay effect */}
           {(service.available === false || service.active === false) && (
             <>
               <div className="absolute inset-0 bg-red-500/10 rounded-lg z-10"></div>
               <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-gray-500/10 rounded-lg z-10"></div>
-              <div className="absolute inset-0 bg-red-500/5 rounded-lg z-10" style={{
-                background: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 71, 87, 0.1) 10px, rgba(255, 71, 87, 0.1) 20px)'
-              }}></div>
               <div className="absolute top-2 left-2 z-20">
                 <div className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse shadow-lg">
-                  {service.active === false ? 'معطل' : 'غير متوفر'}
-                </div>
-              </div>
-              <div className="absolute bottom-2 left-2 right-2 z-20">
-                <div className="bg-red-500/90 text-white text-xs font-bold px-2 py-1 rounded text-center">
-                  {service.active === false ? 'تم إلغاء التفعيل' : 'غير متوفر حالياً'}
+                  غير متوفر
                 </div>
               </div>
             </>
@@ -924,9 +916,7 @@ const ServiceCard = memo(({
                 {(service.available === false || service.active === false) ? (
                   <>
                     <span className="text-lg mr-2 animate-pulse">❌</span>
-                    <span className="font-bold text-gray-200">
-                      {service.active === false ? 'معطل - غير متاح' : 'غير متوفر حالياً'}
-                    </span>
+                    <span className="font-bold text-gray-200">غير متوفر حالياً</span>
                   </>
                 ) : (
                   <>
@@ -1097,67 +1087,54 @@ export default function MDKStore() {
   }, []);
 
   // Fetch services from API
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        setLoadingServices(true);
-        const response = await fetch('/api/services');
-        if (response.ok) {
-          const data = await response.json();
-          setServices(Array.isArray(data.services) ? data.services : []);
-        } else {
-          console.error('Failed to fetch services');
-          // Fallback to empty array if API fails
-          setServices([]);
-        }
-      } catch (error) {
-        console.error('Error fetching services:', error);
+  const fetchServices = useCallback(async () => {
+    try {
+      setLoadingServices(true);
+      const response = await fetch('/api/services');
+      if (response.ok) {
+        const data = await response.json();
+        setServices(Array.isArray(data.services) ? data.services : []);
+      } else {
+        console.error('Failed to fetch services');
+        // Fallback to empty array if API fails
         setServices([]);
-      } finally {
-        setLoadingServices(false);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      setServices([]);
+    } finally {
+      setLoadingServices(false);
+    }
+  }, []);
 
+  useEffect(() => {
     fetchServices();
-    
-    // Set up periodic refresh for real-time updates
-    const interval = setInterval(fetchServices, 3000); // Refresh every 3 seconds
-    
-    // Listen for storage events (when admin makes changes)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'serviceStatusChanged') {
-        fetchServices();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also check for changes periodically
-    let lastChangeTime = 0;
-    const checkForChanges = () => {
-      const changeTime = localStorage.getItem('serviceStatusChanged');
-      if (changeTime && parseInt(changeTime) > lastChangeTime) {
-        lastChangeTime = parseInt(changeTime);
-        fetchServices();
-      }
-    };
-    
-    const changeInterval = setInterval(checkForChanges, 1000);
-    
-    // Listen for focus events (when user returns to tab)
-    const handleFocus = () => {
+  }, [fetchServices]);
+
+  // Add polling to refresh services data every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchServices();
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [fetchServices]);
+
+  // Listen for service updates from admin panel
+  useEffect(() => {
+    const handleServiceUpdate = () => {
       fetchServices();
     };
-    
-    window.addEventListener('focus', handleFocus);
-    
+
+    // Listen for custom events
+    window.addEventListener('serviceUpdated', handleServiceUpdate);
+    window.addEventListener('serviceAvailabilityChanged', handleServiceUpdate);
+
     return () => {
-      clearInterval(interval);
-      clearInterval(changeInterval);
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('serviceUpdated', handleServiceUpdate);
+      window.removeEventListener('serviceAvailabilityChanged', handleServiceUpdate);
     };
-  }, []);
+  }, [fetchServices]);
 
   const handleNotification = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning') => {
     setNotification({ message, type });

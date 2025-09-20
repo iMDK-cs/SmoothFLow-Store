@@ -162,6 +162,11 @@ export default function AdminServices() {
         `تم ${!service.available ? 'إظهار' : 'إخفاء'} الخدمة بنجاح`, 
         'success'
       )
+
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('serviceAvailabilityChanged', {
+        detail: { serviceId, available: !service.available, active: service.active }
+      }))
     } catch (error) {
       console.error('Error toggling service availability:', error)
       showNotification('حدث خطأ أثناء تحديث حالة التوفر', 'error')
@@ -206,18 +211,15 @@ export default function AdminServices() {
           : s
       ))
       
-      // Force refresh of main site data
-      setTimeout(() => {
-        fetchServices()
-      }, 1000)
-      
-      // Notify main site of changes
-      localStorage.setItem('serviceStatusChanged', Date.now().toString())
-      
       showNotification(
         `تم ${newActiveStatus ? 'تفعيل' : 'إلغاء تفعيل'} الخدمة بنجاح`, 
         'success'
       )
+
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('serviceAvailabilityChanged', {
+        detail: { serviceId, active: newActiveStatus, available: newAvailableStatus }
+      }))
     } catch (error) {
       console.error('Error toggling service status:', error)
       showNotification('حدث خطأ أثناء تحديث حالة الخدمة', 'error')
@@ -245,6 +247,11 @@ export default function AdminServices() {
       // Optimistic update
       setServices(services.filter(s => s.id !== serviceId))
       showNotification('تم حذف الخدمة بنجاح', 'success')
+
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('serviceUpdated', {
+        detail: { serviceId, action: 'deleted' }
+      }))
     } catch (error) {
       console.error('Error deleting service:', error)
       showNotification(
@@ -290,6 +297,11 @@ export default function AdminServices() {
         stock: null
       })
       showNotification('تم إضافة الخدمة بنجاح', 'success')
+
+      // Dispatch event to notify other components
+      window.dispatchEvent(new CustomEvent('serviceUpdated', {
+        detail: { serviceId: data.service.id, action: 'created' }
+      }))
     } catch (error) {
       console.error('Error creating service:', error)
       showNotification(
