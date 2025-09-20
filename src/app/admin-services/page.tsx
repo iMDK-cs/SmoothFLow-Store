@@ -177,10 +177,18 @@ export default function AdminServices() {
       const service = services.find(s => s.id === serviceId)
       if (!service) return
 
+      const newActiveStatus = !service.active
+      const newAvailableStatus = newActiveStatus // ربط حالة التفعيل مع التوفر
+
       const response = await fetch('/api/admin/services/toggle-status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ serviceId, active: !service.active })
+        body: JSON.stringify({ 
+          serviceId, 
+          active: newActiveStatus,
+          available: newAvailableStatus,
+          availabilityStatus: newAvailableStatus ? 'available' : 'out_of_stock'
+        })
       })
 
       if (!response.ok) {
@@ -190,12 +198,17 @@ export default function AdminServices() {
       // Optimistic update
       setServices(services.map(s => 
         s.id === serviceId 
-          ? { ...s, active: !s.active }
+          ? { 
+              ...s, 
+              active: newActiveStatus,
+              available: newAvailableStatus,
+              availabilityStatus: newAvailableStatus ? 'available' : 'out_of_stock'
+            }
           : s
       ))
       
       showNotification(
-        `تم ${!service.active ? 'تفعيل' : 'إلغاء تفعيل'} الخدمة بنجاح`, 
+        `تم ${newActiveStatus ? 'تفعيل' : 'إلغاء تفعيل'} الخدمة بنجاح`, 
         'success'
       )
     } catch (error) {

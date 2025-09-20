@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
     }
 
-    const { serviceId, active } = await request.json()
+    const { serviceId, active, available, availabilityStatus } = await request.json()
 
     if (!serviceId || active === undefined) {
       return NextResponse.json(
@@ -25,10 +25,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Toggle service status
+    // Prepare update data
+    const updateData: any = { active }
+    
+    // If availability is provided, update it too
+    if (available !== undefined) {
+      updateData.available = available
+    }
+    
+    if (availabilityStatus) {
+      updateData.availabilityStatus = availabilityStatus
+      updateData.availabilityUpdatedAt = new Date()
+    }
+
+    // Toggle service status and availability
     const updatedService = await prisma.service.update({
       where: { id: serviceId },
-      data: { active },
+      data: updateData,
       include: {
         options: {
           where: { active: true },

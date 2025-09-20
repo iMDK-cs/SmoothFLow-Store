@@ -164,7 +164,8 @@ const servicesData = {
         rating: 5,
         color: 'from-sky-400 to-sky-500',
         available: false,
-        availabilityStatus: 'out_of_stock'
+        availabilityStatus: 'out_of_stock',
+        active: false
       },
       
       {
@@ -175,7 +176,8 @@ const servicesData = {
         image: '💧',
         serviceImage: imageConfig.services['water-cooling'],
         rating: 5,
-        color: 'from-sky-500 to-sky-600'
+        color: 'from-sky-500 to-sky-600',
+        active: true
       },
       {
         id: 'air-cooling',
@@ -185,7 +187,8 @@ const servicesData = {
         image: '🌀',
         serviceImage: imageConfig.services['air-cooling'],
         rating: 4.7,
-        color: 'from-sky-500 to-sky-600'
+        color: 'from-sky-500 to-sky-600',
+        active: true
       },
       {
         id: 'custom-build',
@@ -195,7 +198,8 @@ const servicesData = {
         image: '🔧',
         serviceImage: imageConfig.services['custom-build'],
         rating: 5,
-        color: 'from-sky-400 to-sky-500'
+        color: 'from-sky-400 to-sky-500',
+        active: true
       },
     ]
   },
@@ -214,7 +218,8 @@ const servicesData = {
         serviceImage: imageConfig.services['Pc-check'],
         popular: true,
         rating: 4.9,
-        color: 'from-sky-500 to-sky-600'
+        color: 'from-sky-500 to-sky-600',
+        active: true
       },
       {
         id: 'windows-format',
@@ -224,7 +229,8 @@ const servicesData = {
         image: '🔄',
         serviceImage: imageConfig.services['windows-format'],
         rating: 4.6,
-        color: 'from-sky-500 to-sky-600'
+        color: 'from-sky-500 to-sky-600',
+        active: true
       },
       {
         id: 'gpu-drivers',
@@ -234,7 +240,8 @@ const servicesData = {
         image: '🛠️',
         serviceImage: imageConfig.services['gpu-drivers'],
         rating: 4.8,
-        color: 'from-sky-500 to-sky-600'
+        color: 'from-sky-500 to-sky-600',
+        active: true
       },
       {
         id: 'thermal-paste',
@@ -244,7 +251,8 @@ const servicesData = {
         image: '🌡️',
         serviceImage: imageConfig.services['thermal-paste'],
         rating: 5,
-        color: 'from-sky-500 to-sky-600'
+        color: 'from-sky-500 to-sky-600',
+        active: true
       },
       {
         id: 'bios-update',
@@ -254,7 +262,8 @@ const servicesData = {
         image: '⚙️',
         serviceImage: imageConfig.services['bios-update'],
         rating: 4.9,
-        color: 'from-sky-500 to-sky-600'
+        color: 'from-sky-500 to-sky-600',
+        active: true
       }
     ]
   },
@@ -272,7 +281,8 @@ const servicesData = {
         image: '📈',
         serviceImage: imageConfig.services['bios-tweak'],
         rating: 4.8,
-        color: 'from-purple-500 to-purple-600'
+        color: 'from-purple-500 to-purple-600',
+        active: true
       },
       {
         id: 'windows-tweaking',
@@ -285,6 +295,7 @@ const servicesData = {
         popular: true,
         rating: 4.9,
         color: 'from-purple-500 to-purple-600',
+        active: true,
         options: [
           { id: 'cmfqppnmm0001uajwp8623wcj', title: 'بدون فورمات', price: '100', description: 'تحسين الويندوز الحالي' },
           { id: 'cmfqppoa90003uajw80tu9k4h', title: 'مع فورمات', price: '130', description: 'تحسين + فورمات كامل للنظام' }
@@ -298,7 +309,8 @@ const servicesData = {
         image: '⚙️',
         serviceImage: imageConfig.services['gaming-windows'],
         rating: 4.7,
-        color: 'from-purple-500 to-purple-600'
+        color: 'from-purple-500 to-purple-600',
+        active: true
       },
       {
         id: 'internet-tweak',
@@ -308,7 +320,8 @@ const servicesData = {
         image: '🌐',
         serviceImage: imageConfig.services['internet-tweak'],
         rating: 4.6,
-        color: 'from-purple-500 to-purple-600'
+        color: 'from-purple-500 to-purple-600',
+        active: true
       },
       {
         id: 'controller-oc',
@@ -318,7 +331,8 @@ const servicesData = {
         image: '🎮',
         serviceImage: imageConfig.services['controller-oc'],
         rating: 4.6,
-        color: 'from-purple-500 to-purple-600'
+        color: 'from-purple-500 to-purple-600',
+        active: true
       }
     ]
   }
@@ -601,6 +615,7 @@ interface Service {
   optional?: boolean;
   available?: boolean;
   availabilityStatus?: string;
+  active?: boolean;
   options?: Array<{
     id: string;
     title: string;
@@ -862,21 +877,21 @@ const ServiceCard = memo(({
 
             <button 
               className={`w-full py-3 rounded-lg font-bold transition-all duration-300 transform text-sm relative overflow-hidden ${
-                service.available === false 
+                (service.available === false || service.active === false)
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-60' 
                   : `sky-blue-gradient text-white ${
                       isHovered ? 'scale-105 shadow-lg shadow-sky-500/50' : 'shadow-md'
                     } hover:shadow-lg group-hover:shadow-sky-500/30`
               } ${isAdding ? 'animate-pulse' : ''} disabled:opacity-50 disabled:cursor-not-allowed`}
-              disabled={isAdding || service.available === false}
+              disabled={isAdding || service.available === false || service.active === false}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (service.available !== false) {
+                if (service.available !== false && service.active !== false) {
                   handleAddToCart();
                 }
               }}
-              aria-label={service.available === false ? `${service.title} غير متوفر` : `إضافة ${service.title} إلى السلة`}
+              aria-label={(service.available === false || service.active === false) ? `${service.title} غير متوفر` : `إضافة ${service.title} إلى السلة`}
             >
               {/* Animated background effect - only for available items */}
               {service.available !== false && (
@@ -884,7 +899,7 @@ const ServiceCard = memo(({
               )}
               
               <span className="flex items-center justify-center relative z-10">
-                {service.available === false ? (
+                {(service.available === false || service.active === false) ? (
                   <>
                     <span className="text-lg mr-2">❌</span>
                     <span className="font-bold">غير متوفر حالياً</span>

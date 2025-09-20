@@ -540,7 +540,7 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ servic
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl font-bold text-white mb-4">{service.title}</h1>
-              {service.id === 'ready-builds' && (
+              {(service.id === 'ready-builds' || service.active === false) && (
                 <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
                   <div className="flex items-center text-red-400 font-bold">
                     <span className="text-xl mr-2">❌</span>
@@ -661,15 +661,15 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ servic
               </div>
 
               <button
-                onClick={service.id === 'ready-builds' ? undefined : handleAddToCart}
-                disabled={isAddingToCart || service.id === 'ready-builds'}
+                onClick={(service.id === 'ready-builds' || service.active === false) ? undefined : handleAddToCart}
+                disabled={isAddingToCart || service.id === 'ready-builds' || service.active === false}
                 className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  service.id === 'ready-builds' 
+                  (service.id === 'ready-builds' || service.active === false)
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
                     : 'bg-blue-600 hover:bg-blue-700 text-white'
                 }`}
               >
-                {service.id === 'ready-builds' ? 'غير متوفر حالياً' : (isAddingToCart ? 'جاري الإضافة...' : 'أضف للسلة')}
+                {(service.id === 'ready-builds' || service.active === false) ? 'غير متوفر حالياً' : (isAddingToCart ? 'جاري الإضافة...' : 'أضف للسلة')}
               </button>
             </div>
           </div>
