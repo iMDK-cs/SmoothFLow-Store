@@ -23,6 +23,7 @@ interface ServiceDetail {
   color: string;
   addon?: string;
   optional?: boolean;
+  active?: boolean;
   estimatedTime: string;
   features: string[];
   images: string[];
@@ -54,6 +55,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     popular: true,
     rating: 5,
     color: 'from-sky-400 to-sky-500',
+    active: false,
     estimatedTime: '',
     features: [
       'تجميع احترافي',    
@@ -84,6 +86,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/water-cooling.jpg',
     rating: 5,
     color: 'from-sky-500 to-sky-600',
+    active: true,
     estimatedTime: '3-4 ساعات',
     features: [
       'تركيب نظام تبريد مائي كامل',
@@ -120,6 +123,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/air-cooling.jpg',
     rating: 4.7,
     color: 'from-sky-500 to-sky-600',
+    active: true,
     estimatedTime: '1-2 ساعات',
     features: [
       'تركيب مبرد هوائي احترافي',
@@ -140,6 +144,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/custom-build.jpg',
     rating: 5,
     color: 'from-sky-400 to-sky-500',
+    active: true,
     estimatedTime: '2-3 ساعات',
     features: [
       'تجميع حسب المواصفات المطلوبة',
@@ -171,6 +176,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     popular: true,
     rating: 4.9,
     color: 'from-sky-500 to-sky-600',
+    active: true,
     estimatedTime: '1-3 ساعات',
     features: [
       'فحص شامل لجميع المكونات',
@@ -192,6 +198,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/format.png',
     rating: 4.6,
     color: 'from-sky-500 to-sky-600',
+    active: true,
     estimatedTime: '1-2 ساعات',
     features: [
       'فورمات كامل للنظام',
@@ -213,6 +220,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/gpu-drivers.jpg',
     rating: 4.8,
     color: 'from-sky-500 to-sky-600',
+    active: true,
     estimatedTime: '30-45 دقيقة',
     features: [
       'حذف التعريفات القديمة',
@@ -234,6 +242,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/thermal-paste.jpg',
     rating: 4.7,
     color: 'from-sky-500 to-sky-600',
+    active: true,
     estimatedTime: '30-45 دقيقة',
     features: [
       'تنظيف البي سي ',
@@ -254,6 +263,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/bios-update.jpg',
     rating: 4.8,
     color: 'from-sky-500 to-sky-600',
+    active: true,
     estimatedTime: '45-60 دقيقة',
     features: [
       'تحديث البايوس بأمان',
@@ -274,6 +284,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/bios-tweak.jpg',
     rating: 4.8,
     color: 'from-sky-500 to-sky-600',
+    active: true,
     estimatedTime: '30-45 دقيقة',
     features: [
       'ضبط إعدادات الرام في البايوس',
@@ -294,6 +305,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/tweak.jpg?v=2',
     rating: 4.9,
     color: 'from-purple-500 to-purple-600',
+    active: true,
     estimatedTime: '1-2 ساعات',
     features: [
       'إزالة البرامج غير الضرورية',
@@ -319,6 +331,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/custom-windows1.jpg?v=2',
     rating: 4.7,
     color: 'from-purple-500 to-purple-600',
+    active: true,
     estimatedTime: '2-3 ساعات',
     features: [
       'ويندوز محسن للألعاب',
@@ -341,6 +354,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/controller-oc.jpg',
     rating: 4.6,
     color: 'from-sky-500 to-sky-600',
+    active: true,
     estimatedTime: '1-30 دقيقة',
     features: [
       'رفع سرعة استجابة القير',
@@ -361,6 +375,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     serviceImage: '/images/services/Network.jpg?v=2',
     rating: 4.6,
     color: 'from-purple-500 to-purple-600',
+    active: true,
     estimatedTime: '1-2 ساعات',
     features: [
       'تحسين إعدادات الشبكة',
