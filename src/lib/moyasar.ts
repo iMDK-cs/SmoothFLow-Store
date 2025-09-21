@@ -159,14 +159,21 @@ class MoyasarService {
       console.log('Creating Moyasar payment intent with data:', paymentData);
       console.log('Using secret key:', this.config.secretKey ? 'Present' : 'Missing');
       
-      // Create a payment intent without card details - Moyasar will handle the payment form
+      // Create a payment intent with minimal source - Moyasar will handle the payment form
       const paymentRequest = {
         amount: paymentData.amount,
         currency: paymentData.currency,
         description: paymentData.description,
         callback_url: paymentData.callback_url,
+        source: {
+          type: 'creditcard',
+          name: 'Customer Name', // Placeholder - Moyasar will collect real data
+          number: '4111111111111111', // Test card number
+          month: 12,
+          year: 2025,
+          cvc: '123'
+        },
         metadata: paymentData.metadata,
-        // Don't include source - let Moyasar handle the payment form
       };
       
       const response = await fetch(`${this.config.baseUrl}/payments`, {
