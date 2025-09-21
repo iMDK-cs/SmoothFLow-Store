@@ -56,7 +56,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
     }
 
     fetchOrder();
-  }, [session, status, router, orderId]);
+  }, [session, status, router, orderId, fetchOrder]);
 
   const fetchOrder = async () => {
     try {

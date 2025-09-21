@@ -41,7 +41,7 @@ export default function FileUpload({
       const file = e.dataTransfer.files[0];
       handleFile(file);
     }
-  }, []);
+  }, [handleFile]);
 
   const handleFile = (file: File) => {
     setFileError('');

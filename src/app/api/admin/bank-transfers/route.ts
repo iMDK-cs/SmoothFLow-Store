@@ -3,11 +3,11 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Check admin authentication
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id || session.user.role !== 'ADMIN') {
+    if (!session?.user?.id || (session.user as any)?.role !== 'ADMIN') {
       return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
     }
 
