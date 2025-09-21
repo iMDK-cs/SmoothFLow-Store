@@ -23,7 +23,7 @@ export async function sendOrderStatusEmail(data: OrderStatusEmailData) {
   try {
     if (!process.env.RESEND_API_KEY) {
       console.warn('RESEND_API_KEY not configured, skipping email notification');
-      return { success: false, error: 'Email service not configured' };
+      return { success: true, error: 'Email service not configured - notification skipped' };
     }
 
     const { customerName, customerEmail, orderNumber, orderStatus, paymentStatus, bankTransferStatus, adminNotes, totalAmount, items } = data;
