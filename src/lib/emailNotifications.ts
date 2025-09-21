@@ -8,6 +8,7 @@ interface OrderStatusEmailData {
   orderNumber: string;
   orderStatus: string;
   paymentStatus: string;
+  paymentMethod?: string;
   bankTransferStatus?: string;
   adminNotes?: string;
   totalAmount: number;
@@ -26,13 +27,38 @@ export async function sendOrderStatusEmail(data: OrderStatusEmailData) {
       return { success: true, error: 'Email service not configured - notification skipped' };
     }
 
-    const { customerName, customerEmail, orderNumber, orderStatus, paymentStatus, bankTransferStatus, adminNotes, totalAmount, items } = data;
+    const { customerName, customerEmail, orderNumber, orderStatus, paymentStatus, paymentMethod, bankTransferStatus, adminNotes, totalAmount, items } = data;
 
     // Determine email subject and content based on status
     let subject = '';
     let content = '';
 
-    if (orderStatus === 'CONFIRMED' && paymentStatus === 'PAID') {
+    if (orderStatus === 'PENDING' && paymentStatus === 'PENDING') {
+      subject = `تم استلام طلبك #${orderNumber}`;
+      content = `
+        <h2>مرحباً ${customerName}،</h2>
+        <p>شكراً لك! تم استلام طلبك رقم <strong>${orderNumber}</strong> بنجاح.</p>
+        <p>نحن نعمل على مراجعة طلبك وسنتواصل معك قريباً لتأكيد التفاصيل.</p>
+        ${paymentMethod === 'bank_transfer' ? `
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #007bff; margin-top: 0;">معلومات التحويل البنكي:</h3>
+            <p><strong>اسم صاحب الحساب:</strong> محمد عبدالله صالح الدخيلي</p>
+            <p><strong>IBAN:</strong> SA23 8000 0499 6080 1600 4598</p>
+            <p><strong>رقم الحساب:</strong> 499000010006086004598</p>
+            <p><strong>المبلغ:</strong> ${totalAmount.toFixed(2)} ريال</p>
+            <p style="color: #dc3545; font-weight: bold;">يرجى تحويل المبلغ ورفع إيصال التحويل من خلال رابط تتبع الطلب أدناه.</p>
+          </div>
+        ` : ''}
+      `;
+    } else if (orderStatus === 'PENDING_ADMIN_APPROVAL' && bankTransferStatus === 'PENDING_ADMIN_APPROVAL') {
+      subject = `طلبك #${orderNumber} في انتظار موافقة الإدارة`;
+      content = `
+        <h2>مرحباً ${customerName}،</h2>
+        <p>تم استلام إيصال التحويل البنكي لطلبك رقم <strong>${orderNumber}</strong>.</p>
+        <p>نحن نراجع إيصال التحويل حالياً وسنتواصل معك خلال 24 ساعة لتأكيد أو رفض الطلب.</p>
+        <p>يمكنك تتبع حالة طلبك من خلال الرابط أدناه.</p>
+      `;
+    } else if (orderStatus === 'CONFIRMED' && paymentStatus === 'PAID') {
       subject = `تم تأكيد طلبك #${orderNumber}`;
       content = `
         <h2>مرحباً ${customerName}،</h2>

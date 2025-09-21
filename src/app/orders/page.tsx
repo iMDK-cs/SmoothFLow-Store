@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useOrderNotifications } from '@/components/EnhancedNotification'
 
 export default function Orders() {
   const { data: session } = useSession()

@@ -4,6 +4,7 @@ import { useState, useEffect, use, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import FileUpload from '@/components/FileUpload'
+import { useOrderNotifications } from '@/components/EnhancedNotification'
 // import { loadStripe } from '@stripe/stripe-js'
 
 // const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
@@ -30,6 +31,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [uploadingFile, setUploadingFile] = useState(false)
   const [fileError, setFileError] = useState('')
+  const { notifyReceiptUploaded, notifyError } = useOrderNotifications()
   
   // Unwrap the params Promise
   const resolvedParams = use(params)
@@ -135,10 +137,15 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
         throw new Error(orderData.error || 'فشل في تحديث الطلب')
       }
 
+      // Show success notification
+      notifyReceiptUploaded(order.orderNumber)
+      
       // Redirect to order tracking page
       router.push(`/orders/${orderId}?bank_transfer=true`)
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'فشل في إتمام الدفع')
+      const errorMessage = error instanceof Error ? error.message : 'فشل في إتمام الدفع'
+      setError(errorMessage)
+      notifyError(errorMessage)
     } finally {
       setProcessing(false)
       setUploadingFile(false)

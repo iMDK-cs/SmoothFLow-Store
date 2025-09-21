@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { sendOrderStatusEmail } from '@/lib/emailNotifications';
+import { sendAdminBankTransferNotification } from '@/lib/adminEmailNotifications';
 import { z } from 'zod';
 
 const bankTransferSchema = z.object({
@@ -29,6 +31,15 @@ export async function POST(
         id: orderId,
         userId: session.user.id,
       },
+      include: {
+        user: true,
+        items: {
+          include: {
+            service: true,
+            option: true,
+          },
+        },
+      },
     });
 
     if (!order) {
@@ -46,6 +57,47 @@ export async function POST(
         paymentStatus: 'PENDING',
       },
     });
+
+    // Send email notifications
+    try {
+      // Send notification to customer
+      await sendOrderStatusEmail({
+        customerName: order.user.name || 'عميلنا العزيز',
+        customerEmail: order.user.email,
+        orderNumber: order.orderNumber,
+        orderStatus: updatedOrder.status,
+        paymentStatus: updatedOrder.paymentStatus,
+        paymentMethod: updatedOrder.paymentMethod || 'bank_transfer',
+        bankTransferStatus: updatedOrder.bankTransferStatus || undefined,
+        totalAmount: order.totalAmount,
+        items: order.items.map(item => ({
+          serviceTitle: item.service.title,
+          optionTitle: item.option?.title,
+          quantity: item.quantity,
+          totalPrice: item.totalPrice,
+        })),
+      });
+
+      // Send notification to admin
+      await sendAdminBankTransferNotification({
+        orderNumber: order.orderNumber,
+        customerName: order.user.name || 'عميلنا العزيز',
+        customerEmail: order.user.email,
+        customerPhone: order.user.phone || undefined,
+        totalAmount: order.totalAmount,
+        items: order.items.map(item => ({
+          serviceTitle: item.service.title,
+          optionTitle: item.option?.title,
+          quantity: item.quantity,
+          totalPrice: item.totalPrice,
+        })),
+        receiptPath: receiptPath,
+        orderDate: order.createdAt.toLocaleDateString('ar-SA'),
+      });
+    } catch (emailError) {
+      console.error('Failed to send email notifications:', emailError);
+      // Don't fail the request if email fails
+    }
 
     return NextResponse.json({
       success: true,

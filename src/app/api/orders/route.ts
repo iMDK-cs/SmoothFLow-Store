@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { sendOrderConfirmation } from '@/lib/email'
+import { sendOrderStatusEmail } from '@/lib/emailNotifications'
 
 const createOrderSchema = z.object({
   items: z.array(z.object({
@@ -120,19 +120,20 @@ export async function POST(request: NextRequest) {
       })
 
       if (userData?.email) {
-        await sendOrderConfirmation({
-          orderId: order.id,
-          customerName: userData.name || 'عميل',
+        await sendOrderStatusEmail({
+          customerName: userData.name || 'عميلنا العزيز',
           customerEmail: userData.email,
+          orderNumber: order.orderNumber,
+          orderStatus: order.status,
+          paymentStatus: order.paymentStatus,
+          paymentMethod: order.paymentMethod || 'stripe',
+          totalAmount: order.totalAmount,
           items: order.items.map(item => ({
-            serviceName: item.service.title,
+            serviceTitle: item.service.title,
+            optionTitle: item.option?.title,
             quantity: item.quantity,
-            unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
           })),
-          totalAmount: order.totalAmount,
-          orderDate: order.createdAt.toLocaleDateString('ar-SA'),
-          status: order.status,
         })
       }
     } catch (emailError) {

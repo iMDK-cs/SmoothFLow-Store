@@ -63,22 +63,23 @@ export async function POST(
 
     // Send email notification to customer
     try {
-      await sendOrderStatusEmail({
-        customerName: order.user.name || 'عميلنا العزيز',
-        customerEmail: order.user.email,
-        orderNumber: order.orderNumber,
-        orderStatus: updatedOrder.status,
-        paymentStatus: updatedOrder.paymentStatus,
-        bankTransferStatus: updatedOrder.bankTransferStatus || undefined,
-        adminNotes: updatedOrder.adminNotes || undefined,
-        totalAmount: order.totalAmount,
-        items: order.items.map(item => ({
-          serviceTitle: item.service.title,
-          optionTitle: item.option?.title,
-          quantity: item.quantity,
-          totalPrice: item.totalPrice,
-        })),
-      });
+        await sendOrderStatusEmail({
+          customerName: order.user.name || 'عميلنا العزيز',
+          customerEmail: order.user.email,
+          orderNumber: order.orderNumber,
+          orderStatus: updatedOrder.status,
+          paymentStatus: updatedOrder.paymentStatus,
+          paymentMethod: order.paymentMethod,
+          bankTransferStatus: updatedOrder.bankTransferStatus || undefined,
+          adminNotes: updatedOrder.adminNotes || undefined,
+          totalAmount: order.totalAmount,
+          items: order.items.map(item => ({
+            serviceTitle: item.service.title,
+            optionTitle: item.option?.title,
+            quantity: item.quantity,
+            totalPrice: item.totalPrice,
+          })),
+        });
     } catch (emailError) {
       console.error('Failed to send email notification:', emailError);
       // Don't fail the request if email fails
