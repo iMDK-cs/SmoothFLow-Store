@@ -260,6 +260,33 @@ export default function AdminOrders() {
     }
   }
 
+  const cleanNotesDisplay = (notes: string) => {
+    if (!notes) return '';
+    
+    // Split notes by lines
+    const lines = notes.split('\n');
+    const cleanLines = [];
+    
+    for (const line of lines) {
+      // Skip lines that contain technical file data
+      if (line.includes('File:') || 
+          line.includes('Type:') || 
+          line.includes('Size:') || 
+          line.includes('Base64:') ||
+          line.includes('base64:') ||
+          line.includes('uploadedAt:')) {
+        continue;
+      }
+      
+      // Skip empty lines
+      if (line.trim() === '') continue;
+      
+      cleanLines.push(line);
+    }
+    
+    return cleanLines.join('\n');
+  }
+
   const viewReceipt = (notes: string) => {
     try {
       // First try to extract from the new format with complete Base64 data
@@ -628,8 +655,7 @@ export default function AdminOrders() {
                   <div>
                     <p className="text-gray-400 text-sm mb-2">ملاحظات</p>
                     <p className="text-white bg-gray-700 p-3 rounded text-sm max-h-32 overflow-y-auto">
-                      {selectedOrder.notes.split('\n').slice(0, 3).join('\n')}
-                      {selectedOrder.notes.split('\n').length > 3 && '...'}
+                      {cleanNotesDisplay(selectedOrder.notes || '') || 'لا توجد ملاحظات'}
                     </p>
                     
                     {/* Bank Transfer Receipt */}

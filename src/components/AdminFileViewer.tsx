@@ -66,6 +66,19 @@ const AdminFileViewer: React.FC<AdminFileViewerProps> = ({
     return '📎';
   };
 
+  const formatFileName = (fileName: string) => {
+    // Extract just the filename without the technical prefix
+    const cleanName = fileName.replace(/^receipt_[a-zA-Z0-9_]+_/, '');
+    
+    // If it's a receipt file, show a friendly name
+    if (fileName.includes('receipt_')) {
+      const date = new Date().toLocaleDateString('ar-SA');
+      return `إيصال التحويل البنكي - ${date}.pdf`;
+    }
+    
+    return cleanName;
+  };
+
   return (
     <div className="bg-gray-700 rounded-lg p-4 border border-gray-600">
       <div className="flex items-center justify-between mb-3">
@@ -73,7 +86,7 @@ const AdminFileViewer: React.FC<AdminFileViewerProps> = ({
           <span className="text-2xl">{getFileIcon()}</span>
           <div>
             <h4 className="text-white font-medium text-sm">إيصال التحويل البنكي</h4>
-            <p className="text-gray-300 text-xs">{fileName}</p>
+            <p className="text-gray-300 text-xs">{formatFileName(fileName)}</p>
             {fileSize && (
               <p className="text-gray-400 text-xs">{formatFileSize(fileSize)}</p>
             )}
@@ -110,13 +123,13 @@ const AdminFileViewer: React.FC<AdminFileViewerProps> = ({
           <div className="bg-gray-800 rounded border border-gray-600 p-4 text-center">
             <div className="text-4xl mb-2">📄</div>
             <p className="text-gray-300 text-sm mb-2">ملف PDF</p>
-            <p className="text-gray-400 text-xs">{fileName}</p>
+            <p className="text-gray-400 text-xs">{formatFileName(fileName)}</p>
           </div>
         ) : (
           <div className="bg-gray-800 rounded border border-gray-600 p-4 text-center">
             <div className="text-4xl mb-2">📎</div>
             <p className="text-gray-300 text-sm mb-2">ملف مرفق</p>
-            <p className="text-gray-400 text-xs">{fileName}</p>
+            <p className="text-gray-400 text-xs">{formatFileName(fileName)}</p>
           </div>
         )}
       </div>

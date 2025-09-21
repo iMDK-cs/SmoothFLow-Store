@@ -265,12 +265,27 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
               )}
 
               {/* Additional Notes */}
-              {order.notes && (
-                <div className="bg-gray-800 rounded-lg p-6">
-                  <h2 className="text-xl font-semibold text-white mb-4">ملاحظات إضافية</h2>
-                  <p className="text-white">{order.notes}</p>
-                </div>
-              )}
+              {order.notes && (() => {
+                const cleanNotes = order.notes
+                  .split('\n')
+                  .filter(line => 
+                    !line.includes('File:') && 
+                    !line.includes('Type:') && 
+                    !line.includes('Size:') && 
+                    !line.includes('Base64:') &&
+                    !line.includes('base64:') &&
+                    !line.includes('uploadedAt:') &&
+                    line.trim() !== ''
+                  )
+                  .join('\n');
+                
+                return cleanNotes ? (
+                  <div className="bg-gray-800 rounded-lg p-6">
+                    <h2 className="text-xl font-semibold text-white mb-4">ملاحظات إضافية</h2>
+                    <p className="text-white">{cleanNotes}</p>
+                  </div>
+                ) : null;
+              })()}
 
               {/* Scheduled Date */}
               {order.scheduledDate && (
