@@ -161,7 +161,7 @@ class MoyasarService {
       const response = await fetch(`${this.config.baseUrl}/payments`, {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${Buffer.from(this.config.secretKey + ':').toString('base64')}`,
+          'Authorization': `Bearer ${this.config.secretKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(paymentData),
