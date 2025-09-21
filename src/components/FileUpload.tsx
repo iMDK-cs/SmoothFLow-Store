@@ -43,7 +43,7 @@ export default function FileUpload({
     }
   }, [handleFile]);
 
-  const handleFile = (file: File) => {
+  const handleFile = useCallback((file: File) => {
     setFileError('');
 
     // Validate file type
@@ -59,7 +59,7 @@ export default function FileUpload({
     }
 
     onFileSelect(file);
-  };
+  }, [onFileSelect]);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {

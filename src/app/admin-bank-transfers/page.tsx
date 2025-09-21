@@ -48,7 +48,7 @@ export default function AdminBankTransfers() {
   useEffect(() => {
     if (status === 'loading') return;
     
-    if (!session || (session.user as any)?.role !== 'ADMIN') {
+    if (!session || (session.user as { role?: string })?.role !== 'ADMIN') {
       router.push('/auth/signin');
       return;
     }
@@ -164,7 +164,7 @@ export default function AdminBankTransfers() {
     );
   }
 
-  if (!session || (session.user as any)?.role !== 'ADMIN') {
+  if (!session || (session.user as { role?: string })?.role !== 'ADMIN') {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">

@@ -48,6 +48,22 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
   const orderId = resolvedParams.orderId;
 
   useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const response = await fetch(`/api/orders/${orderId}`);
+        if (!response.ok) {
+          throw new Error('Order not found');
+        }
+        const data = await response.json();
+        setOrder(data.order);
+      } catch (error) {
+        setError('Failed to load order');
+        console.error('Error fetching order:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (status === 'loading') return;
     
     if (!session) {
@@ -56,23 +72,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
     }
 
     fetchOrder();
-  }, [session, status, router, orderId, fetchOrder]);
-
-  const fetchOrder = async () => {
-    try {
-      const response = await fetch(`/api/orders/${orderId}`);
-      if (!response.ok) {
-        throw new Error('Order not found');
-      }
-      const data = await response.json();
-      setOrder(data.order);
-    } catch (error) {
-      setError('Failed to load order');
-      console.error('Error fetching order:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [session, status, router, orderId]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
