@@ -138,7 +138,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
       }
 
       // Show success notification
-      notifyReceiptUploaded(order.orderNumber)
+      notifyReceiptUploaded(order?.orderNumber || orderId)
       
       // Redirect to order tracking page
       router.push(`/orders/${orderId}?bank_transfer=true`)

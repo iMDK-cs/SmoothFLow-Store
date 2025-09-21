@@ -69,9 +69,9 @@ export async function POST(
           orderNumber: order.orderNumber,
           orderStatus: updatedOrder.status,
           paymentStatus: updatedOrder.paymentStatus,
-          paymentMethod: order.paymentMethod,
-          bankTransferStatus: updatedOrder.bankTransferStatus || undefined,
-          adminNotes: updatedOrder.adminNotes || undefined,
+          paymentMethod: order.paymentMethod || undefined,
+          bankTransferStatus: (updatedOrder as { bankTransferStatus?: string }).bankTransferStatus || undefined,
+          adminNotes: (updatedOrder as { adminNotes?: string }).adminNotes || undefined,
           totalAmount: order.totalAmount,
           items: order.items.map(item => ({
             serviceTitle: item.service.title,
@@ -97,7 +97,7 @@ export async function POST(
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'بيانات غير صحيحة', details: error.errors },
+        { error: 'بيانات غير صحيحة', details: error.issues },
         { status: 400 }
       );
     }

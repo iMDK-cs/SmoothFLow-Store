@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 interface AdminNotificationData {
   orderNumber: string;
@@ -125,6 +125,11 @@ export async function sendAdminBankTransferNotification(data: AdminNotificationD
         </div>
       </div>
     `;
+
+    if (!resend) {
+      console.warn('Resend not initialized, skipping admin email');
+      return { success: true, error: 'Email service not configured' };
+    }
 
     const { data: emailData, error } = await resend.emails.send({
       from: 'SmoothFlow Admin <admin@smoothflow-sa.com>',

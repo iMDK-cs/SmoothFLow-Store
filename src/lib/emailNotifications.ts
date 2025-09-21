@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 interface OrderStatusEmailData {
   customerName: string;
@@ -140,6 +140,11 @@ export async function sendOrderStatusEmail(data: OrderStatusEmailData) {
       <p>شكراً لاختيارك خدماتنا!</p>
       <p>فريق SmoothFlow</p>
     `;
+
+    if (!resend) {
+      console.warn('Resend not initialized, skipping email');
+      return { success: true, error: 'Email service not configured' };
+    }
 
     const { data: emailData, error } = await resend.emails.send({
       from: 'SmoothFlow <noreply@smoothflow-sa.com>',

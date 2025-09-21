@@ -22,6 +22,24 @@ export default function FileUpload({
   const [fileError, setFileError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleFile = useCallback((file: File) => {
+    setFileError('');
+
+    // Validate file type
+    if (!validateFileType(file)) {
+      setFileError(getFileTypeErrorMessage());
+      return;
+    }
+
+    // Validate file size
+    if (!validateFileSize(file)) {
+      setFileError(getFileSizeErrorMessage());
+      return;
+    }
+
+    onFileSelect(file);
+  }, [onFileSelect]);
+
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -42,24 +60,6 @@ export default function FileUpload({
       handleFile(file);
     }
   }, [handleFile]);
-
-  const handleFile = useCallback((file: File) => {
-    setFileError('');
-
-    // Validate file type
-    if (!validateFileType(file)) {
-      setFileError(getFileTypeErrorMessage());
-      return;
-    }
-
-    // Validate file size
-    if (!validateFileSize(file)) {
-      setFileError(getFileSizeErrorMessage());
-      return;
-    }
-
-    onFileSelect(file);
-  }, [onFileSelect]);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
