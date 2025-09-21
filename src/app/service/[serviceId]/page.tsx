@@ -247,6 +247,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
       'تغيير معجون حراري عالي الجودة',
       'اختبار درجات الحرارة',
     ],
+    note: 'تغيير المعجون الحراري فقط بالرس',
     images: [
       '/images/services/thermal-paste.jpg'
     ]
