@@ -53,10 +53,17 @@ export async function POST(
       return NextResponse.json({ error: 'الطلب غير موجود' }, { status: 404 });
     }
 
-    // Prepare notes with file data
-    let notes = `Bank transfer receipt uploaded: ${receiptPath}`;
+    // Prepare notes with file data, preserving original customer notes
+    let notes = order.notes || '';
+    if (notes) {
+      notes += '\n\n--- إيصال التحويل البنكي ---\n';
+    } else {
+      notes = '--- إيصال التحويل البنكي ---\n';
+    }
+    
+    notes += `Bank transfer receipt uploaded: ${receiptPath}`;
     if (fileData) {
-      notes = `Bank transfer receipt uploaded: ${receiptPath}\nFile: ${fileData.fileName}\nType: ${fileData.fileType}\nSize: ${fileData.fileSize} bytes\nBase64: ${fileData.base64Data}`;
+      notes += `\nFile: ${fileData.fileName}\nType: ${fileData.fileType}\nSize: ${fileData.fileSize} bytes\nBase64: ${fileData.base64Data}`;
     }
 
     // Update order with bank transfer details
