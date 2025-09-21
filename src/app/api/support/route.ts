@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { sendSupportTicketEmail } from '@/lib/emailNotifications'
 import { z } from 'zod'
 
 const createTicketSchema = z.object({
@@ -37,7 +38,23 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Log ticket creation (email functionality removed)
+    // Send email notifications
+    try {
+      await sendSupportTicketEmail({
+        customerName: user.name || 'عميل',
+        customerEmail: user.email || '',
+        ticketId: ticket.id,
+        subject: ticket.subject,
+        message: ticket.message,
+        priority: ticket.priority,
+        adminEmail: process.env.ADMIN_EMAIL || 'admin@smoothflow-sa.com'
+      })
+      console.log(`Support ticket email sent for: ${ticket.id}`)
+    } catch (emailError) {
+      console.error('Failed to send support ticket email:', emailError)
+      // Don't fail the request if email fails
+    }
+
     console.log(`Support ticket created: ${ticket.id} by user ${user.id}`)
 
     return NextResponse.json({ ticket }, { status: 201 })
