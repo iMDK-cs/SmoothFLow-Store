@@ -3,7 +3,6 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { sendSupportTicket } from '@/lib/email'
 
 const createTicketSchema = z.object({
   subject: z.string().min(1, 'الموضوع مطلوب'),
@@ -38,28 +37,8 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Send confirmation email
-    try {
-      const userData = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: { name: true, email: true }
-      })
-
-      if (userData?.email) {
-        await sendSupportTicket({
-          ticketId: ticket.id,
-          customerName: userData.name || 'عميل',
-          customerEmail: userData.email,
-          subject: ticket.subject,
-          message: ticket.message,
-          priority: ticket.priority.toLowerCase() as 'low' | 'medium' | 'high',
-          createdAt: ticket.createdAt.toLocaleDateString('ar-SA'),
-        })
-      }
-    } catch (emailError) {
-      console.error('Failed to send support ticket email:', emailError)
-      // Don't fail the ticket creation if email fails
-    }
+    // Log ticket creation (email functionality removed)
+    console.log(`Support ticket created: ${ticket.id} by user ${user.id}`)
 
     return NextResponse.json({ ticket }, { status: 201 })
   } catch (error) {
