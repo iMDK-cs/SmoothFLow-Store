@@ -53,21 +53,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create Moyasar payment session (secure - no card data on our server)
+    // Create Moyasar payment intent (redirect to Moyasar checkout)
     const paymentData = {
       amount: Math.round(order.totalAmount * 100), // Convert to halalas
       currency: 'SAR',
       description: `طلب رقم ${order.orderNumber}`,
       callback_url: `${process.env.NEXTAUTH_URL}/api/webhooks/moyasar`,
-      source: {
-        type: 'creditcard', // Moyasar will handle the actual payment method selection
-      },
       metadata: {
         order_id: order.id,
       },
     };
 
-    const moyasarPayment = await moyasarService.createPaymentSession(paymentData);
+    const moyasarPayment = await moyasarService.createPaymentIntent(paymentData);
 
     // Update order with payment ID
     await prisma.order.update({

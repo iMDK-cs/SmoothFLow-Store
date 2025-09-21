@@ -11,9 +11,6 @@ export interface MoyasarPaymentRequest {
   currency: string;
   description: string;
   callback_url: string;
-  source: {
-    type: string;
-  };
   metadata: {
     order_id: string;
   };
@@ -151,21 +148,25 @@ class MoyasarService {
     }
   }
 
-  // Get payment URL for frontend
+  // Get payment URL for frontend (redirect to Moyasar checkout page)
   getPaymentUrl(paymentId: string): string {
     return `https://moyasar.com/pay/${paymentId}`;
   }
 
-  // Create payment session (secure - no card data stored on our server)
-  async createPaymentSession(paymentData: MoyasarPaymentRequest): Promise<MoyasarPaymentResponse> {
+  // Create payment intent (for redirect to Moyasar checkout)
+  async createPaymentIntent(paymentData: MoyasarPaymentRequest): Promise<MoyasarPaymentResponse> {
     try {
-      console.log('Creating Moyasar payment session with data:', paymentData);
+      console.log('Creating Moyasar payment intent with data:', paymentData);
       console.log('Using secret key:', this.config.secretKey ? 'Present' : 'Missing');
       
-      // Ensure source is included in payment data
+      // Create a payment intent without card details - Moyasar will handle the payment form
       const paymentRequest = {
-        ...paymentData,
-        source: paymentData.source || { type: 'creditcard' }
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        description: paymentData.description,
+        callback_url: paymentData.callback_url,
+        metadata: paymentData.metadata,
+        // Don't include source - let Moyasar handle the payment form
       };
       
       const response = await fetch(`${this.config.baseUrl}/payments`, {
@@ -186,11 +187,11 @@ class MoyasarService {
       }
 
       const result = await response.json();
-      console.log('Moyasar payment session created successfully:', result);
+      console.log('Moyasar payment intent created successfully:', result);
       return result;
     } catch (error) {
-      console.error('Moyasar payment session creation error:', error);
-      throw new Error('Failed to create Moyasar payment session');
+      console.error('Moyasar payment intent creation error:', error);
+      throw new Error('Failed to create Moyasar payment intent');
     }
   }
 }

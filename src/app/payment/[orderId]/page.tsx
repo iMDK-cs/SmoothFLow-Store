@@ -28,10 +28,6 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [uploadingFile, setUploadingFile] = useState(false)
   const [fileError, setFileError] = useState('')
-  const [moyasarData, setMoyasarData] = useState<{
-    paymentId: string;
-    paymentUrl: string;
-  } | null>(null)
   const { notifyReceiptUploaded, notifyError } = useOrderNotifications()
   
   // Unwrap the params Promise
@@ -83,10 +79,10 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
         throw new Error(data.error || 'Payment failed')
       }
 
-      setMoyasarData(data)
+      // Redirect to Moyasar checkout page instead of showing iframe
+      window.location.href = data.paymentUrl
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Payment failed')
-    } finally {
       setProcessing(false)
     }
   }
@@ -261,23 +257,14 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
               </div>
             </div>
 
-            {/* Moyasar Payment Iframe */}
-            {paymentMethod === 'moyasar' && moyasarData && (
+            {/* Moyasar Payment Info */}
+            {paymentMethod === 'moyasar' && (
               <div className="mb-6">
                 <div className="bg-gray-700/50 rounded-lg p-4 mb-4">
                   <h3 className="text-lg font-semibold text-white mb-2">الدفع الآمن - بطاقات + Apple Pay</h3>
                   <p className="text-gray-300 text-sm">
-                    بيانات البطاقة محفوظة بأمان. لن يتم حفظ أي بيانات حساسة على خوادمنا.
+                    سيتم توجيهك إلى صفحة دفع آمنة ومحمية. يمكنك الدفع باستخدام بطاقات Mada، Visa، Mastercard، أو Apple Pay.
                   </p>
-                </div>
-                <div className="w-full h-[600px] bg-gray-800 rounded-lg overflow-hidden">
-                  <iframe
-                    src={moyasarData.paymentUrl}
-                    className="w-full h-full border-0"
-                    title="Moyasar Payment"
-                    onLoad={() => console.log('Moyasar iframe loaded')}
-                    onError={() => setError('فشل في تحميل بوابة الدفع')}
-                  ></iframe>
                 </div>
               </div>
             )}
@@ -333,7 +320,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
 
             {/* Payment Button */}
             <div className="space-y-4">
-              {paymentMethod === 'moyasar' && !moyasarData ? (
+              {paymentMethod === 'moyasar' ? (
                 <button
                   onClick={handleMoyasarPayment}
                   disabled={processing}
