@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
         totalAmount,
         notes,
         scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
-        paymentMethod: 'stripe', // Default payment method
+        paymentMethod: 'paymob', // Default payment method
         items: {
           create: items.map(item => ({
             serviceId: item.serviceId,
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
           orderNumber: order.orderNumber,
           orderStatus: order.status,
           paymentStatus: order.paymentStatus,
-          paymentMethod: order.paymentMethod || 'stripe',
+          paymentMethod: order.paymentMethod || 'paymob',
           totalAmount: order.totalAmount,
           items: order.items.map(item => ({
             serviceTitle: item.service.title,
