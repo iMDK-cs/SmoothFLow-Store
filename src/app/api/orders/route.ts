@@ -57,21 +57,46 @@ export async function POST(request: NextRequest) {
     const user = await getUserFromSession(session)
     
     if (!user) {
+      console.log('❌ No authenticated user')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    console.log('✅ Authenticated user:', user.id, user.email)
+
     const body = await request.json()
-    console.log('Order creation request body:', JSON.stringify(body, null, 2))
+    console.log('📝 Order creation request body:', JSON.stringify(body, null, 2))
     
     const { items, notes, scheduledDate } = createOrderSchema.parse(body)
-    console.log('Parsed order data:', { items, notes, scheduledDate })
+    console.log('✅ Parsed order data:', { itemsCount: items.length, notes, scheduledDate })
 
     // Calculate total amount
     const totalAmount = items.reduce((sum, item) => sum + item.totalPrice, 0)
+    console.log('💰 Total amount calculated:', totalAmount)
 
     // Generate order number
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    console.log('🔢 Generated order number:', orderNumber)
 
+    // Validate that all services exist
+    console.log('🔍 Validating services...')
+    for (const item of items) {
+      const service = await prisma.service.findUnique({
+        where: { id: item.serviceId },
+        select: { id: true, title: true, active: true, available: true }
+      })
+      
+      if (!service) {
+        throw new Error(`Service not found: ${item.serviceId}`)
+      }
+      
+      if (!service.active || !service.available) {
+        throw new Error(`Service not available: ${service.title}`)
+      }
+      
+      console.log(`✅ Service validated: ${service.title}`)
+    }
+
+    console.log('📦 Creating order in database...')
     // Create order
     const order = await prisma.order.create({
       data: {
@@ -101,6 +126,8 @@ export async function POST(request: NextRequest) {
         }
       }
     })
+    
+    console.log('✅ Order created successfully:', order.id)
 
     // Clear cart after successful order
     const cart = await prisma.cart.findUnique({
