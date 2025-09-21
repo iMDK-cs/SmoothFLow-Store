@@ -128,6 +128,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
         },
         body: JSON.stringify({
           receiptPath: uploadData.filePath,
+          fileData: uploadData.fileData, // Send complete file data
         }),
       })
 

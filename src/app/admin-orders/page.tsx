@@ -175,42 +175,70 @@ export default function AdminOrders() {
   }
 
   const downloadReceipt = (notes: string) => {
-    // Extract base64 data from notes
-    const base64Match = notes.match(/base64:([A-Za-z0-9+/=]+)/);
-    if (base64Match) {
-      const base64Data = base64Match[1];
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    try {
+      // Extract base64 data from notes - look for the complete Base64 data
+      const base64Match = notes.match(/Base64: ([A-Za-z0-9+/=]+)/);
+      if (base64Match) {
+        const base64Data = base64Match[1];
+        
+        // Extract file type from notes
+        const typeMatch = notes.match(/Type: ([^\\n]+)/);
+        const fileType = typeMatch ? typeMatch[1] : 'application/pdf';
+        
+        // Extract file name from notes
+        const nameMatch = notes.match(/File: ([^\\n]+)/);
+        const fileName = nameMatch ? nameMatch[1] : `receipt_${selectedOrder?.orderNumber}.pdf`;
+        
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: fileType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } else {
+        alert('لم يتم العثور على بيانات الملف');
       }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `receipt_${selectedOrder?.orderNumber}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      alert('حدث خطأ أثناء تحميل الملف');
     }
   }
 
   const viewReceipt = (notes: string) => {
-    // Extract base64 data from notes
-    const base64Match = notes.match(/base64:([A-Za-z0-9+/=]+)/);
-    if (base64Match) {
-      const base64Data = base64Match[1];
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
+    try {
+      // Extract base64 data from notes - look for the complete Base64 data
+      const base64Match = notes.match(/Base64: ([A-Za-z0-9+/=]+)/);
+      if (base64Match) {
+        const base64Data = base64Match[1];
+        
+        // Extract file type from notes
+        const typeMatch = notes.match(/Type: ([^\\n]+)/);
+        const fileType = typeMatch ? typeMatch[1] : 'application/pdf';
+        
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: fileType });
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      } else {
+        alert('لم يتم العثور على بيانات الملف');
       }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Error viewing file:', error);
+      alert('حدث خطأ أثناء عرض الملف');
     }
   }
 
@@ -534,7 +562,7 @@ export default function AdminOrders() {
                     <p className="text-white bg-gray-700 p-3 rounded">{selectedOrder.notes}</p>
                     
                     {/* Bank Transfer Receipt */}
-                    {selectedOrder.paymentMethod === 'bank_transfer' && selectedOrder.notes.includes('base64:') && (
+                    {selectedOrder.paymentMethod === 'bank_transfer' && selectedOrder.notes.includes('Base64:') && (
                       <div className="mt-4">
                         <p className="text-gray-400 text-sm mb-2">إيصال التحويل البنكي</p>
                         <div className="flex space-x-2 space-x-reverse">

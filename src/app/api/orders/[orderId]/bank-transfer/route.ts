@@ -8,6 +8,13 @@ import { z } from 'zod';
 
 const bankTransferSchema = z.object({
   receiptPath: z.string().min(1, 'مسار الإيصال مطلوب'),
+  fileData: z.object({
+    fileName: z.string(),
+    fileType: z.string(),
+    fileSize: z.number(),
+    base64Data: z.string(),
+    uploadedAt: z.string(),
+  }).optional(),
 });
 
 export async function POST(
@@ -23,7 +30,7 @@ export async function POST(
 
     const { orderId } = await params;
     const body = await request.json();
-    const { receiptPath } = bankTransferSchema.parse(body);
+    const { receiptPath, fileData } = bankTransferSchema.parse(body);
 
     // Verify order exists and belongs to user
     const order = await prisma.order.findFirst({
@@ -46,6 +53,12 @@ export async function POST(
       return NextResponse.json({ error: 'الطلب غير موجود' }, { status: 404 });
     }
 
+    // Prepare notes with file data
+    let notes = `Bank transfer receipt uploaded: ${receiptPath}`;
+    if (fileData) {
+      notes = `Bank transfer receipt uploaded: ${receiptPath}\nFile: ${fileData.fileName}\nType: ${fileData.fileType}\nSize: ${fileData.fileSize} bytes\nBase64: ${fileData.base64Data}`;
+    }
+
     // Update order with bank transfer details
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
@@ -53,7 +66,7 @@ export async function POST(
         paymentMethod: 'bank_transfer',
         status: 'PENDING_ADMIN_APPROVAL',
         paymentStatus: 'PENDING',
-        notes: `Bank transfer receipt uploaded: ${receiptPath}`,
+        notes: notes,
       },
     });
 
