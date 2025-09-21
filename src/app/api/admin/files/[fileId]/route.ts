@@ -1,6 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function GET(
@@ -8,21 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ fileId: string }> }
 ) {
   try {
-    // Check admin authentication
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
-    }
-
-    // Check if user is admin
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true }
-    });
-
-    if (user?.role !== 'admin') {
-      return NextResponse.json({ error: 'غير مصرح' }, { status: 403 });
-    }
+    // Remove authentication for now - make files public
 
     const { fileId } = await params;
 
