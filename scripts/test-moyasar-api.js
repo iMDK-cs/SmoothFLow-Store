@@ -2,7 +2,7 @@ const https = require('https');
 
 // Test Moyasar API connection
 async function testMoyasarAPI() {
-  const apiKey = 'sk_test_3e00ef6f4d5848b79e86d5e62c60e9d6';
+  const apiKey = 'sk_test_oGY41XSCPmyr6HexUMuk65s8WQNeDJuZV1xQRVAQ';
   const auth = Buffer.from(apiKey + ':').toString('base64');
   
   console.log('🔑 Testing Moyasar API connection...');

@@ -27,6 +27,7 @@ interface ServiceDetail {
   estimatedTime: string;
   features: string[];
   images: string[];
+  note?: string;
   addOns?: Array<{
     id: string;
     name: string;
@@ -93,6 +94,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
       'اختبار التسريب والأداء',
       'ضبط السرعات والتحكم',    
     ],
+    note: 'التركيب حاليا في القصيم فقط',
     images: [
       '/images/services/water-cooling.jpg'
     ],
@@ -102,13 +104,6 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
         name: 'المراوح ',
         description: 'أكثر من 7 مراوح',
         price: 30,
-        optional: true
-      },
-      {
-        id: 'custom-tubing',
-        name: 'كيابل RGB',
-        description: 'كيابل مثل Lina li rgb',
-        price: 20,
         optional: true
       }
     ]
@@ -130,6 +125,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
       'اختبار درجات الحرارة',
       'ضبط السرعات',
     ],
+    note: 'التركيب حاليا في القصيم فقط',
     images: [
       '/images/services/air-cooling.jpg'
     ]
@@ -151,6 +147,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
       'ضبط الأداء والاستقرار',
       'اختبار شامل للمكونات',
     ],
+    note: 'التركيب حاليا في القصيم فقط',
     images: [
       '/images/services/custom-build.jpg'
     ],
@@ -184,6 +181,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
       'تقرير مفصل عن الحالة',
       'اقتراحات للإصلاح',
     ],
+    note: 'الكشف حاليا بالقصيم فقط',
     images: [
       '/images/services/diagnosis.jpg'
     ]
@@ -594,6 +592,18 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ servic
                 ))}
               </ul>
             </div>
+
+            {/* Note */}
+            {service.note && (
+              <div className="bg-blue-500/20 border border-blue-500/50 rounded-lg p-4">
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <svg className="w-5 h-5 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-blue-300 font-medium">{service.note}</span>
+                </div>
+              </div>
+            )}
 
             {/* Service Options */}
             {service.options && service.options.length > 0 && (
