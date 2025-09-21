@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from 'react';
-import { validateFileType, validateFileSize, getFileSizeInMB } from '@/lib/fileUpload';
+import { validateFileType, validateFileSize, getFileSizeInMB, getFileTypeErrorMessage, getFileSizeErrorMessage } from '@/lib/fileValidation';
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -48,13 +48,13 @@ export default function FileUpload({
 
     // Validate file type
     if (!validateFileType(file)) {
-      setFileError('نوع الملف غير مدعوم. يرجى رفع ملف PDF أو صورة (JPG, PNG)');
+      setFileError(getFileTypeErrorMessage());
       return;
     }
 
     // Validate file size
     if (!validateFileSize(file)) {
-      setFileError('حجم الملف كبير جداً. الحد الأقصى 10 ميجابايت');
+      setFileError(getFileSizeErrorMessage());
       return;
     }
 

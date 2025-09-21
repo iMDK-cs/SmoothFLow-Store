@@ -1,6 +1,5 @@
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { NextRequest } from 'next/server';
 
 const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads', 'receipts');
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
