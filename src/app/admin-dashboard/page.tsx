@@ -188,6 +188,12 @@ export default function AdminDashboard() {
                   إدارة الخدمات
                 </Link>
                 <Link
+                  href="/admin-bank-transfers"
+                  className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                >
+                  🏦 التحويلات البنكية
+                </Link>
+                <Link
                   href="/"
                   className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
                 >

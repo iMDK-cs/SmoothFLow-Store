@@ -3,6 +3,7 @@
 import { useState, useEffect, use, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import FileUpload from '@/components/FileUpload'
 // import { loadStripe } from '@stripe/stripe-js'
 
 // const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
@@ -25,6 +26,10 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'bank_transfer'>('stripe')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploadingFile, setUploadingFile] = useState(false)
+  const [fileError, setFileError] = useState('')
   
   // Unwrap the params Promise
   const resolvedParams = use(params)
@@ -83,6 +88,71 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
     } finally {
       setProcessing(false)
     }
+  }
+
+  const handleBankTransferPayment = async () => {
+    if (!selectedFile) {
+      setFileError('يرجى رفع إيصال التحويل البنكي')
+      return
+    }
+
+    setProcessing(true)
+    setError('')
+    setFileError('')
+
+    try {
+      // First upload the file
+      setUploadingFile(true)
+      const formData = new FormData()
+      formData.append('file', selectedFile)
+      formData.append('orderId', orderId)
+
+      const uploadResponse = await fetch('/api/upload/receipt', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const uploadData = await uploadResponse.json()
+
+      if (!uploadResponse.ok) {
+        throw new Error(uploadData.error || 'فشل في رفع الملف')
+      }
+
+      // Then update the order with bank transfer details
+      const orderResponse = await fetch(`/api/orders/${orderId}/bank-transfer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          receiptPath: uploadData.filePath,
+        }),
+      })
+
+      const orderData = await orderResponse.json()
+
+      if (!orderResponse.ok) {
+        throw new Error(orderData.error || 'فشل في تحديث الطلب')
+      }
+
+      // Redirect to order tracking page
+      router.push(`/orders/${orderId}?bank_transfer=true`)
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'فشل في إتمام الدفع')
+    } finally {
+      setProcessing(false)
+      setUploadingFile(false)
+    }
+  }
+
+  const handleFileSelect = (file: File) => {
+    setSelectedFile(file)
+    setFileError('')
+  }
+
+  const handleFileRemove = () => {
+    setSelectedFile(null)
+    setFileError('')
   }
 
 
@@ -148,14 +218,109 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
           <div className="bg-gray-800 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-white mb-4">اختر طريقة الدفع</h2>
             
+            {/* Payment Method Selection */}
+            <div className="mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                  onClick={() => setPaymentMethod('stripe')}
+                  className={`p-4 rounded-lg border-2 transition-colors ${
+                    paymentMethod === 'stripe'
+                      ? 'border-blue-500 bg-blue-500/20'
+                      : 'border-gray-600 bg-gray-700/50'
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">💳</div>
+                    <p className="text-white font-medium">البطاقة الائتمانية</p>
+                    <p className="text-gray-400 text-sm">دفع فوري</p>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => setPaymentMethod('bank_transfer')}
+                  className={`p-4 rounded-lg border-2 transition-colors ${
+                    paymentMethod === 'bank_transfer'
+                      ? 'border-blue-500 bg-blue-500/20'
+                      : 'border-gray-600 bg-gray-700/50'
+                  }`}
+                >
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">🏦</div>
+                    <p className="text-white font-medium">حوالة بنكية</p>
+                    <p className="text-gray-400 text-sm">يتطلب موافقة</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Bank Transfer Details */}
+            {paymentMethod === 'bank_transfer' && (
+              <div className="mb-6 p-4 bg-gray-700/50 rounded-lg">
+                <h3 className="text-lg font-semibold text-white mb-3">تفاصيل الحساب البنكي</h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">اسم صاحب الحساب:</span>
+                    <span className="text-white font-medium">محمد عبدالله صالح الدخيلي</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">IBAN:</span>
+                    <span className="text-white font-mono">SA23 8000 0499 6080 1600 4598</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">رقم الحساب:</span>
+                    <span className="text-white font-mono">499000010006086004598</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">المبلغ:</span>
+                    <span className="text-white font-bold text-lg">{order.totalAmount.toFixed(2)} ريال</span>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-blue-900/30 rounded-lg">
+                  <h4 className="text-blue-300 font-medium mb-2">خطوات الدفع:</h4>
+                  <ol className="text-blue-200 text-sm space-y-1 list-decimal list-inside">
+                    <li>قم بتحويل المبلغ إلى الحساب أعلاه</li>
+                    <li>احفظ إيصال التحويل</li>
+                    <li>ارفع إيصال التحويل أدناه</li>
+                    <li>انتظر موافقة الإدارة</li>
+                  </ol>
+                </div>
+              </div>
+            )}
+
+            {/* File Upload for Bank Transfer */}
+            {paymentMethod === 'bank_transfer' && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-white mb-3">رفع إيصال التحويل</h3>
+                <FileUpload
+                  onFileSelect={handleFileSelect}
+                  onFileRemove={handleFileRemove}
+                  selectedFile={selectedFile}
+                  loading={uploadingFile}
+                  error={fileError}
+                />
+              </div>
+            )}
+
+            {/* Payment Button */}
             <div className="space-y-4">
-              <button
-                onClick={handleStripePayment}
-                disabled={processing}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
-              >
-                {processing ? 'جاري المعالجة...' : 'الدفع بالبطاقة الائتمانية'}
-              </button>
+              {paymentMethod === 'stripe' ? (
+                <button
+                  onClick={handleStripePayment}
+                  disabled={processing}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
+                >
+                  {processing ? 'جاري المعالجة...' : 'الدفع بالبطاقة الائتمانية'}
+                </button>
+              ) : (
+                <button
+                  onClick={handleBankTransferPayment}
+                  disabled={processing || !selectedFile}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
+                >
+                  {processing ? 'جاري المعالجة...' : 'إرسال إيصال التحويل'}
+                </button>
+              )}
             </div>
 
             {error && (
