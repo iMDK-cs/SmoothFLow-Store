@@ -10,6 +10,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:set-admin": "node scripts/set-admin-role.js",
+    "db:create-admin": "node scripts/create-admin-user.js",
     "db:show-services": "node scripts/show-services.js",
     "db:deploy": "prisma db push && prisma generate",
     "postinstall": "prisma generate"
