@@ -4,7 +4,6 @@ import { useState, useEffect, use, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import FileUpload from '@/components/FileUpload'
-import MoyasarPayment from '@/components/MoyasarPayment'
 import { useOrderNotifications } from '@/components/EnhancedNotification'
 
 export default function Payment({ params }: { params: Promise<{ orderId: string }> }) {
@@ -33,11 +32,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
     paymentId: string;
     paymentUrl: string;
   } | null>(null)
-  const [customerData, setCustomerData] = useState({
-    name: '',
-    email: '',
-    phone: ''
-  })
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle')
   const { notifyReceiptUploaded, notifyError } = useOrderNotifications()
   
   // Unwrap the params Promise
@@ -71,6 +66,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
   const handleMoyasarPayment = async () => {
     setProcessing(true)
     setError('')
+    setPaymentStatus('processing')
 
     try {
       const response = await fetch('/api/payments/moyasar', {
@@ -80,7 +76,6 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
         },
         body: JSON.stringify({
           orderId: orderId,
-          customerData: customerData,
         }),
       })
 
@@ -91,27 +86,15 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
       }
 
       setMoyasarData(data)
+      setPaymentStatus('idle')
     } catch (error) {
+      setPaymentStatus('error')
       setError(error instanceof Error ? error.message : 'Payment failed')
     } finally {
       setProcessing(false)
     }
   }
 
-  const handleMoyasarSuccess = (paymentId: string) => {
-    console.log('Moyasar payment successful:', paymentId)
-    router.push(`/orders/${orderId}?success=true`)
-  }
-
-  const handleMoyasarError = (error: string) => {
-    console.error('Moyasar payment error:', error)
-    setError(`خطأ في الدفع: ${error}`)
-  }
-
-  const handleMoyasarCancel = () => {
-    console.log('Moyasar payment cancelled')
-    setError('تم إلغاء الدفع')
-  }
 
   const handleBankTransferPayment = async () => {
     if (!selectedFile) {
@@ -282,44 +265,23 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
               </div>
             </div>
 
-            {/* Moyasar Customer Data */}
-            {paymentMethod === 'moyasar' && (
-              <div className="mb-6 p-4 bg-gray-700/50 rounded-lg">
-                <h3 className="text-lg font-semibold text-white mb-3">بيانات العميل</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">الاسم الكامل</label>
-                    <input
-                      type="text"
-                      value={customerData.name}
-                      onChange={(e) => setCustomerData({...customerData, name: e.target.value})}
-                      className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
-                      placeholder="الاسم الكامل"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">البريد الإلكتروني</label>
-                    <input
-                      type="email"
-                      value={customerData.email}
-                      onChange={(e) => setCustomerData({...customerData, email: e.target.value})}
-                      className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
-                      placeholder="example@email.com"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">رقم الهاتف</label>
-                    <input
-                      type="tel"
-                      value={customerData.phone}
-                      onChange={(e) => setCustomerData({...customerData, phone: e.target.value})}
-                      className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
-                      placeholder="+966501234567"
-                      required
-                    />
-                  </div>
+            {/* Moyasar Payment Iframe */}
+            {paymentMethod === 'moyasar' && moyasarData && (
+              <div className="mb-6">
+                <div className="bg-gray-700/50 rounded-lg p-4 mb-4">
+                  <h3 className="text-lg font-semibold text-white mb-2">الدفع الآمن عبر Moyasar</h3>
+                  <p className="text-gray-300 text-sm">
+                    بيانات البطاقة محفوظة بأمان عند Moyasar. لن يتم حفظ أي بيانات حساسة على خوادمنا.
+                  </p>
+                </div>
+                <div className="w-full h-[600px] bg-gray-800 rounded-lg overflow-hidden">
+                  <iframe
+                    src={moyasarData.paymentUrl}
+                    className="w-full h-full border-0"
+                    title="Moyasar Payment"
+                    onLoad={() => console.log('Moyasar iframe loaded')}
+                    onError={() => setError('فشل في تحميل بوابة الدفع')}
+                  ></iframe>
                 </div>
               </div>
             )}
@@ -373,18 +335,6 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
               </div>
             )}
 
-            {/* Moyasar Payment Component */}
-            {paymentMethod === 'moyasar' && moyasarData && (
-              <div className="mb-6">
-                <MoyasarPayment
-                  paymentId={moyasarData.paymentId}
-                  onSuccess={handleMoyasarSuccess}
-                  onError={handleMoyasarError}
-                  onCancel={handleMoyasarCancel}
-                />
-              </div>
-            )}
-
             {/* Payment Button */}
             <div className="space-y-4">
               {paymentMethod === 'moyasar' && !moyasarData ? (
@@ -393,7 +343,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
                   disabled={processing}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
                 >
-                  {processing ? 'جاري المعالجة...' : 'الدفع عبر Moyasar'}
+                  {processing ? 'جاري تحضير الدفع...' : 'الدفع عبر Moyasar'}
                 </button>
               ) : paymentMethod === 'bank_transfer' ? (
                 <button

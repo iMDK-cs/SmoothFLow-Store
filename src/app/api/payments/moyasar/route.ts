@@ -7,11 +7,6 @@ import { z } from 'zod';
 
 const moyasarPaymentSchema = z.object({
   orderId: z.string().min(1, 'Order ID is required'),
-  customerData: z.object({
-    name: z.string().min(1, 'Customer name is required'),
-    email: z.string().email('Valid email is required'),
-    phone: z.string().min(1, 'Phone number is required'),
-  }),
 });
 
 export async function POST(request: NextRequest) {
@@ -23,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { orderId, customerData } = moyasarPaymentSchema.parse(body);
+    const { orderId } = moyasarPaymentSchema.parse(body);
 
     // Get order details
     const order = await prisma.order.findUnique({
@@ -58,7 +53,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create Moyasar payment
+    // Create Moyasar payment session (secure - no card data on our server)
     const paymentData = {
       amount: Math.round(order.totalAmount * 100), // Convert to halalas
       currency: 'SAR',
@@ -66,12 +61,10 @@ export async function POST(request: NextRequest) {
       callback_url: `${process.env.NEXTAUTH_URL}/api/webhooks/moyasar`,
       metadata: {
         order_id: order.id,
-        customer_name: customerData.name,
-        customer_email: customerData.email,
       },
     };
 
-    const moyasarPayment = await moyasarService.createPayment(paymentData);
+    const moyasarPayment = await moyasarService.createPaymentSession(paymentData);
 
     // Update order with payment ID
     await prisma.order.update({
