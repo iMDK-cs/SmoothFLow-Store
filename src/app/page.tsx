@@ -213,7 +213,7 @@ const servicesData = {
         id: 'Pc-check',
         title: 'كشف وصيانة PC',
         description: 'فحص شامل وتشخيص دقيق لجميع المكونات',
-        price: '50-100',
+        price: '50',
         image: '⚠️',
         serviceImage: imageConfig.services['Pc-check'],
         popular: true,

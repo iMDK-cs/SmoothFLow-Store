@@ -167,7 +167,7 @@ const enhancedServicesData: Record<string, ServiceDetail> = {
     title: 'كشف وصيانة PC',
     description: 'فحص شامل وتشخيص دقيق لجميع المكونات',
     fullDescription: 'فحص شامل وتشخيص دقيق لجميع مكونات الكمبيوتر لتحديد المشاكل وإصلاحها بأعلى جودة.',
-    price: '50-100',
+    price: '50',
     image: '⚠️',
     serviceImage: '/images/services/diagnosis.jpg',
     popular: true,
