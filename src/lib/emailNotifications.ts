@@ -22,8 +22,8 @@ interface OrderStatusEmailData {
 
 export async function sendOrderStatusEmail(data: OrderStatusEmailData) {
   try {
-    if (!process.env.RESEND_API_KEY) {
-      console.warn('RESEND_API_KEY not configured, skipping email notification');
+    if (!process.env.RESEND_API_KEY || !resend) {
+      console.log('RESEND_API_KEY not configured, skipping email notification');
       return { success: true, error: 'Email service not configured - notification skipped' };
     }
 
