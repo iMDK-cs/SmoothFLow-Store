@@ -1,7 +1,8 @@
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 
-const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads', 'receipts');
+// Use /tmp directory for Vercel compatibility
+const UPLOAD_DIR = join('/tmp', 'uploads', 'receipts');
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
 
@@ -47,8 +48,10 @@ export async function uploadReceiptFile(
     const buffer = Buffer.from(bytes);
     await writeFile(filePath, buffer);
 
-    // Return relative path for database storage
-    const relativePath = `/uploads/receipts/${fileName}`;
+    // Return file path for database storage
+    // Note: In Vercel, files in /tmp are temporary and will be deleted
+    // For production, consider using cloud storage (AWS S3, Cloudinary, etc.)
+    const relativePath = `/tmp/uploads/receipts/${fileName}`;
 
     return {
       success: true,
