@@ -13,7 +13,7 @@ export async function POST() {
     try {
       await prisma.$queryRaw`SELECT "paymobOrderId" FROM "orders" LIMIT 1`
       console.log('✅ Paymob fields already exist in orders table')
-    } catch (error) {
+    } catch {
       console.log('📝 Adding Paymob fields to orders table...')
       
       // Add Paymob fields to orders table
@@ -31,7 +31,7 @@ export async function POST() {
     try {
       await prisma.$queryRaw`SELECT "paymobTransactionId" FROM "payments" LIMIT 1`
       console.log('✅ Paymob fields already exist in payments table')
-    } catch (error) {
+    } catch {
       console.log('📝 Adding Paymob fields to payments table...')
       
       // Add Paymob fields to payments table

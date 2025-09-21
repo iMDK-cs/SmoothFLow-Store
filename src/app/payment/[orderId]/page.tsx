@@ -4,10 +4,8 @@ import { useState, useEffect, use, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import FileUpload from '@/components/FileUpload'
+import PaymobPayment from '@/components/PaymobPayment'
 import { useOrderNotifications } from '@/components/EnhancedNotification'
-// import { loadStripe } from '@stripe/stripe-js'
-
-// const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 export default function Payment({ params }: { params: Promise<{ orderId: string }> }) {
   const { data: session } = useSession()
@@ -27,10 +25,25 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<'stripe' | 'bank_transfer'>('stripe')
+  const [paymentMethod, setPaymentMethod] = useState<'paymob' | 'bank_transfer'>('paymob')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [uploadingFile, setUploadingFile] = useState(false)
   const [fileError, setFileError] = useState('')
+  const [paymobData, setPaymobData] = useState<{
+    paymentKey: string;
+    orderId: number;
+    iframeUrl: string;
+  } | null>(null)
+  const [billingData, setBillingData] = useState({
+    first_name: '',
+    last_name: '',
+    phone_number: '',
+    email: '',
+    street: '',
+    city: '',
+    country: 'Saudi Arabia',
+    zip_code: ''
+  })
   const { notifyReceiptUploaded, notifyError } = useOrderNotifications()
   
   // Unwrap the params Promise
@@ -61,19 +74,20 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
     fetchOrder()
   }, [session, orderId, router, fetchOrder])
 
-  const handleStripePayment = async () => {
+  const handlePaymobPayment = async () => {
     setProcessing(true)
     setError('')
 
     try {
-      const response = await fetch('/api/payments/stripe', {
+      const response = await fetch('/api/payments/paymob', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           orderId: orderId,
-          paymentMethodId: 'pm_card_visa', // This would come from Stripe Elements
+          billingData: billingData,
+          integrationId: 3, // Cards integration ID
         }),
       })
 
@@ -83,13 +97,27 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
         throw new Error(data.error || 'Payment failed')
       }
 
-      // Redirect to success page
-      router.push(`/orders/${orderId}?success=true`)
+      setPaymobData(data)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Payment failed')
     } finally {
       setProcessing(false)
     }
+  }
+
+  const handlePaymobSuccess = (transactionId: string) => {
+    console.log('Paymob payment successful:', transactionId)
+    router.push(`/orders/${orderId}?success=true`)
+  }
+
+  const handlePaymobError = (error: string) => {
+    console.error('Paymob payment error:', error)
+    setError(`خطأ في الدفع: ${error}`)
+  }
+
+  const handlePaymobCancel = () => {
+    console.log('Paymob payment cancelled')
+    setError('تم إلغاء الدفع')
   }
 
   const handleBankTransferPayment = async () => {
@@ -230,17 +258,17 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
             <div className="mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
-                  onClick={() => setPaymentMethod('stripe')}
+                  onClick={() => setPaymentMethod('paymob')}
                   className={`p-4 rounded-lg border-2 transition-colors ${
-                    paymentMethod === 'stripe'
+                    paymentMethod === 'paymob'
                       ? 'border-blue-500 bg-blue-500/20'
                       : 'border-gray-600 bg-gray-700/50'
                   }`}
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">💳</div>
-                    <p className="text-white font-medium">البطاقة الائتمانية</p>
-                    <p className="text-gray-400 text-sm">دفع فوري</p>
+                    <p className="text-white font-medium">Paymob</p>
+                    <p className="text-gray-400 text-sm">بطاقات + Apple Pay</p>
                   </div>
                 </button>
                 
@@ -260,6 +288,92 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
                 </button>
               </div>
             </div>
+
+            {/* Paymob Billing Data */}
+            {paymentMethod === 'paymob' && (
+              <div className="mb-6 p-4 bg-gray-700/50 rounded-lg">
+                <h3 className="text-lg font-semibold text-white mb-3">بيانات الفاتورة</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">الاسم الأول</label>
+                    <input
+                      type="text"
+                      value={billingData.first_name}
+                      onChange={(e) => setBillingData({...billingData, first_name: e.target.value})}
+                      className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                      placeholder="الاسم الأول"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">الاسم الأخير</label>
+                    <input
+                      type="text"
+                      value={billingData.last_name}
+                      onChange={(e) => setBillingData({...billingData, last_name: e.target.value})}
+                      className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                      placeholder="الاسم الأخير"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">رقم الهاتف</label>
+                    <input
+                      type="tel"
+                      value={billingData.phone_number}
+                      onChange={(e) => setBillingData({...billingData, phone_number: e.target.value})}
+                      className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                      placeholder="+966501234567"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">البريد الإلكتروني</label>
+                    <input
+                      type="email"
+                      value={billingData.email}
+                      onChange={(e) => setBillingData({...billingData, email: e.target.value})}
+                      className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                      placeholder="example@email.com"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">العنوان</label>
+                    <input
+                      type="text"
+                      value={billingData.street}
+                      onChange={(e) => setBillingData({...billingData, street: e.target.value})}
+                      className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                      placeholder="العنوان الكامل"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">المدينة</label>
+                    <input
+                      type="text"
+                      value={billingData.city}
+                      onChange={(e) => setBillingData({...billingData, city: e.target.value})}
+                      className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                      placeholder="الرياض"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">الرمز البريدي</label>
+                    <input
+                      type="text"
+                      value={billingData.zip_code}
+                      onChange={(e) => setBillingData({...billingData, zip_code: e.target.value})}
+                      className="w-full bg-gray-600 text-white px-3 py-2 rounded-lg border border-gray-500 focus:border-blue-500 focus:outline-none"
+                      placeholder="12345"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Bank Transfer Details */}
             {paymentMethod === 'bank_transfer' && (
@@ -310,17 +424,29 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
               </div>
             )}
 
+            {/* Paymob Payment Component */}
+            {paymentMethod === 'paymob' && paymobData && (
+              <div className="mb-6">
+                <PaymobPayment
+                  paymentKey={paymobData.paymentKey}
+                  onSuccess={handlePaymobSuccess}
+                  onError={handlePaymobError}
+                  onCancel={handlePaymobCancel}
+                />
+              </div>
+            )}
+
             {/* Payment Button */}
             <div className="space-y-4">
-              {paymentMethod === 'stripe' ? (
+              {paymentMethod === 'paymob' && !paymobData ? (
                 <button
-                  onClick={handleStripePayment}
+                  onClick={handlePaymobPayment}
                   disabled={processing}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
                 >
-                  {processing ? 'جاري المعالجة...' : 'الدفع بالبطاقة الائتمانية'}
+                  {processing ? 'جاري المعالجة...' : 'الدفع عبر Paymob'}
                 </button>
-              ) : (
+              ) : paymentMethod === 'bank_transfer' ? (
                 <button
                   onClick={handleBankTransferPayment}
                   disabled={processing || !selectedFile}
@@ -328,7 +454,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
                 >
                   {processing ? 'جاري المعالجة...' : 'إرسال إيصال التحويل'}
                 </button>
-              )}
+              ) : null}
             </div>
 
             {error && (
