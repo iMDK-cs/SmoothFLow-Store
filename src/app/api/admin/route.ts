@@ -22,8 +22,6 @@ export async function GET() {
       totalOrders,
       totalRevenue,
       pendingOrders,
-      totalSupportTickets,
-      openSupportTickets,
       recentOrders,
       topServices,
       monthlyStats
@@ -36,10 +34,6 @@ export async function GET() {
       }),
       prisma.order.count({
         where: { status: 'PENDING' }
-      }),
-      prisma.supportTicket.count(),
-      prisma.supportTicket.count({
-        where: { status: 'OPEN' }
       }),
       prisma.order.findMany({
         take: 10,
@@ -78,8 +72,6 @@ export async function GET() {
       totalOrders,
       totalRevenue: totalRevenue._sum.totalAmount || 0,
       pendingOrders,
-      totalSupportTickets,
-      openSupportTickets,
       recentOrders,
       topServices: await Promise.all(
         topServices.map(async (service) => {

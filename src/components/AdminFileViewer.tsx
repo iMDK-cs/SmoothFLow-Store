@@ -72,7 +72,7 @@ const AdminFileViewer: React.FC<AdminFileViewerProps> = ({
     
     // If it's a receipt file, show a friendly name
     if (fileName.includes('receipt_')) {
-      const date = new Date().toLocaleDateString('ar-SA');
+      const date = new Date().toLocaleDateString('en-GB');
       return `إيصال التحويل البنكي - ${date}.pdf`;
     }
     
@@ -92,7 +92,7 @@ const AdminFileViewer: React.FC<AdminFileViewerProps> = ({
             )}
             {uploadedAt && (
               <p className="text-gray-400 text-xs">
-                رفع في: {new Date(uploadedAt).toLocaleDateString('ar-SA')}
+                رفع في: {new Date(uploadedAt).toLocaleDateString('en-GB')}
               </p>
             )}
           </div>

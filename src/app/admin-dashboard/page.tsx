@@ -190,12 +190,6 @@ export default function AdminDashboard() {
                   🏦 التحويلات
                 </Link>
                 <Link
-                  href="/admin-support"
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  🎫 الدعم
-                </Link>
-                <Link
                   href="/"
                   className="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded-lg transition-colors"
                 >
@@ -241,15 +235,6 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
-          <Link href="/admin-support" className="bg-purple-600 rounded-lg p-4 hover:bg-purple-700 transition-colors">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-200 text-sm mb-1">الدعم الفني</p>
-                <p className="text-2xl font-bold text-white">{(stats as AdminStats & { openSupportTickets?: number }).openSupportTickets || 0}</p>
-              </div>
-              <span className="text-2xl">🎫</span>
-            </div>
-          </Link>
         </div>
 
         {/* Revenue and Pending Orders */}
@@ -298,7 +283,7 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td className="py-3 text-slate-400 text-sm">
-                      {new Date(order.createdAt).toLocaleDateString('ar-SA')}
+                        {new Date(order.createdAt).toLocaleDateString('en-GB')}
                     </td>
                   </tr>
                 ))}
