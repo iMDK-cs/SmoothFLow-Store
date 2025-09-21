@@ -32,7 +32,6 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
     paymentId: string;
     paymentUrl: string;
   } | null>(null)
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle')
   const { notifyReceiptUploaded, notifyError } = useOrderNotifications()
   
   // Unwrap the params Promise
@@ -66,7 +65,6 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
   const handleMoyasarPayment = async () => {
     setProcessing(true)
     setError('')
-    setPaymentStatus('processing')
 
     try {
       const response = await fetch('/api/payments/moyasar', {
@@ -86,9 +84,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
       }
 
       setMoyasarData(data)
-      setPaymentStatus('idle')
     } catch (error) {
-      setPaymentStatus('error')
       setError(error instanceof Error ? error.message : 'Payment failed')
     } finally {
       setProcessing(false)

@@ -85,7 +85,7 @@ class MoyasarService {
       const response = await fetch(`${this.config.baseUrl}/payments`, {
         method: 'POST',
         headers: {
-          'Authorization': `Basic ${Buffer.from(this.config.secretKey + ':').toString('base64')}`,
+          'Authorization': `Bearer ${this.config.secretKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(paymentData),
@@ -93,6 +93,7 @@ class MoyasarService {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Moyasar API error response:', errorData);
         throw new Error(`Moyasar API error: ${errorData.message || response.statusText}`);
       }
 
@@ -109,13 +110,14 @@ class MoyasarService {
       const response = await fetch(`${this.config.baseUrl}/payments/${paymentId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Basic ${Buffer.from(this.config.secretKey + ':').toString('base64')}`,
+          'Authorization': `Bearer ${this.config.secretKey}`,
           'Content-Type': 'application/json',
         },
       });
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Moyasar API error response:', errorData);
         throw new Error(`Moyasar API error: ${errorData.message || response.statusText}`);
       }
 
@@ -153,6 +155,9 @@ class MoyasarService {
   // Create payment session (secure - no card data stored on our server)
   async createPaymentSession(paymentData: MoyasarPaymentRequest): Promise<MoyasarPaymentResponse> {
     try {
+      console.log('Creating Moyasar payment session with data:', paymentData);
+      console.log('Using secret key:', this.config.secretKey ? 'Present' : 'Missing');
+      
       const response = await fetch(`${this.config.baseUrl}/payments`, {
         method: 'POST',
         headers: {
@@ -162,12 +167,17 @@ class MoyasarService {
         body: JSON.stringify(paymentData),
       });
 
+      console.log('Moyasar API response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Moyasar API error response:', errorData);
         throw new Error(`Moyasar API error: ${errorData.message || response.statusText}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('Moyasar payment session created successfully:', result);
+      return result;
     } catch (error) {
       console.error('Moyasar payment session creation error:', error);
       throw new Error('Failed to create Moyasar payment session');
