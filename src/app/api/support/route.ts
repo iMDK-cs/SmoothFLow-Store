@@ -26,7 +26,24 @@ export async function POST(request: NextRequest) {
     // Generate ticket ID
     const ticketId = `TKT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
 
-    // Create support ticket
+    // Send email notifications only (no database storage)
+    try {
+      await sendSupportTicketEmail({
+        customerName: user.name || 'عميل',
+        customerEmail: user.email || '',
+        ticketId: ticketId,
+        subject: subject,
+        message: message,
+        priority: priority,
+        adminEmail: process.env.ADMIN_EMAIL || 'admin@smoothflow-sa.com'
+      })
+      console.log(`Support message email sent for: ${ticketId}`)
+    } catch (emailError) {
+      console.error('Failed to send support message email:', emailError)
+      // Don't fail the request if email fails
+    }
+
+    // Also save to database for admin panel viewing
     const ticket = await prisma.supportTicket.create({
       data: {
         id: ticketId,
@@ -38,26 +55,12 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Send email notifications
-    try {
-      await sendSupportTicketEmail({
-        customerName: user.name || 'عميل',
-        customerEmail: user.email || '',
-        ticketId: ticket.id,
-        subject: ticket.subject,
-        message: ticket.message,
-        priority: ticket.priority,
-        adminEmail: process.env.ADMIN_EMAIL || 'admin@smoothflow-sa.com'
-      })
-      console.log(`Support ticket email sent for: ${ticket.id}`)
-    } catch (emailError) {
-      console.error('Failed to send support ticket email:', emailError)
-      // Don't fail the request if email fails
-    }
+    console.log(`Support message created: ${ticket.id} by user ${user.id}`)
 
-    console.log(`Support ticket created: ${ticket.id} by user ${user.id}`)
-
-    return NextResponse.json({ ticket }, { status: 201 })
+    return NextResponse.json({ 
+      message: 'تم إرسال رسالة الدعم الفني بنجاح',
+      ticketId: ticket.id 
+    }, { status: 201 })
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

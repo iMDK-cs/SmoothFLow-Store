@@ -17,17 +17,12 @@ export async function GET() {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const tickets = await prisma.supportTicket.findMany({
+    const messages = await prisma.supportTicket.findMany({
       include: {
         user: {
           select: {
             name: true,
             email: true,
-          }
-        },
-        replies: {
-          orderBy: {
-            createdAt: 'asc'
           }
         }
       },
@@ -36,7 +31,7 @@ export async function GET() {
       }
     })
 
-    return NextResponse.json({ tickets })
+    return NextResponse.json({ messages })
   } catch (error) {
     console.error('Get support tickets error:', error)
     return NextResponse.json(
