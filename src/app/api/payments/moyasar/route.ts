@@ -59,6 +59,9 @@ export async function POST(request: NextRequest) {
       currency: 'SAR',
       description: `طلب رقم ${order.orderNumber}`,
       callback_url: `${process.env.NEXTAUTH_URL}/api/webhooks/moyasar`,
+      source: {
+        type: 'creditcard', // Moyasar will handle the actual payment method selection
+      },
       metadata: {
         order_id: order.id,
       },

@@ -11,6 +11,9 @@ export interface MoyasarPaymentRequest {
   currency: string;
   description: string;
   callback_url: string;
+  source: {
+    type: string;
+  };
   metadata: {
     order_id: string;
   };
@@ -159,13 +162,19 @@ class MoyasarService {
       console.log('Creating Moyasar payment session with data:', paymentData);
       console.log('Using secret key:', this.config.secretKey ? 'Present' : 'Missing');
       
+      // Ensure source is included in payment data
+      const paymentRequest = {
+        ...paymentData,
+        source: paymentData.source || { type: 'creditcard' }
+      };
+      
       const response = await fetch(`${this.config.baseUrl}/payments`, {
         method: 'POST',
         headers: {
           'Authorization': `Basic ${Buffer.from(this.config.secretKey + ':').toString('base64')}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(paymentData),
+        body: JSON.stringify(paymentRequest),
       });
 
       console.log('Moyasar API response status:', response.status);
