@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
         totalAmount,
         notes,
         scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
+        paymentMethod: 'stripe', // Default payment method
         items: {
           create: items.map(item => ({
             serviceId: item.serviceId,

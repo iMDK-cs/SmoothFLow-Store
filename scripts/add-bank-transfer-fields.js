@@ -3,32 +3,20 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 async function addBankTransferFields() {
+  console.log('Adding bank transfer fields to Order model...');
+  
   try {
-    console.log('Adding bank transfer fields to existing orders...');
+    // This will be handled by Prisma migration
+    // We just need to run: npx prisma db push
     
-    // Update existing orders to have default bank transfer status
-    const updatedOrders = await prisma.order.updateMany({
-      where: {
-        bankTransferStatus: null
-      },
-      data: {
-        bankTransferStatus: 'PENDING'
-      }
-    });
+    console.log('✅ Bank transfer fields will be added via Prisma migration');
+    console.log('Run: npx prisma db push');
     
-    console.log(`Updated ${updatedOrders.count} orders with default bank transfer status`);
-    
-    console.log('Bank transfer fields added successfully!');
   } catch (error) {
-    console.error('Error adding bank transfer fields:', error);
-    throw error;
+    console.error('❌ Error adding bank transfer fields:', error);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-addBankTransferFields()
-  .catch((error) => {
-    console.error('Migration failed:', error);
-    process.exit(1);
-  });
+addBankTransferFields();

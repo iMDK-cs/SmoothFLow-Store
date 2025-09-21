@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!service.available || !service.active) {
-      console.log('Service not available:', serviceId)
+      console.log('Service not available:', serviceId, { available: service.available, active: service.active })
       return NextResponse.json({ error: 'Service is not available' }, { status: 400 })
     }
 

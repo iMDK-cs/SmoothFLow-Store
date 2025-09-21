@@ -24,10 +24,8 @@ export async function GET(request: NextRequest) {
       })
     }
     
-    // Build query conditions - return all services regardless of availability
-    const where: Record<string, unknown> = {
-      active: true
-    }
+    // Build query conditions - return all services (including inactive ones for display)
+    const where: Record<string, unknown> = {}
     
     if (category) {
       where.category = category
