@@ -125,6 +125,11 @@ model Order {
   notes         String?
   scheduledDate DateTime?
   
+  // Paymob Integration Fields
+  paymobOrderId     Int?     // Paymob order ID
+  paymobPaymentKey  String?  // Payment key for iframe
+  paymobTransactionId String? // Transaction ID from Paymob
+  
   // Bank Transfer fields (temporarily commented out until migration)
   // bankTransferReceipt String? // Path to uploaded receipt file
   // bankTransferStatus  String? // PENDING_ADMIN_APPROVAL, APPROVED, REJECTED
@@ -170,6 +175,13 @@ model Payment {
   transactionId String?
   gateway       String
   gatewayData   Json?
+  
+  // Paymob specific fields
+  paymobTransactionId String? // Paymob transaction ID
+  paymobOrderId       Int?    // Paymob order ID
+  paymobPaymentKey    String? // Payment key used
+  paymobData          Json?   // Full Paymob response data
+  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
