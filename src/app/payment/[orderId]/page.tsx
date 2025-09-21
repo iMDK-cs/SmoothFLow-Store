@@ -233,14 +233,14 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
                   onClick={() => setPaymentMethod('moyasar')}
                   className={`p-4 rounded-lg border-2 transition-colors ${
                     paymentMethod === 'moyasar'
-                      ? 'border-blue-500 bg-blue-500/20'
+                      ? 'border-sky-500 bg-sky-500/20'
                       : 'border-gray-600 bg-gray-700/50'
                   }`}
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">💳</div>
-                    <p className="text-white font-medium">Moyasar</p>
-                    <p className="text-gray-400 text-sm">بطاقات + Apple Pay</p>
+                    <p className="text-white font-medium">بطاقات + Apple Pay</p>
+                    <p className="text-gray-400 text-sm">دفع آمن ومضمون</p>
                   </div>
                 </button>
                 
@@ -265,9 +265,9 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
             {paymentMethod === 'moyasar' && moyasarData && (
               <div className="mb-6">
                 <div className="bg-gray-700/50 rounded-lg p-4 mb-4">
-                  <h3 className="text-lg font-semibold text-white mb-2">الدفع الآمن عبر Moyasar</h3>
+                  <h3 className="text-lg font-semibold text-white mb-2">الدفع الآمن - بطاقات + Apple Pay</h3>
                   <p className="text-gray-300 text-sm">
-                    بيانات البطاقة محفوظة بأمان عند Moyasar. لن يتم حفظ أي بيانات حساسة على خوادمنا.
+                    بيانات البطاقة محفوظة بأمان. لن يتم حفظ أي بيانات حساسة على خوادمنا.
                   </p>
                 </div>
                 <div className="w-full h-[600px] bg-gray-800 rounded-lg overflow-hidden">
@@ -337,9 +337,9 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
                 <button
                   onClick={handleMoyasarPayment}
                   disabled={processing}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
+                  className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
                 >
-                  {processing ? 'جاري تحضير الدفع...' : 'الدفع عبر Moyasar'}
+                  {processing ? 'جاري تحضير الدفع...' : 'الدفع - بطاقات + Apple Pay'}
                 </button>
               ) : paymentMethod === 'bank_transfer' ? (
                 <button

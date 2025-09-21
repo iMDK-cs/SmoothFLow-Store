@@ -190,9 +190,9 @@ export default function Checkout() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50"
+                    className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50"
                   >
-                    {loading ? 'جاري إنشاء الطلب...' : 'المتابعة للدفع'}
+                    {loading ? 'جاري إنشاء الطلب...' : 'المتابعة للدفع - بطاقات + Apple Pay'}
                   </button>
                 </div>
               </form>
