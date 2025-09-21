@@ -51,10 +51,9 @@ export async function POST(
       where: { id: orderId },
       data: {
         paymentMethod: 'bank_transfer',
-        bankTransferReceipt: receiptPath,
-        bankTransferStatus: 'PENDING_ADMIN_APPROVAL',
         status: 'PENDING_ADMIN_APPROVAL',
         paymentStatus: 'PENDING',
+        notes: `Bank transfer receipt uploaded: ${receiptPath}`,
       },
     });
 
@@ -68,7 +67,7 @@ export async function POST(
         orderStatus: updatedOrder.status,
         paymentStatus: updatedOrder.paymentStatus,
         paymentMethod: updatedOrder.paymentMethod || 'bank_transfer',
-        bankTransferStatus: updatedOrder.bankTransferStatus || undefined,
+          bankTransferStatus: 'PENDING_ADMIN_APPROVAL',
         totalAmount: order.totalAmount,
         items: order.items.map(item => ({
           serviceTitle: item.service.title,

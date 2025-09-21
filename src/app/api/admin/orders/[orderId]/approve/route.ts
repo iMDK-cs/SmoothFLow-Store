@@ -48,12 +48,9 @@ export async function POST(
 
     // Update order based on action
     const updateData = {
-      bankTransferStatus: action === 'approve' ? 'APPROVED' : 'REJECTED',
       status: action === 'approve' ? 'CONFIRMED' : 'CANCELLED',
       paymentStatus: action === 'approve' ? 'PAID' : 'FAILED',
-      adminNotes: adminNotes || null,
-      adminApprovedBy: session.user.id,
-      adminApprovedAt: new Date(),
+      notes: adminNotes ? `${order.notes || ''}\nAdmin Notes: ${adminNotes}` : order.notes,
     };
 
     const updatedOrder = await prisma.order.update({
@@ -70,8 +67,8 @@ export async function POST(
           orderStatus: updatedOrder.status,
           paymentStatus: updatedOrder.paymentStatus,
           paymentMethod: order.paymentMethod || undefined,
-          bankTransferStatus: (updatedOrder as { bankTransferStatus?: string }).bankTransferStatus || undefined,
-          adminNotes: (updatedOrder as { adminNotes?: string }).adminNotes || undefined,
+          bankTransferStatus: 'APPROVED',
+          adminNotes: adminNotes || undefined,
           totalAmount: order.totalAmount,
           items: order.items.map(item => ({
             serviceTitle: item.service.title,

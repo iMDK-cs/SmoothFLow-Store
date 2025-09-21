@@ -125,12 +125,12 @@ model Order {
   notes         String?
   scheduledDate DateTime?
   
-  // Bank Transfer fields
-  bankTransferReceipt String? // Path to uploaded receipt file
-  bankTransferStatus  String? // PENDING_ADMIN_APPROVAL, APPROVED, REJECTED
-  adminNotes          String? // Admin notes for approval/rejection
-  adminApprovedBy     String? // Admin user ID who approved/rejected
-  adminApprovedAt     DateTime? // When admin approved/rejected
+  // Bank Transfer fields (temporarily commented out until migration)
+  // bankTransferReceipt String? // Path to uploaded receipt file
+  // bankTransferStatus  String? // PENDING_ADMIN_APPROVAL, APPROVED, REJECTED
+  // adminNotes          String? // Admin notes for approval/rejection
+  // adminApprovedBy     String? // Admin user ID who approved/rejected
+  // adminApprovedAt     DateTime? // When admin approved/rejected
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
