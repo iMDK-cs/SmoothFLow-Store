@@ -11,6 +11,7 @@ interface Order {
   status: string
   totalAmount: number
   paymentStatus: string
+  paymentMethod?: string
   notes?: string
   scheduledDate?: string
   createdAt: string
@@ -41,6 +42,9 @@ export default function AdminOrders() {
   const [updating, setUpdating] = useState<string | null>(null)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [showApprovalModal, setShowApprovalModal] = useState(false)
+  const [adminNotes, setAdminNotes] = useState('')
+  const [approvalAction, setApprovalAction] = useState<'approve' | 'reject' | null>(null)
 
   useEffect(() => {
     if (status === 'loading') return
@@ -129,9 +133,91 @@ export default function AdminOrders() {
     }
   }
 
+  const handleApproval = (order: Order, action: 'approve' | 'reject') => {
+    setSelectedOrder(order)
+    setApprovalAction(action)
+    setAdminNotes('')
+    setShowApprovalModal(true)
+  }
+
+  const submitApproval = async () => {
+    if (!selectedOrder || !approvalAction) return
+
+    setUpdating(selectedOrder.id)
+    try {
+      const response = await fetch(`/api/admin/orders/${selectedOrder.id}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: approvalAction,
+          adminNotes: adminNotes
+        })
+      })
+
+      if (response.ok) {
+        // Refresh orders
+        fetchOrders()
+        setShowApprovalModal(false)
+        setSelectedOrder(null)
+        setApprovalAction(null)
+        setAdminNotes('')
+        alert(approvalAction === 'approve' ? 'تم قبول الطلب بنجاح' : 'تم رفض الطلب')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'فشل في تحديث حالة الطلب')
+      }
+    } catch (error) {
+      console.error('Approval error:', error)
+      alert('حدث خطأ أثناء تحديث حالة الطلب')
+    } finally {
+      setUpdating(null)
+    }
+  }
+
+  const downloadReceipt = (notes: string) => {
+    // Extract base64 data from notes
+    const base64Match = notes.match(/base64:([A-Za-z0-9+/=]+)/);
+    if (base64Match) {
+      const base64Data = base64Match[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `receipt_${selectedOrder?.orderNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  const viewReceipt = (notes: string) => {
+    // Extract base64 data from notes
+    const base64Match = notes.match(/base64:([A-Za-z0-9+/=]+)/);
+    if (base64Match) {
+      const base64Data = base64Match[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'PENDING': return 'bg-yellow-500'
+      case 'PENDING_ADMIN_APPROVAL': return 'bg-orange-500'
       case 'CONFIRMED': return 'bg-blue-500'
       case 'IN_PROGRESS': return 'bg-purple-500'
       case 'COMPLETED': return 'bg-green-500'
@@ -144,6 +230,7 @@ export default function AdminOrders() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'PENDING': return 'معلق'
+      case 'PENDING_ADMIN_APPROVAL': return 'في انتظار موافقة الإدارة'
       case 'CONFIRMED': return 'مؤكد'
       case 'IN_PROGRESS': return 'قيد التنفيذ'
       case 'COMPLETED': return 'مكتمل'
@@ -259,6 +346,25 @@ export default function AdminOrders() {
                             {updating === order.id ? 'جاري...' : 'قبول'}
                           </button>
                         )}
+
+                        {order.status === 'PENDING_ADMIN_APPROVAL' && (
+                          <>
+                            <button
+                              onClick={() => handleApproval(order, 'approve')}
+                              disabled={updating === order.id}
+                              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs disabled:opacity-50"
+                            >
+                              {updating === order.id ? 'جاري...' : 'قبول'}
+                            </button>
+                            <button
+                              onClick={() => handleApproval(order, 'reject')}
+                              disabled={updating === order.id}
+                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs disabled:opacity-50"
+                            >
+                              {updating === order.id ? 'جاري...' : 'رفض'}
+                            </button>
+                          </>
+                        )}
                         
                         {order.status === 'CONFIRMED' && (
                           <button
@@ -295,6 +401,65 @@ export default function AdminOrders() {
             </table>
           </div>
         </div>
+
+        {/* Approval Modal */}
+        {showApprovalModal && selectedOrder && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-white">
+                  {approvalAction === 'approve' ? 'قبول الطلب' : 'رفض الطلب'}
+                </h3>
+                <button
+                  onClick={() => setShowApprovalModal(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <p className="text-gray-300 mb-2">رقم الطلب: {selectedOrder.orderNumber}</p>
+                  <p className="text-gray-300 mb-2">المبلغ: {selectedOrder.totalAmount.toFixed(2)} ريال</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    ملاحظات الإدارة (اختياري)
+                  </label>
+                  <textarea
+                    value={adminNotes}
+                    onChange={(e) => setAdminNotes(e.target.value)}
+                    className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                    rows={3}
+                    placeholder="أضف ملاحظات حول قرار الموافقة أو الرفض..."
+                  />
+                </div>
+
+                <div className="flex space-x-3 space-x-reverse">
+                  <button
+                    onClick={submitApproval}
+                    disabled={updating === selectedOrder.id}
+                    className={`flex-1 py-2 px-4 rounded-lg font-medium ${
+                      approvalAction === 'approve'
+                        ? 'bg-green-500 hover:bg-green-600 text-white'
+                        : 'bg-red-500 hover:bg-red-600 text-white'
+                    } disabled:opacity-50`}
+                  >
+                    {updating === selectedOrder.id ? 'جاري...' : (approvalAction === 'approve' ? 'قبول' : 'رفض')}
+                  </button>
+                  <button
+                    onClick={() => setShowApprovalModal(false)}
+                    className="flex-1 py-2 px-4 rounded-lg font-medium bg-gray-500 hover:bg-gray-600 text-white"
+                  >
+                    إلغاء
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Order Details Modal */}
         {showModal && selectedOrder && (
@@ -367,6 +532,27 @@ export default function AdminOrders() {
                   <div>
                     <p className="text-gray-400 text-sm mb-2">ملاحظات</p>
                     <p className="text-white bg-gray-700 p-3 rounded">{selectedOrder.notes}</p>
+                    
+                    {/* Bank Transfer Receipt */}
+                    {selectedOrder.paymentMethod === 'bank_transfer' && selectedOrder.notes.includes('base64:') && (
+                      <div className="mt-4">
+                        <p className="text-gray-400 text-sm mb-2">إيصال التحويل البنكي</p>
+                        <div className="flex space-x-2 space-x-reverse">
+                          <button
+                            onClick={() => viewReceipt(selectedOrder.notes!)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm"
+                          >
+                            عرض الملف
+                          </button>
+                          <button
+                            onClick={() => downloadReceipt(selectedOrder.notes!)}
+                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm"
+                          >
+                            تحميل الملف
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
