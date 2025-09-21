@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import AdminFileViewer from '@/components/AdminFileViewer'
 
 interface Order {
   id: string
@@ -232,6 +233,30 @@ export default function AdminOrders() {
     } catch (error) {
       console.error('Error downloading file:', error);
       alert('حدث خطأ أثناء تحميل الملف');
+    }
+  }
+
+  const extractFileInfo = (notes: string) => {
+    try {
+      // Extract file information from notes
+      const base64Match = notes.match(/Base64: ([A-Za-z0-9+/=]+)/);
+      const typeMatch = notes.match(/Type: ([^\n]+)/);
+      const nameMatch = notes.match(/File: ([^\n]+)/);
+      const sizeMatch = notes.match(/Size: (\d+) bytes/);
+      const uploadedMatch = notes.match(/uploadedAt: ([^\n]+)/);
+
+      if (!base64Match) return null;
+
+      return {
+        hasFile: true,
+        fileName: nameMatch ? nameMatch[1] : 'receipt.pdf',
+        fileType: typeMatch ? typeMatch[1] : 'application/pdf',
+        fileSize: sizeMatch ? parseInt(sizeMatch[1]) : undefined,
+        uploadedAt: uploadedMatch ? uploadedMatch[1] : undefined
+      };
+    } catch (error) {
+      console.error('Error extracting file info:', error);
+      return null;
     }
   }
 
@@ -602,26 +627,44 @@ export default function AdminOrders() {
                 {selectedOrder.notes && (
                   <div>
                     <p className="text-gray-400 text-sm mb-2">ملاحظات</p>
-                    <p className="text-white bg-gray-700 p-3 rounded">{selectedOrder.notes}</p>
+                    <p className="text-white bg-gray-700 p-3 rounded text-sm max-h-32 overflow-y-auto">
+                      {selectedOrder.notes.split('\n').slice(0, 3).join('\n')}
+                      {selectedOrder.notes.split('\n').length > 3 && '...'}
+                    </p>
                     
                     {/* Bank Transfer Receipt */}
                     {selectedOrder.paymentMethod === 'bank_transfer' && (selectedOrder.notes.includes('Base64:') || selectedOrder.notes.includes('base64:')) && (
                       <div className="mt-4">
-                        <p className="text-gray-400 text-sm mb-2">إيصال التحويل البنكي</p>
-                        <div className="flex space-x-2 space-x-reverse">
-                          <button
-                            onClick={() => viewReceipt(selectedOrder.notes!)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm"
-                          >
-                            عرض الملف
-                          </button>
-                          <button
-                            onClick={() => downloadReceipt(selectedOrder.notes!)}
-                            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm"
-                          >
-                            تحميل الملف
-                          </button>
-                        </div>
+                        {(() => {
+                          const fileInfo = extractFileInfo(selectedOrder.notes!);
+                          return fileInfo ? (
+                            <AdminFileViewer
+                              orderId={selectedOrder.id}
+                              fileName={fileInfo.fileName}
+                              fileType={fileInfo.fileType}
+                              fileSize={fileInfo.fileSize}
+                              uploadedAt={fileInfo.uploadedAt}
+                            />
+                          ) : (
+                            <div className="bg-gray-700 rounded-lg p-4 border border-gray-600">
+                              <p className="text-gray-300 text-sm">لا يمكن عرض الملف - بيانات تالفة</p>
+                              <div className="flex space-x-2 space-x-reverse mt-3">
+                                <button
+                                  onClick={() => viewReceipt(selectedOrder.notes!)}
+                                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm"
+                                >
+                                  محاولة عرض
+                                </button>
+                                <button
+                                  onClick={() => downloadReceipt(selectedOrder.notes!)}
+                                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm"
+                                >
+                                  محاولة تحميل
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
