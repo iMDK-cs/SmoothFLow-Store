@@ -339,7 +339,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
                   disabled={processing}
                   className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
                 >
-                  {processing ? 'جاري تحضير الدفع...' : 'الدفع - بطاقات + Apple Pay'}
+                  {processing ? 'جاري تحضير الدفع...' : 'المتابعة للدفع'}
                 </button>
               ) : paymentMethod === 'bank_transfer' ? (
                 <button

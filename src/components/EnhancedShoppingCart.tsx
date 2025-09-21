@@ -196,7 +196,7 @@ export default function EnhancedShoppingCart() {
                   </div>
                   <Link
                     href="/checkout"
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 text-center block transform hover:scale-105 shadow-lg"
+                    className="w-full bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700 text-white py-3 px-4 rounded-lg font-medium transition-all duration-200 text-center block transform hover:scale-105 shadow-lg"
                     onClick={() => setIsOpen(false)}
                   >
                     المتابعة للدفع
