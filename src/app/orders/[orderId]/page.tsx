@@ -184,7 +184,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">تاريخ الطلب</label>
-                    <p className="text-white">{new Date(order.createdAt).toLocaleDateString('ar-SA')}</p>
+                    <p className="text-white">{new Date(order.createdAt).toLocaleDateString('en-GB')}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-1">حالة الطلب</label>
@@ -258,7 +258,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
                   {order.adminApprovedAt && (
                     <div className="mt-4">
                       <label className="block text-sm font-medium text-gray-300 mb-1">تاريخ المراجعة</label>
-                      <p className="text-white">{new Date(order.adminApprovedAt).toLocaleDateString('ar-SA')}</p>
+                      <p className="text-white">{new Date(order.adminApprovedAt).toLocaleDateString('en-GB')}</p>
                     </div>
                   )}
                 </div>
@@ -276,7 +276,7 @@ export default function OrderDetails({ params }: { params: Promise<{ orderId: st
               {order.scheduledDate && (
                 <div className="bg-gray-800 rounded-lg p-6">
                   <h2 className="text-xl font-semibold text-white mb-4">موعد الخدمة</h2>
-                  <p className="text-white">{new Date(order.scheduledDate).toLocaleDateString('ar-SA')}</p>
+                    <p className="text-white">{new Date(order.scheduledDate).toLocaleDateString('en-GB')}</p>
                 </div>
               )}
             </div>

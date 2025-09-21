@@ -244,7 +244,7 @@ export default function AdminBankTransfers() {
                         {getStatusBadge(order.bankTransferStatus)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        {new Date(order.createdAt).toLocaleDateString('ar-SA')}
+                        {new Date(order.createdAt).toLocaleDateString('en-GB')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2 space-x-reverse">

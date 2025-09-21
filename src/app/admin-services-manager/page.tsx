@@ -564,7 +564,7 @@ export default function AdminServicesManager() {
               {/* Last Updated Info */}
               {service.availabilityUpdatedAt && (
                 <div className="mt-3 text-xs text-gray-500">
-                  آخر تحديث: {new Date(service.availabilityUpdatedAt).toLocaleDateString('ar-SA')}
+                  آخر تحديث: {new Date(service.availabilityUpdatedAt).toLocaleDateString('en-GB')}
                 </div>
               )}
             </div>

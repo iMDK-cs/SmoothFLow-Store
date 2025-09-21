@@ -137,7 +137,7 @@ export default function BookingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div>
                     <p className="text-gray-400 text-sm">التاريخ</p>
-                    <p className="text-white">{new Date(booking.date).toLocaleDateString('ar-SA')}</p>
+                    <p className="text-white">{new Date(booking.date).toLocaleDateString('en-GB')}</p>
                   </div>
                   <div>
                     <p className="text-gray-400 text-sm">الوقت</p>
@@ -151,7 +151,7 @@ export default function BookingsPage() {
 
                 <div className="flex items-center justify-between">
                   <p className="text-gray-400 text-sm">
-                    تاريخ الحجز: {new Date(booking.createdAt).toLocaleDateString('ar-SA')}
+                    تاريخ الحجز: {new Date(booking.createdAt).toLocaleDateString('en-GB')}
                   </p>
                   {booking.status === 'PENDING' && (
                     <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm">
