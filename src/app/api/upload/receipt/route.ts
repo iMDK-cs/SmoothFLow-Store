@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      filePath: `base64:${base64.substring(0, 50)}...`, // Truncated for response
+      filePath: `base64:${base64}`, // Complete base64 data
       fileName: fileName,
       fileData: fileData
     });

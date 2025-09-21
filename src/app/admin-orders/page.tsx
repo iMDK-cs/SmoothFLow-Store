@@ -176,20 +176,42 @@ export default function AdminOrders() {
 
   const downloadReceipt = (notes: string) => {
     try {
-      // Extract base64 data from notes - look for the complete Base64 data
+      // First try to extract from the new format with complete Base64 data
+      let base64Data = null;
+      let fileType = 'application/pdf';
+      let fileName = `receipt_${selectedOrder?.orderNumber}.pdf`;
+      
+      // Try new format first (Base64: complete data)
       const base64Match = notes.match(/Base64: ([A-Za-z0-9+/=]+)/);
       if (base64Match) {
-        const base64Data = base64Match[1];
+        base64Data = base64Match[1];
         
         // Extract file type from notes
         const typeMatch = notes.match(/Type: ([^\\n]+)/);
-        const fileType = typeMatch ? typeMatch[1] : 'application/pdf';
+        if (typeMatch) fileType = typeMatch[1];
         
         // Extract file name from notes
         const nameMatch = notes.match(/File: ([^\\n]+)/);
-        const fileName = nameMatch ? nameMatch[1] : `receipt_${selectedOrder?.orderNumber}.pdf`;
+        if (nameMatch) fileName = nameMatch[1];
+      } else {
+        // Try old format (base64: truncated data)
+        const oldBase64Match = notes.match(/base64:([A-Za-z0-9+/=]+)/);
+        if (oldBase64Match) {
+          base64Data = oldBase64Match[1];
+        }
+      }
+      
+      if (base64Data) {
+        // Clean the base64 data (remove any non-base64 characters)
+        const cleanBase64 = base64Data.replace(/[^A-Za-z0-9+/=]/g, '');
         
-        const byteCharacters = atob(base64Data);
+        // Check if the base64 data is valid
+        if (cleanBase64.length < 100) {
+          alert('بيانات الملف مقطوعة أو تالفة. يرجى إعادة رفع الملف.');
+          return;
+        }
+        
+        const byteCharacters = atob(cleanBase64);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
@@ -215,16 +237,37 @@ export default function AdminOrders() {
 
   const viewReceipt = (notes: string) => {
     try {
-      // Extract base64 data from notes - look for the complete Base64 data
+      // First try to extract from the new format with complete Base64 data
+      let base64Data = null;
+      let fileType = 'application/pdf';
+      
+      // Try new format first (Base64: complete data)
       const base64Match = notes.match(/Base64: ([A-Za-z0-9+/=]+)/);
       if (base64Match) {
-        const base64Data = base64Match[1];
+        base64Data = base64Match[1];
         
         // Extract file type from notes
         const typeMatch = notes.match(/Type: ([^\\n]+)/);
-        const fileType = typeMatch ? typeMatch[1] : 'application/pdf';
+        if (typeMatch) fileType = typeMatch[1];
+      } else {
+        // Try old format (base64: truncated data)
+        const oldBase64Match = notes.match(/base64:([A-Za-z0-9+/=]+)/);
+        if (oldBase64Match) {
+          base64Data = oldBase64Match[1];
+        }
+      }
+      
+      if (base64Data) {
+        // Clean the base64 data (remove any non-base64 characters)
+        const cleanBase64 = base64Data.replace(/[^A-Za-z0-9+/=]/g, '');
         
-        const byteCharacters = atob(base64Data);
+        // Check if the base64 data is valid
+        if (cleanBase64.length < 100) {
+          alert('بيانات الملف مقطوعة أو تالفة. يرجى إعادة رفع الملف.');
+          return;
+        }
+        
+        const byteCharacters = atob(cleanBase64);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
@@ -562,7 +605,7 @@ export default function AdminOrders() {
                     <p className="text-white bg-gray-700 p-3 rounded">{selectedOrder.notes}</p>
                     
                     {/* Bank Transfer Receipt */}
-                    {selectedOrder.paymentMethod === 'bank_transfer' && selectedOrder.notes.includes('Base64:') && (
+                    {selectedOrder.paymentMethod === 'bank_transfer' && (selectedOrder.notes.includes('Base64:') || selectedOrder.notes.includes('base64:')) && (
                       <div className="mt-4">
                         <p className="text-gray-400 text-sm mb-2">إيصال التحويل البنكي</p>
                         <div className="flex space-x-2 space-x-reverse">
