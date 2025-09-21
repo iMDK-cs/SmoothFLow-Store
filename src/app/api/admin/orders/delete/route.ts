@@ -25,7 +25,17 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Delete order (this will cascade delete order items due to foreign key constraints)
+    // First delete related payments
+    await prisma.payment.deleteMany({
+      where: { orderId: orderId }
+    })
+
+    // Then delete order items
+    await prisma.orderItem.deleteMany({
+      where: { orderId: orderId }
+    })
+
+    // Finally delete the order
     await prisma.order.delete({
       where: { id: orderId }
     })
