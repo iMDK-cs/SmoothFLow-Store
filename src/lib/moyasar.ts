@@ -1,4 +1,5 @@
 // Moyasar API Integration Service
+import { Buffer } from 'buffer';
 export interface MoyasarConfig {
   secretKey: string;
   publishableKey: string;
@@ -85,7 +86,7 @@ class MoyasarService {
       const response = await fetch(`${this.config.baseUrl}/payments`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.config.secretKey}`,
+          'Authorization': `Basic ${Buffer.from(this.config.secretKey + ':').toString('base64')}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(paymentData),
@@ -110,7 +111,7 @@ class MoyasarService {
       const response = await fetch(`${this.config.baseUrl}/payments/${paymentId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.config.secretKey}`,
+          'Authorization': `Basic ${Buffer.from(this.config.secretKey + ':').toString('base64')}`,
           'Content-Type': 'application/json',
         },
       });
@@ -161,7 +162,7 @@ class MoyasarService {
       const response = await fetch(`${this.config.baseUrl}/payments`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.config.secretKey}`,
+          'Authorization': `Basic ${Buffer.from(this.config.secretKey + ':').toString('base64')}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(paymentData),
