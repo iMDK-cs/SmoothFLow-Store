@@ -220,12 +220,14 @@ export default function AdminOrders() {
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: fileType });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        if (typeof document !== 'undefined') {
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        }
         URL.revokeObjectURL(url);
       } else {
         alert('لم يتم العثور على بيانات الملف');
@@ -327,7 +329,9 @@ export default function AdminOrders() {
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: fileType });
         const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
+        if (typeof window !== 'undefined') {
+          window.open(url, '_blank');
+        }
       } else {
         alert('لم يتم العثور على بيانات الملف');
       }

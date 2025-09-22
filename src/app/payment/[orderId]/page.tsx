@@ -80,7 +80,9 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
       }
 
       // Redirect to Moyasar checkout page instead of showing iframe
-      window.location.href = data.paymentUrl
+        if (typeof window !== 'undefined') {
+          window.location.href = data.paymentUrl
+        }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Payment failed')
       setProcessing(false)

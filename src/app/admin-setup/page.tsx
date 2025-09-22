@@ -20,7 +20,9 @@ export default function AdminSetup() {
 
   // Update page title based on current mode
   useEffect(() => {
-    document.title = isLogin ? 'تسجيل الدخول للإدارة - SmoothFlow' : 'إعداد حساب الإدارة - SmoothFlow'
+    if (typeof document !== 'undefined') {
+      document.title = isLogin ? 'تسجيل الدخول للإدارة - SmoothFlow' : 'إعداد حساب الإدارة - SmoothFlow'
+    }
   }, [isLogin])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
