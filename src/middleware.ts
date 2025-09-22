@@ -38,7 +38,7 @@ function addSecurityHeaders(response: NextResponse) {
   // Content Security Policy
   response.headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.moyasar.com https://checkout.moyasar.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.moyasar.com;"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.moyasar.com https://checkout.moyasar.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self' data: blob:; connect-src 'self' https://api.moyasar.com;"
   )
   
   return response
@@ -52,9 +52,18 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/api/')) {
     // More restrictive rate limiting for sensitive endpoints
     if (pathname.startsWith('/api/auth/') || 
-        pathname.startsWith('/api/payments/') ||
-        pathname.startsWith('/api/admin/')) {
-      if (isRateLimited(ip, 10, 60000)) { // 10 requests per minute for sensitive endpoints
+        pathname.startsWith('/api/payments/')) {
+      if (isRateLimited(ip, 10, 60000)) { // 10 requests per minute for auth/payments
+        return new NextResponse('Too Many Requests', { 
+          status: 429,
+          headers: {
+            'Retry-After': '60'
+          }
+        })
+      }
+    } else if (pathname.startsWith('/api/admin/')) {
+      // More lenient rate limiting for admin endpoints
+      if (isRateLimited(ip, 30, 60000)) { // 30 requests per minute for admin
         return new NextResponse('Too Many Requests', { 
           status: 429,
           headers: {
