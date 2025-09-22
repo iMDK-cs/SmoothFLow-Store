@@ -16,6 +16,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:set-admin": "node scripts/set-admin-role.js",
     "db:create-admin": "node scripts/create-admin-user.js",
+    "db:create-tables": "node scripts/create-missing-tables.js",
     "db:migrate-paymob": "node scripts/migrate-paymob-fields.js",
     "db:vercel-migrate": "node scripts/vercel-migration.js",
     "db:show-services": "node scripts/show-services.js",
