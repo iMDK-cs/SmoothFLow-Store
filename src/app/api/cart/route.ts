@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
     // Return minimal response for better performance
     return NextResponse.json({ 
       success: true,
-      message: 'Item added to cart',
+      message: 'تم إضافة العنصر إلى السلة بنجاح',
       executionTime 
     })
     
@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Validation error', details: error.issues },
+        { error: 'خطأ في التحقق من البيانات', details: error.issues },
         { status: 400 }
       )
     }
@@ -207,7 +207,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'خطأ داخلي في الخادم' },
       { status: 500 }
     )
   }

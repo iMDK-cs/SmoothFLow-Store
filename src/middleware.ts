@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 // import { getToken } from 'next-auth/jwt'
 
-// Simple in-memory rate limiter for basic protection
-const rateLimit = new Map<string, { count: number; resetTime: number }>()
+// Enhanced in-memory rate limiter with sliding window
+const rateLimit = new Map<string, { requests: number[]; resetTime: number }>()
 
 function isRateLimited(ip: string, maxRequests: number = 10, windowMs: number = 60000): boolean {
   const now = Date.now()
@@ -12,15 +12,18 @@ function isRateLimited(ip: string, maxRequests: number = 10, windowMs: number = 
   const current = rateLimit.get(ip)
   
   if (!current || current.resetTime < windowStart) {
-    rateLimit.set(ip, { count: 1, resetTime: now + windowMs })
+    rateLimit.set(ip, { requests: [now], resetTime: now + windowMs })
     return false
   }
   
-  if (current.count >= maxRequests) {
+  // Remove old requests outside the window
+  current.requests = current.requests.filter(time => time > windowStart)
+  
+  if (current.requests.length >= maxRequests) {
     return true
   }
   
-  current.count++
+  current.requests.push(now)
   return false
 }
 
@@ -51,7 +54,17 @@ export async function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/auth/') || 
         pathname.startsWith('/api/payments/') ||
         pathname.startsWith('/api/admin/')) {
-      if (isRateLimited(ip, 5, 60000)) { // 5 requests per minute
+      if (isRateLimited(ip, 10, 60000)) { // 10 requests per minute for sensitive endpoints
+        return new NextResponse('Too Many Requests', { 
+          status: 429,
+          headers: {
+            'Retry-After': '60'
+          }
+        })
+      }
+    } else if (pathname.startsWith('/api/cart')) {
+      // More lenient rate limiting for cart operations
+      if (isRateLimited(ip, 100, 60000)) { // 100 requests per minute for cart
         return new NextResponse('Too Many Requests', { 
           status: 429,
           headers: {
@@ -60,8 +73,8 @@ export async function middleware(request: NextRequest) {
         })
       }
     } else {
-      // General API rate limiting
-      if (isRateLimited(ip, 20, 60000)) { // 20 requests per minute
+      // General API rate limiting - more lenient
+      if (isRateLimited(ip, 60, 60000)) { // 60 requests per minute for general API
         return new NextResponse('Too Many Requests', { 
           status: 429,
           headers: {
