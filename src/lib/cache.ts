@@ -2,7 +2,7 @@
 // In production, you should use Redis or a similar solution
 
 interface CacheItem {
-  data: any
+  data: unknown
   timestamp: number
   ttl: number
 }
@@ -18,7 +18,7 @@ class SimpleCache {
     }, 5 * 60 * 1000)
   }
 
-  set(key: string, data: any, ttlSeconds: number = 300): void {
+  set(key: string, data: unknown, ttlSeconds: number = 300): void {
     const item: CacheItem = {
       data,
       timestamp: Date.now(),
@@ -27,7 +27,7 @@ class SimpleCache {
     this.cache.set(key, item)
   }
 
-  get(key: string): any | null {
+  get(key: string): unknown | null {
     const item = this.cache.get(key)
     
     if (!item) {
@@ -76,18 +76,18 @@ export const cache = new SimpleCache()
 export const cacheUtils = {
   // Services cache
   getServices: () => cache.get('services:all'),
-  setServices: (services: any) => cache.set('services:all', services, 300), // 5 minutes
+  setServices: (services: unknown) => cache.set('services:all', services, 300), // 5 minutes
   clearServices: () => cache.delete('services:all'),
 
   // Service details cache
   getService: (id: string) => cache.get(`service:${id}`),
-  setService: (id: string, service: any) => cache.set(`service:${id}`, service, 600), // 10 minutes
+  setService: (id: string, service: unknown) => cache.set(`service:${id}`, service, 600), // 10 minutes
   clearService: (id: string) => cache.delete(`service:${id}`),
 
   // Reviews cache
   getServiceReviews: (serviceId: string, page: number = 1) => 
     cache.get(`reviews:${serviceId}:page:${page}`),
-  setServiceReviews: (serviceId: string, page: number, reviews: any) => 
+  setServiceReviews: (serviceId: string, page: number, reviews: unknown) => 
     cache.set(`reviews:${serviceId}:page:${page}`, reviews, 180), // 3 minutes
   clearServiceReviews: (serviceId: string) => {
     // Clear all pages for this service
@@ -99,13 +99,13 @@ export const cacheUtils = {
 
   // User profile cache
   getUserProfile: (userId: string) => cache.get(`user:${userId}`),
-  setUserProfile: (userId: string, profile: any) => cache.set(`user:${userId}`, profile, 900), // 15 minutes
+  setUserProfile: (userId: string, profile: unknown) => cache.set(`user:${userId}`, profile, 900), // 15 minutes
   clearUserProfile: (userId: string) => cache.delete(`user:${userId}`),
 
   // Orders cache
   getUserOrders: (userId: string, page: number = 1) => 
     cache.get(`orders:user:${userId}:page:${page}`),
-  setUserOrders: (userId: string, page: number, orders: any) => 
+  setUserOrders: (userId: string, page: number, orders: unknown) => 
     cache.set(`orders:user:${userId}:page:${page}`, orders, 120), // 2 minutes
   clearUserOrders: (userId: string) => {
     const keys = Array.from(cache['cache'].keys()).filter(key => 
@@ -116,7 +116,7 @@ export const cacheUtils = {
 
   // Admin statistics cache
   getAdminStats: () => cache.get('admin:stats'),
-  setAdminStats: (stats: any) => cache.set('admin:stats', stats, 300), // 5 minutes
+  setAdminStats: (stats: unknown) => cache.set('admin:stats', stats, 300), // 5 minutes
   clearAdminStats: () => cache.delete('admin:stats')
 }
 
@@ -148,14 +148,14 @@ export const invalidateCache = {
 }
 
 // Higher-order function for caching API responses
-export function withCache<T>(
+export function withCache(
   cacheKey: string,
   ttlSeconds: number = 300
 ) {
-  return function(target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function(target: unknown, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value
 
-    descriptor.value = async function(...args: any[]) {
+    descriptor.value = async function(...args: unknown[]) {
       // Try to get from cache first
       const cachedResult = cache.get(cacheKey)
       if (cachedResult !== null) {

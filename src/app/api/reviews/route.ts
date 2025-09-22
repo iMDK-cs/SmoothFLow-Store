@@ -3,9 +3,6 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import formidable from 'formidable'
-import { promises as fs } from 'fs'
-import path from 'path'
 
 const reviewSchema = z.object({
   serviceId: z.string().cuid('معرف الخدمة غير صحيح'),
@@ -14,37 +11,6 @@ const reviewSchema = z.object({
   comment: z.string().min(10, 'التعليق يجب أن يكون 10 أحرف على الأقل').max(1000, 'التعليق طويل جداً').optional()
 })
 
-// Helper function to upload files
-async function uploadReviewImages(files: formidable.File[]): Promise<string[]> {
-  const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'reviews')
-  
-  // Ensure upload directory exists
-  try {
-    await fs.mkdir(uploadDir, { recursive: true })
-  } catch (error) {
-    console.error('Error creating upload directory:', error)
-  }
-
-  const uploadedFiles: string[] = []
-
-  for (const file of files) {
-    if (!file.mimetype?.startsWith('image/')) continue
-    if (file.size > 5 * 1024 * 1024) continue // 5MB limit
-
-    const fileExtension = path.extname(file.originalFilename || '')
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}${fileExtension}`
-    const filePath = path.join(uploadDir, fileName)
-
-    try {
-      await fs.copyFile(file.filepath, filePath)
-      uploadedFiles.push(`/uploads/reviews/${fileName}`)
-    } catch (error) {
-      console.error('Error uploading file:', error)
-    }
-  }
-
-  return uploadedFiles
-}
 
 // POST /api/reviews - Create a new review
 export async function POST(request: NextRequest) {
@@ -254,7 +220,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const skip = (page - 1) * limit
 
-    let whereClause: any = {}
+    const whereClause: Record<string, unknown> = {}
     if (serviceId) {
       whereClause.serviceId = serviceId
     }

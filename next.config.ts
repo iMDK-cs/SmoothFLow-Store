@@ -55,7 +55,6 @@ const nextConfig: NextConfig = {
       'date-fns',
       'formidable'
     ],
-    serverComponentsExternalPackages: ['@prisma/client'],
     optimizeCss: true,
   },
 

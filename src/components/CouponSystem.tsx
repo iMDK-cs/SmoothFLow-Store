@@ -87,14 +87,6 @@ export const CouponSystem: React.FC<CouponSystemProps> = ({
     onCouponRemoved()
   }
 
-  const calculateDiscount = (coupon: Coupon, total: number): number => {
-    if (coupon.discountType === 'PERCENTAGE') {
-      const discount = (total * coupon.discountValue) / 100
-      return coupon.maxDiscount ? Math.min(discount, coupon.maxDiscount) : discount
-    } else {
-      return Math.min(coupon.discountValue, total)
-    }
-  }
 
   const formatDiscount = (coupon: Coupon): string => {
     if (coupon.discountType === 'PERCENTAGE') {

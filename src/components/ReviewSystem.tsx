@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import { ErrorMessage, SuccessMessage } from './ui/ErrorBoundary'
 import { useSession } from 'next-auth/react'
@@ -49,9 +49,9 @@ export const ReviewSystem: React.FC<ReviewSystemProps> = ({
 
   useEffect(() => {
     fetchReviews()
-  }, [serviceId])
+  }, [serviceId, fetchReviews])
 
-  const fetchReviews = async () => {
+  const fetchReviews = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -68,7 +68,7 @@ export const ReviewSystem: React.FC<ReviewSystemProps> = ({
     } finally {
       setLoading(false)
     }
-  }
+  }, [serviceId])
 
   const submitReview = async () => {
     if (!session?.user) {
@@ -292,6 +292,7 @@ export const ReviewSystem: React.FC<ReviewSystemProps> = ({
                   <div className="mt-2 flex flex-wrap gap-2">
                     {reviewImages.map((image, index) => (
                       <div key={index} className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={URL.createObjectURL(image)}
                           alt={`Preview ${index + 1}`}
@@ -384,6 +385,7 @@ export const ReviewSystem: React.FC<ReviewSystemProps> = ({
               {review.images.length > 0 && (
                 <div className="flex space-x-2 rtl:space-x-reverse mb-3">
                   {review.images.map((image, index) => (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       key={index}
                       src={image}

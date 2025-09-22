@@ -20,6 +20,7 @@ jest.mock('@/lib/prisma', () => ({
 }))
 
 const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const mockPrisma = require('@/lib/prisma').prisma
 
 describe('/api/coupons/validate', () => {
@@ -38,7 +39,7 @@ describe('/api/coupons/validate', () => {
       },
     })
 
-    const response = await POST(req as any)
+    const response = await POST(req as Request)
     const data = await response.json()
 
     expect(response.status).toBe(401)
@@ -76,7 +77,7 @@ describe('/api/coupons/validate', () => {
       },
     })
 
-    const response = await POST(req as any)
+    const response = await POST(req as Request)
     const data = await response.json()
 
     expect(response.status).toBe(200)
@@ -115,7 +116,7 @@ describe('/api/coupons/validate', () => {
       },
     })
 
-    const response = await POST(req as any)
+    const response = await POST(req as Request)
     const data = await response.json()
 
     expect(response.status).toBe(200)
@@ -139,7 +140,7 @@ describe('/api/coupons/validate', () => {
       },
     })
 
-    const response = await POST(req as any)
+    const response = await POST(req as Request)
     const data = await response.json()
 
     expect(response.status).toBe(400)
@@ -169,7 +170,7 @@ describe('/api/coupons/validate', () => {
       },
     })
 
-    const response = await POST(req as any)
+    const response = await POST(req as Request)
     const data = await response.json()
 
     expect(response.status).toBe(400)
@@ -199,7 +200,7 @@ describe('/api/coupons/validate', () => {
       },
     })
 
-    const response = await POST(req as any)
+    const response = await POST(req as Request)
     const data = await response.json()
 
     expect(response.status).toBe(400)
@@ -230,7 +231,7 @@ describe('/api/coupons/validate', () => {
       },
     })
 
-    const response = await POST(req as any)
+    const response = await POST(req as Request)
     const data = await response.json()
 
     expect(response.status).toBe(400)
@@ -263,7 +264,7 @@ describe('/api/coupons/validate', () => {
       },
     })
 
-    const response = await POST(req as any)
+    const response = await POST(req as Request)
     const data = await response.json()
 
     expect(response.status).toBe(200)

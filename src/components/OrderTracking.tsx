@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import { ErrorMessage } from './ui/ErrorBoundary'
 
@@ -71,9 +71,9 @@ export const OrderTracking: React.FC<OrderTrackingProps> = ({
 
   useEffect(() => {
     fetchTrackingData()
-  }, [orderId])
+  }, [orderId, fetchTrackingData])
 
-  const fetchTrackingData = async () => {
+  const fetchTrackingData = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -90,7 +90,7 @@ export const OrderTracking: React.FC<OrderTrackingProps> = ({
     } finally {
       setLoading(false)
     }
-  }
+  }, [orderId])
 
   const getCurrentStepIndex = () => {
     return statusSteps.findIndex(step => step.status === currentStatus)

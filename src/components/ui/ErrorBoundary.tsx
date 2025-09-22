@@ -241,7 +241,7 @@ export const useAsyncOperation = () => {
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
-  const execute = React.useCallback(async (asyncFunction: () => Promise<any>) => {
+  const execute = React.useCallback(async (asyncFunction: () => Promise<unknown>) => {
     try {
       setLoading(true)
       setError(null)
