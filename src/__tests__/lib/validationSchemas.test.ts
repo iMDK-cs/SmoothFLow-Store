@@ -2,7 +2,6 @@ import {
   userRegistrationSchema,
   serviceSchema,
   orderItemSchema,
-  reviewSchema,
   sanitizeString,
   formatValidationError
 } from '@/lib/validationSchemas'
@@ -145,38 +144,6 @@ describe('Validation Schemas', () => {
     })
   })
 
-  describe('reviewSchema', () => {
-    it('should validate valid review', () => {
-      const validData = {
-        serviceId: 'clx1234567890abcdef',
-        rating: 5,
-        comment: 'خدمة ممتازة وسريعة، أنصح بها بشدة'
-      }
-
-      const result = reviewSchema.parse(validData)
-      expect(result.rating).toBe(5)
-    })
-
-    it('should reject invalid rating', () => {
-      const invalidData = {
-        serviceId: 'clx1234567890abcdef',
-        rating: 6,
-        comment: 'تعليق صحيح'
-      }
-
-      expect(() => reviewSchema.parse(invalidData)).toThrow()
-    })
-
-    it('should reject short comment', () => {
-      const invalidData = {
-        serviceId: 'clx1234567890abcdef',
-        rating: 5,
-        comment: 'قصير'
-      }
-
-      expect(() => reviewSchema.parse(invalidData)).toThrow()
-    })
-  })
 })
 
 describe('Utility Functions', () => {

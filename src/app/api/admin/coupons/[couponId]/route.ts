@@ -19,7 +19,7 @@ const updateCouponSchema = z.object({
 // GET /api/admin/coupons/[couponId] - Get specific coupon (Admin only)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { couponId: string } }
+  context: { params: Promise<{ couponId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -27,7 +27,7 @@ export async function GET(
       return NextResponse.json({ message: 'غير مصرح - مطلوب صلاحيات الإدارة' }, { status: 403 })
     }
 
-    const { couponId } = params
+    const { couponId } = await context.params
 
     const coupon = await prisma.coupon.findUnique({
       where: { id: couponId },
@@ -70,7 +70,7 @@ export async function GET(
 // PATCH /api/admin/coupons/[couponId] - Update coupon (Admin only)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { couponId: string } }
+  context: { params: Promise<{ couponId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -78,7 +78,7 @@ export async function PATCH(
       return NextResponse.json({ message: 'غير مصرح - مطلوب صلاحيات الإدارة' }, { status: 403 })
     }
 
-    const { couponId } = params
+    const { couponId } = await context.params
     const body = await request.json()
     const validatedData = updateCouponSchema.parse(body)
 
@@ -147,7 +147,7 @@ export async function PATCH(
 // DELETE /api/admin/coupons/[couponId] - Delete coupon (Admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { couponId: string } }
+  context: { params: Promise<{ couponId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -155,7 +155,7 @@ export async function DELETE(
       return NextResponse.json({ message: 'غير مصرح - مطلوب صلاحيات الإدارة' }, { status: 403 })
     }
 
-    const { couponId } = params
+    const { couponId } = await context.params
 
     // Check if coupon exists
     const existingCoupon = await prisma.coupon.findUnique({

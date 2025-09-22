@@ -77,13 +77,6 @@ export const bookingSchema = z.object({
   notes: z.string().max(500, 'الملاحظات طويلة جداً').optional()
 })
 
-// Review validation schemas
-export const reviewSchema = z.object({
-  serviceId: z.string().cuid('معرف الخدمة غير صحيح'),
-  orderId: z.string().cuid('معرف الطلب غير صحيح').optional(),
-  rating: z.number().min(1, 'التقييم يجب أن يكون على الأقل 1').max(5, 'التقييم يجب أن يكون 5 كحد أقصى'),
-  comment: z.string().min(10, 'التعليق يجب أن يكون 10 أحرف على الأقل').max(1000, 'التعليق طويل جداً').optional()
-})
 
 // Admin validation schemas
 export const adminOrderUpdateSchema = z.object({

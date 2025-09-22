@@ -78,24 +78,18 @@ export const cacheUtils = {
   getServices: () => cache.get('services:all'),
   setServices: (services: unknown) => cache.set('services:all', services, 300), // 5 minutes
   clearServices: () => cache.delete('services:all'),
+  
+  // Legacy cache functions for backward compatibility
+  getCachedServices: () => cache.get('services:all'),
+  setCachedServices: (services: unknown) => cache.set('services:all', services, 300),
+  clearServicesCache: () => cache.delete('services:all'),
+  createServicesCacheKey: () => 'services:all',
 
   // Service details cache
   getService: (id: string) => cache.get(`service:${id}`),
   setService: (id: string, service: unknown) => cache.set(`service:${id}`, service, 600), // 10 minutes
   clearService: (id: string) => cache.delete(`service:${id}`),
 
-  // Reviews cache
-  getServiceReviews: (serviceId: string, page: number = 1) => 
-    cache.get(`reviews:${serviceId}:page:${page}`),
-  setServiceReviews: (serviceId: string, page: number, reviews: unknown) => 
-    cache.set(`reviews:${serviceId}:page:${page}`, reviews, 180), // 3 minutes
-  clearServiceReviews: (serviceId: string) => {
-    // Clear all pages for this service
-    const keys = Array.from(cache['cache'].keys()).filter(key => 
-      key.startsWith(`reviews:${serviceId}:`)
-    )
-    keys.forEach(key => cache.delete(key))
-  },
 
   // User profile cache
   getUserProfile: (userId: string) => cache.get(`user:${userId}`),
@@ -129,11 +123,6 @@ export const invalidateCache = {
     cacheUtils.clearAdminStats()
   },
 
-  // When a review is added/updated
-  onReviewUpdate: (serviceId: string) => {
-    cacheUtils.clearServiceReviews(serviceId)
-    cacheUtils.clearService(serviceId) // Service rating might change
-  },
 
   // When an order is created/updated
   onOrderUpdate: (userId: string) => {
@@ -245,6 +234,12 @@ export const warmCache = {
     }
   }
 }
+
+// Export individual functions for backward compatibility
+export const getCachedServices = cacheUtils.getCachedServices
+export const setCachedServices = cacheUtils.setCachedServices
+export const clearServicesCache = cacheUtils.clearServicesCache
+export const createServicesCacheKey = cacheUtils.createServicesCacheKey
 
 // Export cache instance and utilities
 export default cache

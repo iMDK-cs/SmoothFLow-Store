@@ -23,7 +23,6 @@ model User {
 
   // Relations
   orders    Order[]
-  reviews   Review[]
   sessions  Session[]
   accounts  Account[]
   cart      Cart?
@@ -92,7 +91,6 @@ model Service {
   options     ServiceOption[]
   orderItems  OrderItem[]
   cartItems   CartItem[]
-  reviews     Review[]
 
   @@map("services")
 }
@@ -196,25 +194,6 @@ model Payment {
   @@map("payments")
 }
 
-model Review {
-  id        String   @id @default(cuid())
-  userId    String
-  serviceId String
-  orderId   String?
-  rating    Int      @db.SmallInt // 1-5 rating
-  comment   String?
-  images    String[] // Review images URLs
-  helpful   Int      @default(0) // Helpful votes count
-  verified  Boolean  @default(false) // Verified purchase review
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user    User    @relation(fields: [userId], references: [id])
-  service Service @relation(fields: [serviceId], references: [id])
-
-  @@unique([userId, serviceId, orderId])
-  @@map("reviews")
-}
 
 model Cart {
   id        String   @id @default(cuid())

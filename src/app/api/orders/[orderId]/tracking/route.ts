@@ -14,7 +14,7 @@ const trackingUpdateSchema = z.object({
 // GET /api/orders/[orderId]/tracking - Get order tracking history
 export async function GET(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  context: { params: Promise<{ orderId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -22,7 +22,7 @@ export async function GET(
       return NextResponse.json({ message: 'غير مصرح' }, { status: 401 })
     }
 
-    const { orderId } = params
+    const { orderId } = await context.params
 
     // Get order and verify ownership or admin access
     const order = await prisma.order.findUnique({
@@ -64,7 +64,7 @@ export async function GET(
 // POST /api/orders/[orderId]/tracking - Add tracking update (Admin only)
 export async function POST(
   request: NextRequest,
-  { params }: { params: { orderId: string } }
+  context: { params: Promise<{ orderId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -72,7 +72,7 @@ export async function POST(
       return NextResponse.json({ message: 'غير مصرح - مطلوب صلاحيات الإدارة' }, { status: 403 })
     }
 
-    const { orderId } = params
+    const { orderId } = await context.params
     const body = await request.json()
     
     // Validate input
