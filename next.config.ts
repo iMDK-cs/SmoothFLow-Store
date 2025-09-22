@@ -2,18 +2,38 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['@prisma/client', 'bcryptjs'],
+  
+  // Image optimization configuration
   images: {
-    domains: ['localhost', 'vercel.app'],
-    // OPTIMIZED: Image optimization
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.vercel.app',
+      },
+      {
+        protocol: 'https',
+        hostname: 'smoothflow-store-web.vercel.app',
+      }
+    ],
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
+
+  // Environment variables
   env: {
     DATABASE_URL: process.env.DATABASE_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    NEXT_PUBLIC_BASE_URL: process.env.NEXT_PUBLIC_BASE_URL,
   },
-  // OPTIMIZED: Bundle analysis
+
+  // Bundle analysis
   ...(process.env.ANALYZE === 'true' && {
     webpack: (config: any) => {
       config.plugins.push(
@@ -25,16 +45,129 @@ const nextConfig: NextConfig = {
       return config;
     },
   }),
-  // OPTIMIZED: Performance optimizations
+
+  // Performance optimizations
   experimental: {
-    optimizePackageImports: ['@next/font', 'next-auth'],
+    optimizePackageImports: [
+      '@next/font', 
+      'next-auth', 
+      'react-hook-form', 
+      'date-fns',
+      'formidable'
+    ],
+    serverComponentsExternalPackages: ['@prisma/client'],
+    optimizeCss: true,
   },
-  // OPTIMIZED: Compression
+
+  // Compression and security
   compress: true,
-  // OPTIMIZED: Power optimization
   poweredByHeader: false,
-  // OPTIMIZED: React strict mode for development only
+  
+  // React configuration
   reactStrictMode: process.env.NODE_ENV === 'development',
+  
+  // Webpack optimizations
+  webpack: (config: any, { dev, isServer }) => {
+    // Production optimizations
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: 10,
+              reuseExistingChunk: true,
+            },
+            common: {
+              minChunks: 2,
+              priority: 5,
+              reuseExistingChunk: true,
+            },
+          },
+        },
+      }
+    }
+
+    // Bundle analyzer (if enabled)
+    if (process.env.ANALYZE === 'true') {
+      config.plugins.push(
+        new (require('@next/bundle-analyzer'))({
+          enabled: true,
+          openAnalyzer: true,
+        })
+      );
+    }
+
+    return config;
+  },
+
+  // Headers for security and performance
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400',
+          },
+        ],
+      },
+    ];
+  },
+
+  // Redirects for SEO
+  async redirects() {
+    return [
+      {
+        source: '/admin',
+        destination: '/admin-dashboard',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

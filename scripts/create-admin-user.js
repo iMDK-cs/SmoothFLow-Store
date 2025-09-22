@@ -7,6 +7,7 @@
 
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
+require('dotenv').config();
 
 const prisma = new PrismaClient();
 
@@ -14,8 +15,11 @@ async function createAdminUser() {
   try {
     console.log('🔧 Creating admin user...\n');
     
-    const adminEmail = 'admin@smoothflow.com';
-    const adminPassword = 'admin123';
+    const adminEmail = process.env.ADMIN_EMAIL_SETUP || 'admin@smoothflow.com';
+    const adminPassword = process.env.ADMIN_PASSWORD_SETUP || (() => {
+      console.error('❌ ADMIN_PASSWORD_SETUP environment variable is required for security');
+      process.exit(1);
+    })();
     
     // Check if admin already exists
     const existingAdmin = await prisma.user.findUnique({
@@ -45,9 +49,9 @@ async function createAdminUser() {
     
     console.log('✅ Admin user created successfully!');
     console.log(`📧 Email: ${admin.email}`);
-    console.log(`🔑 Password: ${adminPassword}`);
     console.log(`👤 Role: ${admin.role}`);
     console.log('\n⚠️  Please change the password after first login!');
+    console.log('\n🔒 Password was set from ADMIN_PASSWORD_SETUP environment variable');
     
   } catch (error) {
     console.error('❌ Error creating admin user:', error);
