@@ -193,7 +193,7 @@ export const useOrderNotifications = () => {
       duration: 8000,
       action: {
         label: 'تتبع الطلب',
-              onClick: () => typeof window !== 'undefined' && window.open(`/orders/${orderNumber}`, '_blank'),
+        onClick: () => window.open(`/orders/${orderNumber}`, '_blank'),
       },
     });
   };
@@ -206,7 +206,7 @@ export const useOrderNotifications = () => {
       duration: 8000,
       action: {
         label: 'تتبع الطلب',
-              onClick: () => typeof window !== 'undefined' && window.open(`/orders/${orderNumber}`, '_blank'),
+        onClick: () => window.open(`/orders/${orderNumber}`, '_blank'),
       },
     });
   };
@@ -238,7 +238,7 @@ export const useOrderNotifications = () => {
       duration: 10000,
       action: {
         label: 'عرض التفاصيل',
-              onClick: () => typeof window !== 'undefined' && window.open(`/orders/${orderNumber}`, '_blank'),
+        onClick: () => window.open(`/orders/${orderNumber}`, '_blank'),
       },
     });
   };

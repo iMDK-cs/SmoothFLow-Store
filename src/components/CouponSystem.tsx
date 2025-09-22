@@ -470,7 +470,7 @@ export const AdminCouponManager: React.FC<AdminCouponManagerProps> = ({
                     <span>خصم: {formatDiscount(coupon)}</span>
                     <span>استخدم: {coupon.usedCount} مرة</span>
                     {coupon.maxUses && <span>من أصل: {coupon.maxUses}</span>}
-                    <span>ينتهي: {new Date(coupon.validUntil).toLocaleDateString('ar-SA')}</span>
+                    <span>ينتهي: {new Date(coupon.validUntil).toLocaleDateString('en-GB')}</span>
                   </div>
                 </div>
                 

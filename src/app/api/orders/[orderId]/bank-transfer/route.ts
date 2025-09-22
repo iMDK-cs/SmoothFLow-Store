@@ -109,7 +109,7 @@ export async function POST(
           totalPrice: item.totalPrice,
         })),
         receiptPath: receiptPath,
-        orderDate: order.createdAt.toLocaleDateString('ar-SA'),
+        orderDate: order.createdAt.toLocaleDateString('en-GB'),
       });
     } catch (emailError) {
       console.error('Failed to send email notifications:', emailError);

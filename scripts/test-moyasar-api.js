@@ -1,21 +1,13 @@
 const https = require('https');
-require('dotenv').config();
 
 // Test Moyasar API connection
 async function testMoyasarAPI() {
-  const apiKey = process.env.MOYASAR_SECRET_KEY;
-  
-  if (!apiKey) {
-    console.error('❌ MOYASAR_SECRET_KEY environment variable is required');
-    console.log('💡 Please set MOYASAR_SECRET_KEY in your .env file');
-    process.exit(1);
-  }
-  
+  const apiKey = 'sk_test_oGY41XSCPmyr6HexUMuk65s8WQNeDJuZV1xQRVAQ';
   const auth = Buffer.from(apiKey + ':').toString('base64');
   
   console.log('🔑 Testing Moyasar API connection...');
-  console.log('📝 API Key:', apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4));
-  console.log('🔐 Auth Header: Basic [REDACTED]');
+  console.log('📝 API Key:', apiKey);
+  console.log('🔐 Auth Header:', `Basic ${auth}`);
   
   const options = {
     hostname: 'api.moyasar.com',

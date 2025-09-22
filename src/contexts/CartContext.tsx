@@ -157,15 +157,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.log(`Add to cart API took ${executionTime}ms`)
       
       if (!response.ok) {
-        // Handle rate limiting specifically
-        if (response.status === 429) {
-          throw new Error('تم تجاوز الحد المسموح من الطلبات. يرجى المحاولة مرة أخرى بعد قليل.')
-        }
-        
-        const errorData = await response.json().catch(() => ({ 
-          error: response.status === 429 ? 'تم تجاوز الحد المسموح من الطلبات' : 'خطأ غير معروف' 
-        }))
-        throw new Error(errorData.error || 'فشل في إضافة العنصر إلى السلة')
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'Failed to add item to cart')
       }
       
       const result = await response.json()
@@ -178,19 +171,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       
     } catch (error) {
       console.error('Add to cart error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'فشل في إضافة العنصر إلى السلة'
-      dispatch({ type: 'SET_ERROR', payload: errorMessage })
+      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to add item to cart' })
       
-      // Retry mechanism for rate limiting (wait longer)
-      if (error instanceof Error && error.message.includes('تجاوز الحد المسموح')) {
-        console.log('Rate limited, retrying after 3 seconds...')
-        setTimeout(() => {
-          addToCart(serviceId, optionId, quantity)
-        }, 3000)
-      }
       // Retry mechanism for network errors
-      else if (error instanceof Error && error.message.includes('fetch')) {
-        console.log('Network error, retrying after 1 second...')
+      if (error instanceof Error && error.message.includes('fetch')) {
+        console.log('Retrying add to cart...')
         setTimeout(() => {
           addToCart(serviceId, optionId, quantity)
         }, 1000)

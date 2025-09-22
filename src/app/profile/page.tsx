@@ -179,7 +179,7 @@ export default function Profile() {
                     <div>
                       <p className="text-gray-400 text-sm">تاريخ الانضمام</p>
                       <p className="text-white">
-                        {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US') : 'غير محدد'}
+                        {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB') : 'غير محدد'}
                       </p>
                     </div>
                     <button

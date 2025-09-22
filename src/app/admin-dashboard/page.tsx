@@ -282,9 +282,9 @@ export default function AdminDashboard() {
                         {order.status}
                       </span>
                     </td>
-                    <td className="py-3 text-slate-400 text-sm">
-                        {new Date(order.createdAt).toLocaleDateString('en-GB')}
-                    </td>
+                     <td className="py-3 text-slate-400 text-sm">
+                         {new Date(order.createdAt).toLocaleDateString('en-GB')}
+                     </td>
                   </tr>
                 ))}
               </tbody>

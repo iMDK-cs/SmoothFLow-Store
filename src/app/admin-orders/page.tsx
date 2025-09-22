@@ -220,14 +220,12 @@ export default function AdminOrders() {
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: fileType });
         const url = URL.createObjectURL(blob);
-        if (typeof document !== 'undefined') {
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = fileName;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        }
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
       } else {
         alert('لم يتم العثور على بيانات الملف');
@@ -329,9 +327,7 @@ export default function AdminOrders() {
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: fileType });
         const url = URL.createObjectURL(blob);
-        if (typeof window !== 'undefined') {
-          window.open(url, '_blank');
-        }
+        window.open(url, '_blank');
       } else {
         alert('لم يتم العثور على بيانات الملف');
       }
@@ -450,7 +446,7 @@ export default function AdminOrders() {
                       </span>
                     </td>
                     <td className="py-3 text-gray-400">
-                      {new Date(order.createdAt).toLocaleDateString('en-US')}
+                      {new Date(order.createdAt).toLocaleDateString('en-GB')}
                     </td>
                     <td className="py-3">
                       <div className="flex space-x-2 space-x-reverse">
@@ -620,7 +616,7 @@ export default function AdminOrders() {
                   </div>
                   <div>
                     <p className="text-gray-400 text-sm">تاريخ الطلب</p>
-                    <p className="text-white">{new Date(selectedOrder.createdAt).toLocaleDateString('en-US')}</p>
+                    <p className="text-white">{new Date(selectedOrder.createdAt).toLocaleDateString('en-GB')}</p>
                   </div>
                 </div>
 

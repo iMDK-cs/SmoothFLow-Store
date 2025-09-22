@@ -23,6 +23,7 @@ model User {
 
   // Relations
   orders    Order[]
+  reviews   Review[]
   sessions  Session[]
   accounts  Account[]
   cart      Cart?
@@ -91,6 +92,7 @@ model Service {
   options     ServiceOption[]
   orderItems  OrderItem[]
   cartItems   CartItem[]
+  reviews     Review[]
 
   @@map("services")
 }
@@ -127,17 +129,12 @@ model Order {
   paymobPaymentKey  String?  // Payment key for iframe
   paymobTransactionId String? // Transaction ID from Paymob
   
-  // Bank Transfer fields
-  bankTransferReceipt String? // Path to uploaded receipt file
-  bankTransferStatus  String? // PENDING_ADMIN_APPROVAL, APPROVED, REJECTED
-  adminNotes          String? // Admin notes for approval/rejection
-  adminApprovedBy     String? // Admin user ID who approved/rejected
-  adminApprovedAt     DateTime? // When admin approved/rejected
-  
-  // Coupon fields
-  couponId            String? // Applied coupon ID
-  couponCode          String? // Applied coupon code (for reference)
-  discountAmount      Float   @default(0) // Discount amount applied
+  // Bank Transfer fields (temporarily commented out until migration)
+  // bankTransferReceipt String? // Path to uploaded receipt file
+  // bankTransferStatus  String? // PENDING_ADMIN_APPROVAL, APPROVED, REJECTED
+  // adminNotes          String? // Admin notes for approval/rejection
+  // adminApprovedBy     String? // Admin user ID who approved/rejected
+  // adminApprovedAt     DateTime? // When admin approved/rejected
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -146,8 +143,6 @@ model Order {
   user      User        @relation(fields: [userId], references: [id])
   items     OrderItem[]
   payments  Payment[]
-  coupon    Coupon?     @relation("OrderCoupon", fields: [couponId], references: [id])
-  tracking  OrderTracking[]
 
   @@map("orders")
 }
@@ -194,6 +189,23 @@ model Payment {
   @@map("payments")
 }
 
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  serviceId String
+  orderId   String?
+  rating    Int
+  comment   String?
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@unique([userId, serviceId, orderId])
+  @@map("reviews")
+}
 
 model Cart {
   id        String   @id @default(cuid())
@@ -253,43 +265,5 @@ model Notification {
   @@map("notifications")
 }
 
-model Coupon {
-  id            String   @id @default(cuid())
-  code          String   @unique
-  name          String   // Display name for admin
-  description   String?  // Coupon description
-  discountType  String   // 'PERCENTAGE' | 'FIXED'
-  discountValue Float    // Percentage (0-100) or fixed amount
-  minAmount     Float?   // Minimum order amount to apply
-  maxDiscount   Float?   // Maximum discount amount (for percentage)
-  maxUses       Int?     // Maximum number of uses (null = unlimited)
-  usedCount     Int      @default(0) // Current usage count
-  validFrom     DateTime @default(now())
-  validUntil    DateTime
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Relations
-  orders Order[] @relation("OrderCoupon")
-
-  @@map("coupons")
-}
-
-model OrderTracking {
-  id          String   @id @default(cuid())
-  orderId     String
-  status      String   // 'RECEIVED', 'CONFIRMED', 'IN_PROGRESS', 'TESTING', 'COMPLETED', 'DELIVERED'
-  title       String   // Status title in Arabic
-  description String?  // Status description
-  notes       String?  // Admin notes for this status
-  timestamp   DateTime @default(now())
-  adminId     String?  // Admin who updated the status
-  
-  // Relations
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  @@map("order_tracking")
-}
 
 // Removed all enum declarations - using String instead

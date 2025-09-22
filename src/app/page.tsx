@@ -55,7 +55,7 @@ class ErrorBoundary extends React.Component<
             <h1 className="text-white text-2xl font-bold mb-2">حدث خطأ غير متوقع</h1>
             <p className="text-gray-400 mb-6">يرجى تحديث الصفحة والمحاولة مرة أخرى</p>
             <button
-              onClick={() => typeof window !== 'undefined' && window.location.reload()}
+              onClick={() => window.location.reload()}
               className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 rounded-lg transition-colors"
             >
               تحديث الصفحة

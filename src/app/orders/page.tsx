@@ -135,7 +135,7 @@ export default function Orders() {
                     <div>
                       <h3 className="text-lg font-semibold text-white">{order.orderNumber}</h3>
                       <p className="text-gray-400 text-sm">
-                        {new Date(order.createdAt).toLocaleDateString('en-US')}
+                        {new Date(order.createdAt).toLocaleDateString('en-GB')}
                       </p>
                     </div>
                     <div className="text-left">

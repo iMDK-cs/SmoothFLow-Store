@@ -1,133 +1,77 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { z } from 'zod'
+import { getCachedServices, setCachedServices, createServicesCacheKey } from '@/lib/cache'
 
 // Use Node.js runtime for Prisma compatibility
 export const runtime = 'nodejs'
-export const maxDuration = 10 // 10 seconds max
-
-const serviceQuerySchema = z.object({
-  category: z.string().optional(),
-  featured: z.string().optional(),
-  limit: z.string().optional(),
-  search: z.string().optional(),
-})
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const query = serviceQuerySchema.parse({
-      category: searchParams.get('category'),
-      featured: searchParams.get('featured'),
-      limit: searchParams.get('limit'),
-      search: searchParams.get('search'),
-    })
-
-    // Build where clause
-    const whereClause: {
-      active: boolean
-      available: boolean
-      category?: string
-      popular?: boolean
-      OR?: Array<{
-        title?: { contains: string; mode: 'insensitive' }
-        description?: { contains: string; mode: 'insensitive' }
-        category?: { contains: string; mode: 'insensitive' }
-      }>
-    } = {
-      active: true,
-      available: true,
+    const category = searchParams.get('category')
+    const popular = searchParams.get('popular')
+    
+    // Create cache key
+    const cacheKey = createServicesCacheKey(category, popular)
+    const cached = getCachedServices(cacheKey)
+    
+    // Return cached data if still valid
+    if (cached) {
+      return NextResponse.json({ 
+        services: cached,
+        cached: true,
+        timestamp: Date.now()
+      })
     }
-
-    if (query.category) {
-      whereClause.category = query.category
+    
+    // Build query conditions - return all services (including inactive ones for display)
+    const where: Record<string, unknown> = {}
+    
+    if (category) {
+      where.category = category
     }
-
-    if (query.featured === 'true') {
-      whereClause.popular = true
+    
+    if (popular === 'true') {
+      where.popular = true
     }
-
-    if (query.search) {
-      whereClause.OR = [
-        { title: { contains: query.search, mode: 'insensitive' } },
-        { description: { contains: query.search, mode: 'insensitive' } },
-        { category: { contains: query.search, mode: 'insensitive' } },
-      ]
-    }
-
-    // Execute query
+    
+    // Optimized query with minimal data
     const services = await prisma.service.findMany({
-      where: whereClause,
-      orderBy: [
-        { popular: 'desc' },
-        { createdAt: 'desc' }
-      ],
-      take: query.limit ? parseInt(query.limit) : undefined,
+      where,
       select: {
         id: true,
         title: true,
         description: true,
         basePrice: true,
+        category: true,
         image: true,
         icon: true,
-        category: true,
+        color: true,
         popular: true,
-        available: true,
-        active: true,
         stock: true,
-        options: {
-          where: { active: true },
-          select: {
-            id: true,
-            title: true,
-            price: true,
-            description: true,
-          }
-        },
-        createdAt: true,
-        updatedAt: true,
-      }
-    })
-
-    // Group services by category for better organization
-    const servicesByCategory = services.reduce((acc, service) => {
-      const category = service.category || 'أخرى'
-      if (!acc[category]) {
-        acc[category] = []
-      }
-      acc[category].push(service)
-      return acc
-    }, {} as Record<string, typeof services>)
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        services,
-        servicesByCategory,
-        total: services.length,
-        categories: Object.keys(servicesByCategory),
-      }
-    })
-
-  } catch (error) {
-    console.error('Services API error:', error)
-    
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'خطأ في معاملات الطلب',
-          details: error.issues 
-        },
-        { status: 400 }
-      )
-    }
-
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'خطأ في جلب الخدمات' 
+        available: true,
+        availabilityStatus: true,
+        active: true
       },
+      orderBy: [
+        { popular: 'desc' },
+        { createdAt: 'desc' }
+      ]
+    })
+    
+    // Cache the result
+    setCachedServices(cacheKey, services)
+    
+    return NextResponse.json({ 
+      services,
+      cached: false,
+      timestamp: Date.now()
+    })
+    
+  } catch (error) {
+    console.error('Get services error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

@@ -30,9 +30,7 @@ const AdminFileViewer: React.FC<AdminFileViewerProps> = ({
     setError('');
     
     // Open file in new tab
-      if (typeof window !== 'undefined') {
-        window.open(fileUrl, '_blank');
-      }
+    window.open(fileUrl, '_blank');
     
     // Reset loading state after a delay
     setTimeout(() => setIsLoading(false), 1000);
@@ -43,15 +41,13 @@ const AdminFileViewer: React.FC<AdminFileViewerProps> = ({
     setError('');
     
     // Create download link
-    if (typeof document !== 'undefined') {
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = fileName;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     
     // Reset loading state after a delay
     setTimeout(() => setIsLoading(false), 1000);
