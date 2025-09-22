@@ -69,10 +69,6 @@ export const OrderTracking: React.FC<OrderTrackingProps> = ({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchTrackingData()
-  }, [orderId, fetchTrackingData])
-
   const fetchTrackingData = useCallback(async () => {
     try {
       setLoading(true)
@@ -91,6 +87,10 @@ export const OrderTracking: React.FC<OrderTrackingProps> = ({
       setLoading(false)
     }
   }, [orderId])
+
+  useEffect(() => {
+    fetchTrackingData()
+  }, [orderId, fetchTrackingData])
 
   const getCurrentStepIndex = () => {
     return statusSteps.findIndex(step => step.status === currentStatus)

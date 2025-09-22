@@ -137,7 +137,7 @@ export const sanitizeString = (str: string): string => {
 export const formatValidationError = (error: z.ZodError) => {
   return {
     message: 'خطأ في التحقق من البيانات',
-    errors: error.errors.map(err => ({
+    errors: error.issues.map(err => ({
       field: err.path.join('.'),
       message: err.message
     }))

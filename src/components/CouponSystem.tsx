@@ -213,6 +213,14 @@ export const AdminCouponManager: React.FC<AdminCouponManagerProps> = ({
     fetchCoupons()
   }, [])
 
+  const formatDiscount = (coupon: Coupon): string => {
+    if (coupon.discountType === 'PERCENTAGE') {
+      return `${coupon.discountValue}%${coupon.maxDiscount ? ` (حد أقصى ${coupon.maxDiscount} ريال)` : ''}`
+    } else {
+      return `${coupon.discountValue} ريال`
+    }
+  }
+
   const fetchCoupons = async () => {
     try {
       setLoading(true)
