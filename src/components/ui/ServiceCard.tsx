@@ -9,13 +9,11 @@ import { useCart } from '@/contexts/CartContext'
 interface ServiceCardProps {
   service: Service
   className?: string
-  showAddToCart?: boolean
 }
 
 export default function ServiceCard({ 
   service, 
-  className = "", 
-  showAddToCart = true 
+  className = ""
 }: ServiceCardProps) {
   const [isAdding, setIsAdding] = useState(false)
   const { addToCart } = useCart()
@@ -115,25 +113,52 @@ export default function ServiceCard({
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2">
-            <Link
-              href={`/service/${service.id}`}
-              className="flex-1 rounded-lg bg-sky-600 px-3 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-sky-700"
-            >
-              عرض التفاصيل
-            </Link>
-            
-            {showAddToCart && service.available && (service.stock === null || service.stock === undefined || service.stock > 0) && (
-              <button
-                onClick={handleAddToCart}
-                disabled={isAdding}
-                className="rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isAdding ? 'جاري الإضافة...' : 'إضافة للسلة'}
-              </button>
+          {/* Add to Cart Button */}
+          <button 
+            className={`w-full py-3 rounded-lg font-bold transition-all duration-300 transform text-sm relative overflow-hidden ${
+              (service.available === false || service.active === false)
+                ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 cursor-not-allowed border border-gray-500/50 shadow-inner' 
+                : `sky-blue-gradient text-white ${
+                    'shadow-md hover:shadow-lg group-hover:shadow-sky-500/30'
+                  }`
+            } ${isAdding ? 'animate-pulse' : ''} disabled:opacity-50 disabled:cursor-not-allowed`}
+            disabled={isAdding || service.available === false || service.active === false}
+            onClick={handleAddToCart}
+            aria-label={(service.available === false || service.active === false) ? `${service.title} غير متوفر` : `إضافة ${service.title} إلى السلة`}
+          >
+            {/* Animated background effect - only for available items */}
+            {service.available !== false && (
+              <div className="absolute inset-0 bg-gradient-to-r from-sky-400/20 to-sky-600/20 animate-pulse-slow"></div>
             )}
-          </div>
+            
+            <span className="flex items-center justify-center relative z-10">
+              {(service.available === false || service.active === false) ? (
+                <>
+                  <span className="text-lg mr-2 animate-pulse">❌</span>
+                  <span className="font-bold text-gray-200">غير متوفر حالياً</span>
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <span className="font-bold" style={{
+                    filter: 'contrast(1.2) brightness(1.1)',
+                    textShadow: '0 0 3px rgba(255, 255, 255, 0.7)'
+                  }}>
+                    {isAdding ? 'جاري الإضافة...' : 'إضافة للسلة'}
+                  </span>
+                  {isAdding ? (
+                    <div className="w-3 h-3 mr-1 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 1.5M7 13l1.5-1.5M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z" />
+                    </svg>
+                  )}
+                </>
+              )}
+            </span>
+          </button>
         </div>
       </Link>
     </div>
