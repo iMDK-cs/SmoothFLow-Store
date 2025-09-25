@@ -692,7 +692,7 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ servic
                 className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   (service.id === 'ready-builds' || service.active === false)
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-sky-500 hover:bg-sky-600 text-white'
                 }`}
               >
                 {(service.id === 'ready-builds' || service.active === false) ? 'غير متوفر حالياً' : (isAddingToCart ? 'جاري الإضافة...' : 'أضف للسلة')}

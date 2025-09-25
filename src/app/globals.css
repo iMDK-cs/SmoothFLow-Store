@@ -130,6 +130,10 @@ body {
   text-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
 }
 
+.sky-blue-gradient {
+  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 475px) {
   .xs\:text-4xl { font-size: 1.875rem; line-height: 2.25rem; }
