@@ -24,7 +24,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [error, setError] = useState('')
-  const [paymentMethod, setPaymentMethod] = useState<'moyasar' | 'bank_transfer'>('moyasar')
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank_transfer'>('bank_transfer')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [uploadingFile, setUploadingFile] = useState(false)
   const [fileError, setFileError] = useState('')
@@ -58,35 +58,9 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
     fetchOrder()
   }, [session, orderId, router, fetchOrder])
 
-  const handleMoyasarPayment = async () => {
-    setProcessing(true)
-    setError('')
-
-    try {
-      const response = await fetch('/api/payments/moyasar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          orderId: orderId,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Payment failed')
-      }
-
-      // Redirect to Moyasar checkout page instead of showing iframe
-      window.location.href = data.paymentUrl
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Payment failed')
-      setProcessing(false)
-    }
+  const handleCardPayment = () => {
+    alert('خدمة الدفع بالبطاقة غير متوفرة حالياً. يرجى استخدام التحويل البنكي.')
   }
-
 
   const handleBankTransferPayment = async () => {
     if (!selectedFile) {
@@ -226,17 +200,17 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
             <div className="mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
-                  onClick={() => setPaymentMethod('moyasar')}
+                  onClick={() => setPaymentMethod('card')}
                   className={`p-4 rounded-lg border-2 transition-colors ${
-                    paymentMethod === 'moyasar'
-                      ? 'border-sky-500 bg-sky-500/20'
+                    paymentMethod === 'card'
+                      ? 'border-red-500 bg-red-500/20'
                       : 'border-gray-600 bg-gray-700/50'
                   }`}
                 >
                   <div className="text-center">
                     <div className="text-2xl mb-2">💳</div>
                     <p className="text-white font-medium">بطاقات + Apple Pay</p>
-                    <p className="text-gray-400 text-sm">دفع آمن ومضمون</p>
+                    <p className="text-gray-400 text-sm">غير متوفر حالياً</p>
                   </div>
                 </button>
                 
@@ -257,21 +231,20 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
               </div>
             </div>
 
-            {/* Moyasar Payment Info */}
-            {paymentMethod === 'moyasar' && (
+            {/* Card Payment Info */}
+            {paymentMethod === 'card' && (
               <div className="mb-6">
-                <div className="bg-gray-700/50 rounded-lg p-4 mb-4">
-                  <h3 className="text-lg font-semibold text-white mb-2">الدفع الآمن - بطاقات + Apple Pay</h3>
-                  <p className="text-gray-300 text-sm">
-                    سيتم توجيهك إلى صفحة دفع آمنة ومحمية. يمكنك الدفع باستخدام بطاقات Mada، Visa، Mastercard، أو Apple Pay.
+                <div className="bg-red-900/30 border border-red-500/50 rounded-lg p-4 mb-4">
+                  <h3 className="text-lg font-semibold text-red-300 mb-2">خدمة الدفع بالبطاقة غير متوفرة</h3>
+                  <p className="text-red-200 text-sm">
+                    نعتذر، خدمة الدفع بالبطاقة غير متوفرة حالياً. يرجى استخدام التحويل البنكي لإتمام طلبك.
                   </p>
                 </div>
               </div>
             )}
 
             {/* Bank Transfer Details */}
-            {paymentMethod === 'bank_transfer' && (
-              <div className="mb-6 p-4 bg-gray-700/50 rounded-lg">
+            <div className="mb-6 p-4 bg-gray-700/50 rounded-lg">
                 <h3 className="text-lg font-semibold text-white mb-3">تفاصيل الحساب البنكي</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
@@ -302,33 +275,29 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
                   </ol>
                 </div>
               </div>
-            )}
 
             {/* File Upload for Bank Transfer */}
-            {paymentMethod === 'bank_transfer' && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-white mb-3">رفع إيصال التحويل</h3>
-                <FileUpload
-                  onFileSelect={handleFileSelect}
-                  onFileRemove={handleFileRemove}
-                  selectedFile={selectedFile}
-                  loading={uploadingFile}
-                  error={fileError}
-                />
-              </div>
-            )}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-white mb-3">رفع إيصال التحويل</h3>
+              <FileUpload
+                onFileSelect={handleFileSelect}
+                onFileRemove={handleFileRemove}
+                selectedFile={selectedFile}
+                loading={uploadingFile}
+                error={fileError}
+              />
+            </div>
 
             {/* Payment Button */}
             <div className="space-y-4">
-              {paymentMethod === 'moyasar' ? (
+              {paymentMethod === 'card' ? (
                 <button
-                  onClick={handleMoyasarPayment}
-                  disabled={processing}
-                  className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors disabled:opacity-50 flex items-center justify-center"
+                  onClick={handleCardPayment}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center"
                 >
-                  {processing ? 'جاري تحضير الدفع...' : 'المتابعة للدفع'}
+                  خدمة غير متوفرة - جرب التحويل البنكي
                 </button>
-              ) : paymentMethod === 'bank_transfer' ? (
+              ) : (
                 <button
                   onClick={handleBankTransferPayment}
                   disabled={processing || !selectedFile}
@@ -336,7 +305,7 @@ export default function Payment({ params }: { params: Promise<{ orderId: string 
                 >
                   {processing ? 'جاري المعالجة...' : 'إرسال إيصال التحويل'}
                 </button>
-              ) : null}
+              )}
             </div>
 
             {error && (
