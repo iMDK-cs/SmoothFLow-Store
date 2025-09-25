@@ -167,22 +167,6 @@ export default function RootLayout({
           </NotificationProvider>
         </Providers>
         
-        {/* Performance monitoring script (optional) */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Basic performance monitoring
-              if (typeof window !== 'undefined') {
-                window.addEventListener('load', function() {
-                  setTimeout(function() {
-                    const perfData = performance.getEntriesByType('navigation')[0];
-                    console.log('Page load time:', perfData.loadEventEnd - perfData.fetchStart + 'ms');
-                  }, 0);
-                });
-              }
-            `
-          }}
-        />
         <SpeedInsights />
       </body>
     </html>

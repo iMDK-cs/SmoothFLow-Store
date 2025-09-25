@@ -177,7 +177,7 @@ export default function AdminServices() {
       if (!service) return
 
       const newActiveStatus = !service.active
-      const newAvailableStatus = newActiveStatus // ربط حالة التفعيل مع التوفر
+      const newAvailableStatus = newActiveStatus
 
       const response = await fetch('/api/admin/services/toggle-status', {
         method: 'POST',

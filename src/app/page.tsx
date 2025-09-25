@@ -23,37 +23,27 @@ const LiveChat = dynamic(() => import('@/components/LiveChat'), {
   ssr: false
 });
 
-// Enhanced Error Boundary Component
+// Simple Error Boundary Component
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: React.ComponentType<{ error?: Error }> },
-  { hasError: boolean; error?: Error }
+  { children: React.ReactNode },
+  { hasError: boolean }
 > {
-  constructor(props: { children: React.ReactNode; fallback?: React.ComponentType<{ error?: Error }> }) {
+  constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+  static getDerivedStateFromError() {
+    return { hasError: true };
   }
 
   render() {
     if (this.state.hasError) {
-      const Fallback = this.props.fallback;
-      if (Fallback) {
-        return <Fallback error={this.state.error} />;
-      }
-      
       return (
         <div className="min-h-screen bg-gray-900 flex items-center justify-center" dir="rtl">
           <div className="text-center p-8">
             <div className="text-red-500 text-6xl mb-4">⚠️</div>
             <h1 className="text-white text-2xl font-bold mb-2">حدث خطأ غير متوقع</h1>
-            <p className="text-gray-400 mb-6">يرجى تحديث الصفحة والمحاولة مرة أخرى</p>
             <button
               onClick={() => window.location.reload()}
               className="bg-sky-500 hover:bg-sky-600 text-white px-6 py-3 rounded-lg transition-colors"
@@ -69,38 +59,12 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Beautiful Animated Background Component
+// Simple Background Component
 const AnimatedBackground = memo(() => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      {/* Base gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900" />
-      
-      {/* Animated floating particles */}
-      <div className="absolute inset-0">
-        {/* Large floating circles with gentle animation */}
-        <div className="absolute w-32 h-32 bg-sky-500/8 rounded-full top-20 left-20 animate-pulse" style={{animationDuration: '6s'}}></div>
-        <div className="absolute w-24 h-24 bg-blue-500/10 rounded-full top-40 right-32 animate-pulse" style={{animationDuration: '8s', animationDelay: '2s'}}></div>
-        <div className="absolute w-40 h-40 bg-cyan-500/6 rounded-full bottom-32 left-1/4 animate-pulse" style={{animationDuration: '10s', animationDelay: '1s'}}></div>
-        <div className="absolute w-20 h-20 bg-purple-500/8 rounded-full top-60 right-1/3 animate-pulse" style={{animationDuration: '7s', animationDelay: '3s'}}></div>
-        
-        {/* Small drifting particles */}
-        <div className="absolute w-3 h-3 bg-sky-400/20 rounded-full top-10 left-10 animate-bounce" style={{animationDuration: '4s', animationDelay: '0.5s'}}></div>
-        <div className="absolute w-2 h-2 bg-blue-400/30 rounded-full top-30 left-30 animate-bounce" style={{animationDuration: '5s', animationDelay: '1.5s'}}></div>
-        <div className="absolute w-4 h-4 bg-cyan-300/15 rounded-full top-50 left-50 animate-bounce" style={{animationDuration: '6s', animationDelay: '2.5s'}}></div>
-        
-        {/* Subtle grid pattern */}
-        <div 
-          className="absolute inset-0 opacity-5"
-          style={{
-            backgroundImage: `radial-gradient(circle at 25% 25%, #00BFFF 1px, transparent 1px), radial-gradient(circle at 75% 75%, #87CEEB 1px, transparent 1px)`,
-            backgroundSize: '100px 100px',
-          }}
-        ></div>
-        
-        {/* Gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/3 via-transparent to-blue-500/3"></div>
-      </div>
+      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/5 via-transparent to-blue-500/5"></div>
     </div>
   );
 });
