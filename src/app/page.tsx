@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
@@ -59,14 +59,49 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Simple Background Component
+// Advanced Background Component
 const AnimatedBackground = memo(() => {
+  const particles = useMemo(() => {
+    return Array.from({ length: 9 }).map((_, index) => {
+      const types = ['circle', 'triangle', 'hex'];
+      const speeds = ['slow', 'medium', 'fast'];
+      const randomTop = 20 + Math.random() * 60;
+      const randomLeft = 5 + Math.random() * 90;
+
+      return {
+        id: `particle-${index}`,
+        type: types[index % types.length],
+        speed: speeds[index % speeds.length],
+        size: 70 + (index % 3) * 50,
+        top: `${randomTop}%`,
+        left: `${randomLeft}%`,
+        delay: `${index * 2.5}s`,
+        duration: `${20 + (index % 3) * 5}s`,
+        opacity: 0.25 + (index % 4) * 0.12
+      };
+    });
+  }, []);
+
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-900 to-slate-950" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/12 via-transparent to-blue-500/12 background-pulse"></div>
-      <div className="absolute top-1/4 left-1/5 w-64 h-64 bg-sky-400/15 blur-3xl rounded-full background-pulse" style={{ animationDelay: '4s' }}></div>
-      <div className="absolute bottom-1/3 right-1/5 w-72 h-72 bg-blue-500/12 blur-3xl rounded-full background-pulse" style={{ animationDelay: '8s' }}></div>
+    <div className="smoothflow-bg" aria-hidden="true">
+      <div className="smoothflow-bg__layer smoothflow-bg__gradient smoothflow-bg__layer--depth1"></div>
+      <div className="smoothflow-bg__layer smoothflow-bg__grid smoothflow-bg__layer--depth2"></div>
+      <div className="smoothflow-bg__layer smoothflow-bg__spotlights smoothflow-bg__layer--depth3">
+        <span className="smoothflow-bg__spotlight" style={{ top: '10%', left: '12%', width: '45vw', height: '45vw', animationDelay: '0s' }}></span>
+        <span className="smoothflow-bg__spotlight" style={{ top: '55%', left: '35%', width: '38vw', height: '38vw', animationDelay: '6s' }}></span>
+        <span className="smoothflow-bg__spotlight" style={{ top: '25%', right: '8%', width: '42vw', height: '42vw', animationDelay: '10s' }}></span>
+      </div>
+      <div className="smoothflow-bg__layer smoothflow-bg__particles smoothflow-bg__layer--depth4">
+        {particles.map(({ id, type, speed, size, top, left, delay, duration, opacity }) => (
+          <span
+            key={id}
+            className={`smoothflow-bg__particle smoothflow-bg__particle--${type} smoothflow-bg__particle--${speed}`}
+            style={{ top, left, width: `${size}px`, height: `${size}px`, animationDuration: duration, animationDelay: delay, opacity }}
+          />
+        ))}
+      </div>
+      <div className="smoothflow-bg__layer smoothflow-bg__beams smoothflow-bg__layer--depth5"></div>
+      <div className="smoothflow-bg__layer smoothflow-bg__noise"></div>
     </div>
   );
 });
