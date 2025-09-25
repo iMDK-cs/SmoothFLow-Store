@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
@@ -59,49 +59,19 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Advanced Background Component
+// Simple Background Component
 const AnimatedBackground = memo(() => {
-  const particles = useMemo(() => {
-    return Array.from({ length: 9 }).map((_, index) => {
-      const types = ['circle', 'triangle', 'hex'];
-      const speeds = ['slow', 'medium', 'fast'];
-      const randomTop = 20 + Math.random() * 60;
-      const randomLeft = 5 + Math.random() * 90;
-
-      return {
-        id: `particle-${index}`,
-        type: types[index % types.length],
-        speed: speeds[index % speeds.length],
-        size: 70 + (index % 3) * 50,
-        top: `${randomTop}%`,
-        left: `${randomLeft}%`,
-        delay: `${index * 2.5}s`,
-        duration: `${20 + (index % 3) * 5}s`,
-        opacity: 0.25 + (index % 4) * 0.12
-      };
-    });
-  }, []);
-
   return (
-    <div className="smoothflow-bg" aria-hidden="true">
-      <div className="smoothflow-bg__layer smoothflow-bg__gradient smoothflow-bg__layer--depth1"></div>
-      <div className="smoothflow-bg__layer smoothflow-bg__grid smoothflow-bg__layer--depth2"></div>
-      <div className="smoothflow-bg__layer smoothflow-bg__spotlights smoothflow-bg__layer--depth3">
-        <span className="smoothflow-bg__spotlight" style={{ top: '10%', left: '12%', width: '45vw', height: '45vw', animationDelay: '0s' }}></span>
-        <span className="smoothflow-bg__spotlight" style={{ top: '55%', left: '35%', width: '38vw', height: '38vw', animationDelay: '6s' }}></span>
-        <span className="smoothflow-bg__spotlight" style={{ top: '25%', right: '8%', width: '42vw', height: '42vw', animationDelay: '10s' }}></span>
-      </div>
-      <div className="smoothflow-bg__layer smoothflow-bg__particles smoothflow-bg__layer--depth4">
-        {particles.map(({ id, type, speed, size, top, left, delay, duration, opacity }) => (
-          <span
-            key={id}
-            className={`smoothflow-bg__particle smoothflow-bg__particle--${type} smoothflow-bg__particle--${speed}`}
-            style={{ top, left, width: `${size}px`, height: `${size}px`, animationDuration: duration, animationDelay: delay, opacity }}
-          />
-        ))}
-      </div>
-      <div className="smoothflow-bg__layer smoothflow-bg__beams smoothflow-bg__layer--depth5"></div>
-      <div className="smoothflow-bg__layer smoothflow-bg__noise"></div>
+    <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-900 to-slate-950" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/12 via-transparent to-blue-500/12 background-pulse"></div>
+
+      <div className="absolute top-[12%] left-[15%] w-[28rem] h-[28rem] bg-sky-400/15 blur-3xl rounded-full background-pulse bg-drift-horizontal"></div>
+      <div className="absolute bottom-[18%] right-[12%] w-[30rem] h-[30rem] bg-blue-500/12 blur-3xl rounded-full background-pulse bg-drift-vertical" style={{ animationDelay: '3s' }}></div>
+      <div className="absolute top-1/2 left-[45%] w-64 h-64 bg-cyan-400/10 blur-[120px] rounded-full background-pulse bg-drift-diagonal" style={{ animationDelay: '6s' }}></div>
+
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-sky-500/10 to-transparent" />
+      <div className="absolute inset-x-10 bottom-[-10rem] h-[20rem] bg-gradient-to-t from-blue-500/15 to-transparent blur-3xl" />
     </div>
   );
 });
@@ -982,7 +952,7 @@ const EnhancedServiceSection = memo(({
   return (
     <section 
       id={sectionKey} 
-      className="py-8 relative z-10"
+      className="py-16 relative z-10"
       aria-labelledby={`${sectionKey}-heading`}
     >
       <div 
@@ -999,16 +969,46 @@ const EnhancedServiceSection = memo(({
         />
       </div>
       
-      <div className="container mx-auto px-4 mt-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
-          {category.services.map((service: Service, index: number) => (
-            <ServiceCard 
-              key={service.id} 
-              service={service} 
-              index={index}
-              onAddToCart={onAddToCart}
-            />
-          ))}
+      <div className="container mx-auto px-4 mt-10 lg:mt-12">
+        <div className="flex flex-col xl:flex-row xl:items-start gap-10">
+          <aside className="xl:w-72 bg-gray-900/60 border border-sky-500/15 rounded-3xl p-6 shadow-lg shadow-sky-900/20 hidden xl:block sticky top-28">
+            <div className="mb-6">
+              <span className="inline-flex items-center px-3 py-1 text-xs font-semibold bg-sky-500/10 text-sky-300 rounded-full border border-sky-400/30 mb-3">
+                {category.icon} {category.title}
+              </span>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                استكشف خدمات {category.title} وتصفح الباقات المختلفة بسهولة مع شريط التنقل السريع.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {category.services.map((service) => (
+                <button
+                  key={`${sectionKey}-${service.id}`}
+                  className="w-full text-right text-sm px-4 py-3 rounded-xl bg-gray-800/60 border border-gray-700/40 text-gray-300 hover:text-white hover:border-sky-500/40 hover:bg-gray-800/90 transition-all"
+                  onClick={() => {
+                    const card = document.querySelector(`[data-service-id="${service.id}"]`);
+                    card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }}
+                >
+                  {service.title}
+                </button>
+              ))}
+            </div>
+          </aside>
+
+          <div className="flex-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 xl:gap-6">
+              {category.services.map((service: Service, index: number) => (
+                <ServiceCard 
+                  key={service.id} 
+                  service={service} 
+                  index={index}
+                  onAddToCart={onAddToCart}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
       
