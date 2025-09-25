@@ -22,11 +22,12 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  orders    Order[]
-  reviews   Review[]
-  sessions  Session[]
-  accounts  Account[]
-  cart      Cart?
+  orders        Order[]
+  reviews       Review[]
+  sessions      Session[]
+  accounts      Account[]
+  cart          Cart?
+  trackingUpdates OrderTracking[] @relation("TrackingUpdates")
 
   @@map("users")
 }
@@ -140,9 +141,10 @@ model Order {
   updatedAt     DateTime @updatedAt
 
   // Relations
-  user      User        @relation(fields: [userId], references: [id])
+  user      User            @relation(fields: [userId], references: [id])
   items     OrderItem[]
   payments  Payment[]
+  tracking  OrderTracking[]
 
   @@map("orders")
 }
@@ -263,6 +265,23 @@ model Notification {
   createdAt DateTime @default(now())
 
   @@map("notifications")
+}
+
+model OrderTracking {
+  id          String   @id @default(cuid())
+  orderId     String
+  status      String   // RECEIVED, CONFIRMED, IN_PROGRESS, TESTING, COMPLETED, DELIVERED
+  title       String
+  description String?
+  notes       String?
+  adminId     String
+  timestamp   DateTime @default(now())
+
+  // Relations
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  admin   User  @relation("TrackingUpdates", fields: [adminId], references: [id])
+
+  @@map("order_tracking")
 }
 
 
