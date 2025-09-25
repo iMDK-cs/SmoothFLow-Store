@@ -59,19 +59,21 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Simple Background Component
+// Enhanced Background Component
 const AnimatedBackground = memo(() => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-900 to-slate-950" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/12 via-transparent to-blue-500/12 background-pulse"></div>
-
-      <div className="absolute top-[12%] left-[15%] w-[28rem] h-[28rem] bg-sky-400/15 blur-3xl rounded-full background-pulse bg-drift-horizontal"></div>
-      <div className="absolute bottom-[18%] right-[12%] w-[30rem] h-[30rem] bg-blue-500/12 blur-3xl rounded-full background-pulse bg-drift-vertical" style={{ animationDelay: '3s' }}></div>
-      <div className="absolute top-1/2 left-[45%] w-64 h-64 bg-cyan-400/10 blur-[120px] rounded-full background-pulse bg-drift-diagonal" style={{ animationDelay: '6s' }}></div>
-
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-sky-500/10 to-transparent" />
-      <div className="absolute inset-x-10 bottom-[-10rem] h-[20rem] bg-gradient-to-t from-blue-500/15 to-transparent blur-3xl" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/15 via-transparent to-blue-500/15 background-pulse"></div>
+      
+      {/* Floating orbs with enhanced animations */}
+      <div className="absolute top-1/4 left-1/5 w-64 h-64 bg-sky-400/18 blur-3xl rounded-full background-pulse gentle-float color-shift" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute bottom-1/3 right-1/5 w-72 h-72 bg-blue-500/15 blur-3xl rounded-full background-pulse gentle-float" style={{ animationDelay: '6s' }}></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-cyan-400/12 blur-3xl rounded-full background-pulse gentle-float color-shift" style={{ animationDelay: '10s' }}></div>
+      
+      {/* Additional floating elements */}
+      <div className="absolute top-1/6 right-1/4 w-32 h-32 bg-indigo-400/10 blur-2xl rounded-full gentle-float" style={{ animationDelay: '4s' }}></div>
+      <div className="absolute bottom-1/6 left-1/3 w-40 h-40 bg-teal-400/8 blur-2xl rounded-full gentle-float" style={{ animationDelay: '8s' }}></div>
     </div>
   );
 });
@@ -952,7 +954,7 @@ const EnhancedServiceSection = memo(({
   return (
     <section 
       id={sectionKey} 
-      className="py-16 relative z-10"
+      className="py-8 relative z-10"
       aria-labelledby={`${sectionKey}-heading`}
     >
       <div 
@@ -969,46 +971,16 @@ const EnhancedServiceSection = memo(({
         />
       </div>
       
-      <div className="container mx-auto px-4 mt-10 lg:mt-12">
-        <div className="flex flex-col xl:flex-row xl:items-start gap-10">
-          <aside className="xl:w-72 bg-gray-900/60 border border-sky-500/15 rounded-3xl p-6 shadow-lg shadow-sky-900/20 hidden xl:block sticky top-28">
-            <div className="mb-6">
-              <span className="inline-flex items-center px-3 py-1 text-xs font-semibold bg-sky-500/10 text-sky-300 rounded-full border border-sky-400/30 mb-3">
-                {category.icon} {category.title}
-              </span>
-              <p className="text-sm text-gray-300 leading-relaxed">
-                استكشف خدمات {category.title} وتصفح الباقات المختلفة بسهولة مع شريط التنقل السريع.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              {category.services.map((service) => (
-                <button
-                  key={`${sectionKey}-${service.id}`}
-                  className="w-full text-right text-sm px-4 py-3 rounded-xl bg-gray-800/60 border border-gray-700/40 text-gray-300 hover:text-white hover:border-sky-500/40 hover:bg-gray-800/90 transition-all"
-                  onClick={() => {
-                    const card = document.querySelector(`[data-service-id="${service.id}"]`);
-                    card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }}
-                >
-                  {service.title}
-                </button>
-              ))}
-            </div>
-          </aside>
-
-          <div className="flex-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5 xl:gap-6">
-              {category.services.map((service: Service, index: number) => (
-                <ServiceCard 
-                  key={service.id} 
-                  service={service} 
-                  index={index}
-                  onAddToCart={onAddToCart}
-                />
-              ))}
-            </div>
-          </div>
+      <div className="container mx-auto px-4 mt-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4">
+          {category.services.map((service: Service, index: number) => (
+            <ServiceCard 
+              key={service.id} 
+              service={service} 
+              index={index}
+              onAddToCart={onAddToCart}
+            />
+          ))}
         </div>
       </div>
       

@@ -32,7 +32,7 @@
 
 /* ===== BASE STYLES ===== */
 body {
-  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 45%, #0ea5e9 100%);
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 25%, #60a5fa 50%, #0ea5e9 75%, #0891b2 100%);
   color: var(--foreground);
   font-family: 'Cairo', Arial, Helvetica, sans-serif;
 }
@@ -50,40 +50,42 @@ body {
 
 @keyframes backgroundGlow {
   0%, 100% {
-    opacity: 0.35;
+    opacity: 0.4;
     transform: scale(1);
   }
   50% {
-    opacity: 0.55;
-    transform: scale(1.08);
+    opacity: 0.7;
+    transform: scale(1.12);
   }
 }
 
-@keyframes driftHorizontal {
-  0% { transform: translateX(-3%); }
-  50% { transform: translateX(3%); }
-  100% { transform: translateX(-3%); }
+@keyframes gentleFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(4px) rotate(-1deg);
+  }
 }
 
-@keyframes driftVertical {
-  0% { transform: translateY(-3%); }
-  50% { transform: translateY(3%); }
-  100% { transform: translateY(-3%); }
-}
-
-@keyframes driftDiagonal {
-  0% { transform: translate3d(-2%, -2%, 0); }
-  50% { transform: translate3d(2%, 2%, 0); }
-  100% { transform: translate3d(-2%, -2%, 0); }
+@keyframes colorShift {
+  0%, 100% {
+    filter: hue-rotate(0deg) saturate(1);
+  }
+  50% {
+    filter: hue-rotate(15deg) saturate(1.1);
+  }
 }
 
 /* ===== ANIMATION CLASSES ===== */
 .animate-fadeInUp { animation: fadeInUp 0.4s ease-out; }
 .animate-pulse-slow { animation: pulse 2s ease-in-out infinite; }
-.background-pulse { animation: backgroundGlow 18s ease-in-out infinite; }
-.bg-drift-horizontal { animation: driftHorizontal 26s ease-in-out infinite; }
-.bg-drift-vertical { animation: driftVertical 32s ease-in-out infinite; }
-.bg-drift-diagonal { animation: driftDiagonal 30s ease-in-out infinite; }
+.background-pulse { animation: backgroundGlow 15s ease-in-out infinite; }
+.gentle-float { animation: gentleFloat 12s ease-in-out infinite; }
+.color-shift { animation: colorShift 20s ease-in-out infinite; }
 
 /* ===== HOVER EFFECTS ===== */
 .hover-lift {
