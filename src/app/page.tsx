@@ -63,8 +63,10 @@ class ErrorBoundary extends React.Component<
 const AnimatedBackground = memo(() => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/6 via-transparent to-blue-500/6"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-900 to-slate-950" />
+      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/12 via-transparent to-blue-500/12 background-pulse"></div>
+      <div className="absolute top-1/4 left-1/5 w-64 h-64 bg-sky-400/15 blur-3xl rounded-full background-pulse" style={{ animationDelay: '4s' }}></div>
+      <div className="absolute bottom-1/3 right-1/5 w-72 h-72 bg-blue-500/12 blur-3xl rounded-full background-pulse" style={{ animationDelay: '8s' }}></div>
     </div>
   );
 });
@@ -437,9 +439,6 @@ const SimpleHeader = memo(({
                   alt="SmoothFlow Logo"
                   className="w-full h-full object-contain bg-transparent"
                 />
-              </div>
-          <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center border-3 border-gray-900 shadow-lg">
-                <span className="text-sm">⚡</span>
               </div>
             </div>
             <div>

@@ -32,7 +32,7 @@
 
 /* ===== BASE STYLES ===== */
 body {
-  background: linear-gradient(135deg, #334155 0%, #2563eb 50%, #0891b2 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 45%, #0ea5e9 100%);
   color: var(--foreground);
   font-family: 'Cairo', Arial, Helvetica, sans-serif;
 }
@@ -48,9 +48,21 @@ body {
   50% { opacity: 0.7; }
 }
 
+@keyframes backgroundGlow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.08);
+  }
+}
+
 /* ===== ANIMATION CLASSES ===== */
 .animate-fadeInUp { animation: fadeInUp 0.4s ease-out; }
 .animate-pulse-slow { animation: pulse 2s ease-in-out infinite; }
+.background-pulse { animation: backgroundGlow 18s ease-in-out infinite; }
 
 /* ===== HOVER EFFECTS ===== */
 .hover-lift {
