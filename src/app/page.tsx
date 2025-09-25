@@ -11,10 +11,10 @@ import dynamic from 'next/dynamic';
 
 // Import components with lazy loading for better performance
 const EnhancedShoppingCart = dynamic(() => import('@/components/EnhancedShoppingCart'), {
-  loading: () => <div className="w-6 h-6 bg-gray-600 rounded animate-pulse" />
+  loading: () => <div className="w-6 h-6 bg-gray-600/60 rounded" />
 });
 const UserProfile = dynamic(() => import('@/components/UserProfile'), {
-  loading: () => <div className="w-8 h-8 bg-gray-600 rounded-full animate-pulse" />
+  loading: () => <div className="w-8 h-8 bg-gray-600/60 rounded-full" />
 });
 const Notification = dynamic(() => import('@/components/Notification'), {
   ssr: false
@@ -64,7 +64,7 @@ const AnimatedBackground = memo(() => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/5 via-transparent to-blue-500/5"></div>
+      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/6 via-transparent to-blue-500/6"></div>
     </div>
   );
 });
@@ -367,7 +367,7 @@ const EnhancedImage = memo(({
   return (
     <div ref={imgRef} className="relative">
       {loading && (
-        <div className={`${className} bg-gray-700 animate-pulse flex items-center justify-center absolute inset-0`}>
+        <div className={`${className} bg-gray-700 flex items-center justify-center absolute inset-0 transition-opacity duration-300`}>
           <div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
@@ -394,23 +394,13 @@ EnhancedImage.displayName = 'EnhancedImage';
 const PopularBadge = memo(({ isHovered }: { isHovered: boolean }) => {
   return (
     <div className="absolute -top-3 -right-3 z-20">
-      <div className="relative">
-        <div className={`bg-gradient-to-r from-pink-500 via-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg transform transition-all duration-500 ${
-          isHovered ? 'scale-125 rotate-6 shadow-pink-500/50' : 'scale-100 rotate-0'
-        }`}>
-          <span className="relative z-10 animate-pulse">الأكثر مبيعاً</span>
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-red-500 rounded-full animate-ping opacity-20"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 rounded-full animate-pulse opacity-30"></div>
-        <div className="absolute -inset-1 bg-gradient-to-r from-pink-400 to-red-400 rounded-full animate-spin opacity-10" style={{ animationDuration: '3s' }}></div>
-        
-        <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-bounce"></div>
-        <div className="absolute -bottom-1 -left-1 w-1 h-1 bg-white rounded-full animate-ping"></div>
-        <div className="absolute top-0 left-0 w-1 h-1 bg-blue-400 rounded-full animate-pulse delay-300"></div>
-        
-        <div className={`absolute inset-0 rounded-full transition-all duration-500 ${
-          isHovered ? 'bg-gradient-to-r from-pink-400 to-red-400 opacity-30 blur-sm scale-150' : 'opacity-0'
-        }`}></div>
+      <div
+        className={`relative bg-gradient-to-r from-pink-500 via-red-500 to-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg transition-transform duration-300 ${
+          isHovered ? 'scale-105 shadow-pink-500/30' : 'scale-100'
+        }`}
+      >
+        <span className="relative z-10 tracking-wide">الأكثر مبيعاً</span>
+        <span className="absolute inset-0 rounded-full bg-white/10 opacity-50"></span>
       </div>
     </div>
   );
@@ -448,7 +438,7 @@ const SimpleHeader = memo(({
                   className="w-full h-full object-contain bg-transparent"
                 />
               </div>
-              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center border-3 border-gray-900 shadow-lg animate-pulse">
+          <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full flex items-center justify-center border-3 border-gray-900 shadow-lg">
                 <span className="text-sm">⚡</span>
               </div>
             </div>
@@ -612,11 +602,21 @@ const ServiceCard = memo(({
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
     const observer = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
-      { threshold: 0.1 }
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.2 }
     );
-    if (ref.current) observer.observe(ref.current);
+
+    observer.observe(element);
+
     return () => observer.disconnect();
   }, []);
   const { addToCart } = useCart();
@@ -685,7 +685,7 @@ const ServiceCard = memo(({
     <ErrorBoundary>
       <div
         ref={ref}
-        className={`group relative transform transition-all duration-700 cursor-pointer ${
+        className={`group relative transform transition-all duration-400 cursor-pointer ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}
         style={{ transitionDelay: `${index * 100}ms` }}
@@ -700,7 +700,7 @@ const ServiceCard = memo(({
       >
         {service.popular && <PopularBadge isHovered={isHovered} />}
 
-        <div className={`modern-card hover:shadow-sky-500/30 transition-all duration-700 overflow-hidden group border border-sky-500/20 ${
+        <div className={`modern-card hover:shadow-sky-500/30 transition-all duration-300 overflow-hidden group border border-sky-500/20 ${
           isHovered ? 'transform -translate-y-3 scale-105 enhanced-glow border-sky-400/40' : ''
         } ${(service.available === false || service.active === false) ? 'opacity-60 grayscale-[0.3] relative' : ''}`}>
           
@@ -1097,7 +1097,7 @@ export default function MDKStore() {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center" dir="rtl">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
           <p className="text-white text-lg">جاري التحميل...</p>
         </div>
       </div>
@@ -1153,20 +1153,20 @@ export default function MDKStore() {
         <section className="relative min-h-[85vh] flex items-center justify-center pt-20 pb-16 z-10 overflow-hidden">
           {/* Beautiful overlay effects */}
           <div className="absolute inset-0">
-            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-sky-500/8 rounded-full blur-3xl animate-pulse" style={{animationDuration: '8s'}}></div>
-            <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{animationDuration: '10s', animationDelay: '2s'}}></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-cyan-500/6 rounded-full blur-2xl animate-pulse" style={{animationDuration: '12s', animationDelay: '4s'}}></div>
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-cyan-500/8 rounded-full blur-2xl"></div>
           </div>
 
           <div className="container mx-auto px-4 md:px-6 text-center relative z-10 max-w-6xl">
               {/* Enhanced Badge */}
               <div className="inline-block px-8 py-4 bg-gray-700/50 backdrop-blur-sm rounded-full border border-sky-500/60 mb-8 hover:border-sky-400/80 transition-all duration-300">
                 <div className="flex items-center space-x-3 space-x-reverse">
-                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 ه-2 bg-sky-400 rounded-full"></div>
                   <span className="font-bold text-base text-sky-400 hover:text-sky-300 transition-colors duration-300">
                     خدمات تقنية احترافية
                   </span>
-                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-sky-400 rounded-full"></div>
                 </div>
               </div>
               
@@ -1215,10 +1215,10 @@ export default function MDKStore() {
         <main className="space-y-12 md:space-y-16">
           {loadingServices || !services ? (
             <div className="flex justify-center items-center py-20">
-              <div className="text-center">
-                <div className="w-16 h-16 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-white text-lg">جاري تحميل الخدمات...</p>
-              </div>
+            <div className="text-center">
+                <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+              <p className="text-white text-lg">جاري تحميل الخدمات...</p>
+            </div>
             </div>
           ) : (
             Object.entries(servicesData).map(([key, category]) => {

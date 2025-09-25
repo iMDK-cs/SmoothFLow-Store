@@ -158,7 +158,7 @@ export default function RootLayout({
         />
       </head>
       <body 
-        className={`${cairo.variable} ${inter.variable} font-['Cairo',sans-serif] antialiased bg-black text-white overflow-x-hidden`}
+        className={`${cairo.variable} ${inter.variable} font-['Cairo',sans-serif] antialiased bg-slate-950 text-white overflow-x-hidden`}
         suppressHydrationWarning
       >
         <Providers>
