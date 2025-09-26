@@ -4,6 +4,8 @@ import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { sendOrderStatusEmail } from '@/lib/emailNotifications'
+import { withRateLimit, apiRateLimit } from '@/lib/rateLimit'
+import { sanitizeNotes, validateUserInput } from '@/lib/security'
 
 const createOrderSchema = z.object({
   items: z.array(z.object({
@@ -64,6 +66,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const rateLimitCheck = await withRateLimit(apiRateLimit)(request)
+    if (!rateLimitCheck.allowed) {
+      return NextResponse.json(
+        { error: rateLimitCheck.error },
+        { status: 429 }
+      )
+    }
+
     const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
     const user = await getUserFromSession(session)
     
@@ -78,6 +89,15 @@ export async function POST(request: NextRequest) {
     console.log('📝 Order creation request body:', JSON.stringify(body, null, 2))
     
     const { items, notes, scheduledDate, paymentMethod, paymentStatus, status, fileData } = createOrderSchema.parse(body)
+
+    // Sanitize user input
+    const sanitizedNotes = notes ? sanitizeNotes(notes) : undefined
+    if (sanitizedNotes && !validateUserInput(sanitizedNotes, 2000)) {
+      return NextResponse.json(
+        { error: 'Invalid notes format' },
+        { status: 400 }
+      )
+    }
     console.log('✅ Parsed order data:', { itemsCount: items.length, notes, scheduledDate, paymentMethod, paymentStatus, status })
 
     // Calculate total amount
@@ -120,7 +140,7 @@ export async function POST(request: NextRequest) {
 
     console.log('📦 Creating order in database...')
     // Prepare notes with file data if provided
-    let finalNotes = notes || ''
+    let finalNotes = sanitizedNotes || ''
     if (fileData) {
       if (finalNotes) {
         finalNotes += '\n\n'

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { withRateLimit, cartRateLimit } from '@/lib/rateLimit'
 
 // Use Node.js runtime for Prisma compatibility
 export const runtime = 'nodejs'
@@ -128,6 +129,15 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now()
   
   try {
+    // Rate limiting check
+    const rateLimitCheck = await withRateLimit(cartRateLimit)(request)
+    if (!rateLimitCheck.allowed) {
+      return NextResponse.json(
+        { error: rateLimitCheck.error },
+        { status: 429 }
+      )
+    }
+
     // Parse request body first
     const body = await request.json()
     const { serviceId, optionId, quantity } = addToCartSchema.parse(body)

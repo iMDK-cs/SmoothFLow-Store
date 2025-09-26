@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { sanitizeUserName, validateUserInput } from '@/lib/security'
+import { withRateLimit, authRateLimit } from '@/lib/rateLimit'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -12,8 +14,28 @@ const registerSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const rateLimitCheck = await withRateLimit(authRateLimit)(request)
+    if (!rateLimitCheck.allowed) {
+      return NextResponse.json(
+        { error: rateLimitCheck.error },
+        { status: 429 }
+      )
+    }
+
     const body = await request.json()
     const { name, email, password, phone } = registerSchema.parse(body)
+
+    // Sanitize and validate user input
+    const sanitizedName = sanitizeUserName(name)
+    if (!sanitizedName || !validateUserInput(sanitizedName, 100)) {
+      return NextResponse.json(
+        { error: 'Invalid name format' },
+        { status: 400 }
+      )
+    }
+
+    const sanitizedPhone = phone ? sanitizeUserName(phone) : undefined
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -33,10 +55,10 @@ export async function POST(request: NextRequest) {
     // Create user
     const user = await prisma.user.create({
       data: {
-        name,
+        name: sanitizedName,
         email,
         password: hashedPassword,
-        phone,
+        phone: sanitizedPhone,
       },
       select: {
         id: true,
