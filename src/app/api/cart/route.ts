@@ -21,7 +21,26 @@ const updateQuantitySchema = z.object({
 
 // Global cache for services (shared across requests)
 const serviceCache = new Map<string, { data: { available: boolean; stock: number | null; title: string; active: boolean; basePrice: number } | null; timestamp: number }>()
-const CACHE_TTL = 60000 // 1 minute
+const CACHE_TTL = 300000 // 5 minutes - increased cache time
+const MAX_CACHE_SIZE = 1000 // Limit cache size to prevent memory issues
+
+// Cache cleanup function
+function cleanupCache() {
+  const now = Date.now()
+  for (const [key, value] of serviceCache.entries()) {
+    if (now - value.timestamp > CACHE_TTL) {
+      serviceCache.delete(key)
+    }
+  }
+  
+  // If cache is too large, remove oldest entries
+  if (serviceCache.size > MAX_CACHE_SIZE) {
+    const entries = Array.from(serviceCache.entries())
+    entries.sort((a, b) => a[1].timestamp - b[1].timestamp)
+    const toRemove = entries.slice(0, entries.length - MAX_CACHE_SIZE)
+    toRemove.forEach(([key]) => serviceCache.delete(key))
+  }
+}
 
 // Optimized service lookup with caching
 async function getServiceWithCache(serviceId: string) {
@@ -30,6 +49,11 @@ async function getServiceWithCache(serviceId: string) {
   
   if (cached && (now - cached.timestamp) < CACHE_TTL) {
     return cached.data
+  }
+  
+  // Cleanup cache periodically
+  if (Math.random() < 0.1) { // 10% chance to cleanup
+    cleanupCache()
   }
   
   const service = await prisma.service.findUnique({

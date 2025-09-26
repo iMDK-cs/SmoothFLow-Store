@@ -41,7 +41,20 @@ export default function Checkout() {
     setError('')
 
     try {
-      // Prepare order items
+      // Validate scheduled date is not in the past
+      if (formData.scheduledDate) {
+        const selectedDate = new Date(formData.scheduledDate)
+        const now = new Date()
+        now.setHours(0, 0, 0, 0) // Reset time to start of day for comparison
+        
+        if (selectedDate < now) {
+          setError('لا يمكن تحديد تاريخ في الماضي')
+          setLoading(false)
+          return
+        }
+      }
+
+      // Prepare order items for payment
       const orderItems = state.cart!.items.map(item => ({
         serviceId: item.serviceId,
         optionId: item.optionId || undefined,
@@ -51,30 +64,22 @@ export default function Checkout() {
         notes: '',
       }))
 
-      console.log('Prepared order items:', orderItems)
+      console.log('Prepared order items for payment:', orderItems)
 
-      // Create order
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: orderItems,
-          notes: formData.notes,
-          scheduledDate: formData.scheduledDate,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        console.error('Order creation error:', data)
-        throw new Error(data.error || 'حدث خطأ أثناء إنشاء الطلب')
+      // Create a temporary order session (not persisted to database yet)
+      const tempOrderData = {
+        items: orderItems,
+        notes: formData.notes,
+        scheduledDate: formData.scheduledDate,
+        totalAmount: getTotalPrice(),
+        orderNumber: `TEMP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
       }
 
-      // Redirect to payment
-      router.push(`/payment/${data.order.id}`)
+      // Store temporary order data in sessionStorage
+      sessionStorage.setItem('tempOrderData', JSON.stringify(tempOrderData))
+
+      // Redirect to payment with temporary order data
+      router.push(`/payment/temp?total=${tempOrderData.totalAmount}&items=${orderItems.length}`)
     } catch (error) {
       setError(error instanceof Error ? error.message : 'حدث خطأ غير متوقع')
     } finally {
@@ -176,6 +181,7 @@ export default function Checkout() {
                     id="scheduledDate"
                     name="scheduledDate"
                     type="datetime-local"
+                    min={new Date().toISOString().slice(0, 16)}
                     className="w-full px-3 py-2 border border-gray-600 rounded-md bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     value={formData.scheduledDate}
                     onChange={handleChange}

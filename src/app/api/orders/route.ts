@@ -16,6 +16,17 @@ const createOrderSchema = z.object({
   })),
   notes: z.string().optional(),
   scheduledDate: z.string().optional(),
+  paymentMethod: z.string().optional().default('bank_transfer'),
+  paymentStatus: z.string().optional().default('PENDING'),
+  status: z.string().optional().default('PENDING_ADMIN_APPROVAL'),
+  receiptPath: z.string().optional(),
+  fileData: z.object({
+    fileName: z.string(),
+    fileType: z.string(),
+    fileSize: z.number(),
+    base64Data: z.string(),
+    uploadedAt: z.string(),
+  }).optional(),
 })
 
 export async function GET() {
@@ -66,8 +77,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('📝 Order creation request body:', JSON.stringify(body, null, 2))
     
-    const { items, notes, scheduledDate } = createOrderSchema.parse(body)
-    console.log('✅ Parsed order data:', { itemsCount: items.length, notes, scheduledDate })
+    const { items, notes, scheduledDate, paymentMethod, paymentStatus, status, receiptPath, fileData } = createOrderSchema.parse(body)
+    console.log('✅ Parsed order data:', { itemsCount: items.length, notes, scheduledDate, paymentMethod, paymentStatus, status })
 
     // Calculate total amount
     const totalAmount = items.reduce((sum, item) => sum + item.totalPrice, 0)
@@ -96,16 +107,38 @@ export async function POST(request: NextRequest) {
       console.log(`✅ Service validated: ${service.title}`)
     }
 
+    // Validate scheduled date is not in the past
+    if (scheduledDate) {
+      const selectedDate = new Date(scheduledDate)
+      const now = new Date()
+      now.setHours(0, 0, 0, 0)
+      
+      if (selectedDate < now) {
+        throw new Error('لا يمكن تحديد تاريخ في الماضي')
+      }
+    }
+
     console.log('📦 Creating order in database...')
+    // Prepare notes with file data if provided
+    let finalNotes = notes || ''
+    if (fileData) {
+      if (finalNotes) {
+        finalNotes += '\n\n'
+      }
+      finalNotes += `File: ${fileData.fileName}\nType: ${fileData.fileType}\nSize: ${fileData.fileSize} bytes\nBase64: ${fileData.base64Data}`
+    }
+
     // Create order
     const order = await prisma.order.create({
       data: {
         userId: user.id,
         orderNumber,
         totalAmount,
-        notes,
+        notes: finalNotes,
         scheduledDate: scheduledDate ? new Date(scheduledDate) : null,
-        paymentMethod: 'bank_transfer', // Default payment method
+        paymentMethod: paymentMethod || 'bank_transfer',
+        paymentStatus: paymentStatus || 'PENDING',
+        status: status || 'PENDING_ADMIN_APPROVAL',
         items: {
           create: items.map(item => ({
             serviceId: item.serviceId,
@@ -155,6 +188,7 @@ export async function POST(request: NextRequest) {
           orderStatus: order.status,
           paymentStatus: order.paymentStatus,
           paymentMethod: order.paymentMethod || 'bank_transfer',
+          bankTransferStatus: order.status === 'PENDING_ADMIN_APPROVAL' ? 'PENDING_ADMIN_APPROVAL' : undefined,
           totalAmount: order.totalAmount,
           items: order.items.map(item => ({
             serviceTitle: item.service.title,

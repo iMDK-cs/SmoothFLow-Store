@@ -144,6 +144,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       const startTime = Date.now()
       
+      // Use AbortController for timeout
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      
       const response = await fetch('/api/cart', {
         method: 'POST',
         headers: { 
@@ -151,8 +155,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           'Cache-Control': 'no-cache'
         },
         body: JSON.stringify({ serviceId, optionId, quantity }),
+        signal: controller.signal
       })
       
+      clearTimeout(timeoutId)
       const executionTime = Date.now() - startTime
       console.log(`Add to cart API took ${executionTime}ms`)
       
@@ -164,17 +170,30 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const result = await response.json()
       console.log('Add to cart success:', result)
       
-      // Refresh cart in background (non-blocking)
-      fetchCart().catch(error => {
-        console.error('Background cart refresh failed:', error)
-      })
+      // Refresh cart in background (non-blocking) with debouncing
+      const debounceId = setTimeout(() => {
+        fetchCart().catch(error => {
+          console.error('Background cart refresh failed:', error)
+        })
+      }, 100) // Small delay to batch multiple rapid calls
+      
+      // Clear any existing debounce timer
+      if ((addToCart as any).debounceId) {
+        clearTimeout((addToCart as any).debounceId)
+      }
+      (addToCart as any).debounceId = debounceId
       
     } catch (error) {
       console.error('Add to cart error:', error)
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to add item to cart' })
       
-      // Retry mechanism for network errors
-      if (error instanceof Error && error.message.includes('fetch')) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        dispatch({ type: 'SET_ERROR', payload: 'Request timeout - please try again' })
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to add item to cart' })
+      }
+      
+      // Retry mechanism for network errors (but not for timeouts)
+      if (error instanceof Error && error.message.includes('fetch') && error.name !== 'AbortError') {
         console.log('Retrying add to cart...')
         setTimeout(() => {
           addToCart(serviceId, optionId, quantity)
