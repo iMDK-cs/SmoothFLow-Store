@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 
 interface CartItem {
   id: string
@@ -344,7 +344,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
-      <Toaster />
     </CartContext.Provider>
   )
 }
