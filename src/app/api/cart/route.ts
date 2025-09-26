@@ -152,51 +152,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Service is not available' }, { status: 400 })
     }
 
-    // Optimized transaction with correct table names
+    // Ultra-optimized single transaction with upsert
     await prisma.$transaction(async (tx) => {
-      // Get or create cart
-      let cart = await tx.cart.findUnique({
-        where: { userId: user.id }
+      // Upsert cart (create if not exists, update if exists)
+      const cart = await tx.cart.upsert({
+        where: { userId: user.id },
+        update: { updatedAt: new Date() },
+        create: { userId: user.id }
       })
 
-      if (!cart) {
-        cart = await tx.cart.create({
-          data: { userId: user.id }
-        })
-      }
-
-      // Check if item already exists in cart
-      const existingItem = await tx.cartItem.findFirst({
-        where: {
-          cartId: cart.id,
-          serviceId,
-          optionId: optionId || null,
-        }
-      })
-
-      const totalQuantity = existingItem ? existingItem.quantity + quantity : quantity
-
-      // Check stock if service has limited stock
-      if (service.stock !== null && totalQuantity > service.stock) {
-        throw new Error(`Only ${service.stock} items available for ${service.title}`)
-      }
-
-      // Update or create cart item
-      if (existingItem) {
-        await tx.cartItem.update({
-          where: { id: existingItem.id },
-          data: { quantity: totalQuantity }
-        })
-      } else {
-        await tx.cartItem.create({
-          data: {
+      // Check stock if service has limited stock (do this before upsert)
+      if (service.stock !== null) {
+        const existingQuantity = await tx.cartItem.findFirst({
+          where: {
             cartId: cart.id,
             serviceId,
             optionId: optionId || null,
-            quantity,
-          }
+          },
+          select: { quantity: true }
         })
+        
+        const totalQuantity = (existingQuantity?.quantity || 0) + quantity
+        if (totalQuantity > service.stock) {
+          throw new Error(`Only ${service.stock} items available for ${service.title}`)
+        }
       }
+
+      // Upsert cart item (single operation)
+      await tx.cartItem.upsert({
+        where: {
+          cartId_serviceId_optionId: {
+            cartId: cart.id,
+            serviceId,
+            optionId: optionId || null,
+          }
+        },
+        update: {
+          quantity: { increment: quantity },
+          updatedAt: new Date()
+        },
+        create: {
+          cartId: cart.id,
+          serviceId,
+          optionId: optionId || null,
+          quantity,
+        }
+      })
 
       return { success: true, cartId: cart.id }
     })

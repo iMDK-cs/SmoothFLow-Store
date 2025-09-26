@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef } from 'react'
+import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 
 interface CartItem {
@@ -86,7 +86,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState)
   const [lastAddedItem, setLastAddedItem] = useState<string | null>(null)
   const { data: session } = useSession()
-  // const debounceTimerRef = useRef<NodeJS.Timeout | null>(null) // Reserved for future debouncing
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const pendingRequestsRef = useRef<Set<string>>(new Set())
 
   const fetchCart = useCallback(async () => {
     // Don't make API calls if user is not logged in
@@ -129,32 +130,31 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [session, fetchCart])
 
-  const addToCart = async (serviceId: string, optionId?: string, quantity = 1) => {
-    // Don't make API calls if user is not logged in
-    if (!session?.user) {
-      throw new Error('User must be logged in to add items to cart')
+  // Debounced API call to prevent spam
+  const debouncedApiCall = useCallback(async (serviceId: string, optionId?: string, quantity = 1) => {
+    const requestKey = `${serviceId}-${optionId || 'null'}-${quantity}`
+    
+    // Prevent duplicate requests
+    if (pendingRequestsRef.current.has(requestKey)) {
+      console.log('Request already pending, skipping...')
+      return
     }
     
-    // Immediate optimistic UI update for perceived performance
-    setLastAddedItem(serviceId)
-    setTimeout(() => setLastAddedItem(null), 1500) // Shorter animation
-    
-    // Don't show loading state immediately - let the animation handle feedback
-    // dispatch({ type: 'SET_LOADING', payload: true })
+    pendingRequestsRef.current.add(requestKey)
     
     try {
       const startTime = Date.now()
       
       // Use AbortController for timeout
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 5000) // Reduced timeout to 5 seconds
+      const timeoutId = setTimeout(() => controller.abort(), 5000)
       
       const response = await fetch('/api/cart', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache',
-          'X-Requested-With': 'XMLHttpRequest' // Add this for better caching
+          'X-Requested-With': 'XMLHttpRequest'
         },
         body: JSON.stringify({ serviceId, optionId, quantity }),
         signal: controller.signal
@@ -172,7 +172,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const result = await response.json()
       console.log('Add to cart success:', result)
       
-      // Immediate cart refresh for better UX
+      // Refresh cart with real data from server
       fetchCart().catch(error => {
         console.error('Background cart refresh failed:', error)
       })
@@ -180,22 +180,84 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Add to cart error:', error)
       
+      // ROLLBACK: Remove optimistic item on error
+      if (state.cart) {
+        const rollbackItems = state.cart.items.filter(item => 
+          !(item.serviceId === serviceId && item.optionId === optionId && item.id.startsWith('temp-'))
+        )
+        dispatch({ type: 'SET_CART', payload: { ...state.cart, items: rollbackItems } })
+      }
+      
       if (error instanceof Error && error.name === 'AbortError') {
         dispatch({ type: 'SET_ERROR', payload: 'Request timeout - please try again' })
       } else {
         dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to add item to cart' })
       }
+    } finally {
+      pendingRequestsRef.current.delete(requestKey)
+    }
+  }, [state.cart, fetchCart, dispatch])
+
+  const addToCart = useCallback(async (serviceId: string, optionId?: string, quantity = 1) => {
+    // Don't make API calls if user is not logged in
+    if (!session?.user) {
+      throw new Error('User must be logged in to add items to cart')
+    }
+    
+    // OPTIMISTIC UI UPDATE - Show immediate feedback
+    setLastAddedItem(serviceId)
+    setTimeout(() => setLastAddedItem(null), 1500)
+    
+    // Create optimistic cart item for immediate UI update
+    const optimisticItem = {
+      id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      serviceId,
+      optionId,
+      quantity,
+      service: {
+        id: serviceId,
+        title: 'جاري الإضافة...', // Loading placeholder
+        basePrice: 0,
+        image: undefined,
+        icon: undefined
+      },
+      option: optionId ? {
+        id: optionId,
+        title: 'جاري الإضافة...',
+        price: 0
+      } : undefined
+    }
+    
+    // Immediately update UI with optimistic item
+    if (state.cart) {
+      const existingItemIndex = state.cart.items.findIndex(
+        item => item.serviceId === serviceId && item.optionId === optionId
+      )
       
-      // Retry mechanism for network errors (but not for timeouts)
-      if (error instanceof Error && error.message.includes('fetch') && error.name !== 'AbortError') {
-        console.log('Retrying add to cart...')
-        setTimeout(() => {
-          addToCart(serviceId, optionId, quantity)
-        }, 500) // Faster retry
+      if (existingItemIndex >= 0) {
+        // Update existing item quantity optimistically
+        const updatedItems = [...state.cart.items]
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: updatedItems[existingItemIndex].quantity + quantity
+        }
+        dispatch({ type: 'SET_CART', payload: { ...state.cart, items: updatedItems } })
+      } else {
+        // Add new item optimistically
+        dispatch({ type: 'SET_CART', payload: { ...state.cart, items: [...state.cart.items, optimisticItem] } })
       }
     }
-    // Remove finally block to avoid showing loading state
-  }
+    
+    // Clear any existing debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+    
+    // Debounce the API call by 300ms to batch rapid clicks
+    debounceTimerRef.current = setTimeout(() => {
+      debouncedApiCall(serviceId, optionId, quantity)
+    }, 300)
+  }, [session, state.cart, debouncedApiCall, dispatch])
 
   const removeFromCart = async (itemId: string) => {
     try {

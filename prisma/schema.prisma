@@ -219,6 +219,7 @@ model Cart {
   user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   items CartItem[]
 
+  @@index([userId]) // Index for faster user cart lookups
   @@map("carts")
 }
 
@@ -236,6 +237,9 @@ model CartItem {
   option  ServiceOption? @relation(fields: [optionId], references: [id])
 
   @@unique([cartId, serviceId, optionId])
+  @@index([cartId]) // Index for faster cart lookups
+  @@index([serviceId]) // Index for faster service lookups
+  @@index([optionId]) // Index for faster option lookups
   @@map("cart_items")
 }
 
