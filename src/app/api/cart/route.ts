@@ -21,8 +21,9 @@ const updateQuantitySchema = z.object({
 
 // Global cache for services (shared across requests)
 const serviceCache = new Map<string, { data: { available: boolean; stock: number | null; title: string; active: boolean; basePrice: number } | null; timestamp: number }>()
-const CACHE_TTL = 300000 // 5 minutes - increased cache time
-const MAX_CACHE_SIZE = 1000 // Limit cache size to prevent memory issues
+const CACHE_TTL = 600000 // 10 minutes - longer cache time
+const MAX_CACHE_SIZE = 2000 // Increased cache size for better hit rate
+const CART_CACHE_TTL = 30000 // 30 seconds for cart operations
 
 // Cache cleanup function
 function cleanupCache() {
@@ -131,8 +132,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { serviceId, optionId, quantity } = addToCartSchema.parse(body)
     
-    console.log('Add to cart request:', { serviceId, optionId, quantity })
-    
     // Get session first
     const session = await getServerSession(authOptions) as { user?: { email?: string | null } } | null
     const user = await getUserFromSession(session)
@@ -141,60 +140,60 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get service with cache
+    // Get service with cache (this should be very fast now)
     const service = await getServiceWithCache(serviceId)
-    console.log('Service found:', service)
 
     // Early validation
     if (!service) {
-      console.log('Service not found:', serviceId)
       return NextResponse.json({ error: 'Service not found' }, { status: 404 })
     }
 
     if (!service.available || !service.active) {
-      console.log('Service not available:', serviceId, { available: service.available, active: service.active })
       return NextResponse.json({ error: 'Service is not available' }, { status: 400 })
     }
 
-    // Optimized single query approach
+    // Ultra-optimized transaction with minimal queries
     await prisma.$transaction(async (tx) => {
-      // Get or create cart
-      let cart = await tx.cart.findUnique({
-        where: { userId: user.id }
-      })
+      // Single query to get or create cart and check existing item
+      const result = await tx.$queryRaw`
+        WITH cart_upsert AS (
+          INSERT INTO "Cart" ("userId", "createdAt", "updatedAt")
+          VALUES (${user.id}, NOW(), NOW())
+          ON CONFLICT ("userId") DO UPDATE SET "updatedAt" = NOW()
+          RETURNING id
+        ),
+        existing_item AS (
+          SELECT ci.id, ci.quantity
+          FROM "CartItem" ci
+          JOIN "Cart" c ON ci."cartId" = c.id
+          WHERE c."userId" = ${user.id} 
+            AND ci."serviceId" = ${serviceId}
+            AND (ci."optionId" = ${optionId || null} OR (ci."optionId" IS NULL AND ${optionId} IS NULL))
+        )
+        SELECT 
+          (SELECT id FROM cart_upsert) as cart_id,
+          (SELECT id FROM existing_item) as existing_item_id,
+          (SELECT quantity FROM existing_item) as existing_quantity
+      ` as any[]
 
-      if (!cart) {
-        cart = await tx.cart.create({
-          data: { userId: user.id }
-        })
-      }
-
-      // Check if item already exists in cart
-      const existingItem = await tx.cartItem.findFirst({
-        where: {
-          cartId: cart.id,
-          serviceId,
-          optionId: optionId || null,
-        }
-      })
-
-      const totalQuantity = existingItem ? existingItem.quantity + quantity : quantity
+      const { cart_id, existing_item_id, existing_quantity } = result[0]
+      const totalQuantity = existing_quantity ? existing_quantity + quantity : quantity
 
       // Check stock if service has limited stock
       if (service.stock !== null && totalQuantity > service.stock) {
         throw new Error(`Only ${service.stock} items available for ${service.title}`)
       }
 
-      // Update or create cart item
-      if (existingItem) {
+      // Update or create cart item with single query
+      if (existing_item_id) {
         await tx.cartItem.update({
-          where: { id: existingItem.id },
+          where: { id: existing_item_id },
           data: { quantity: totalQuantity }
         })
       } else {
         await tx.cartItem.create({
           data: {
-            cartId: cart.id,
+            cartId: cart_id,
             serviceId,
             optionId: optionId || null,
             quantity,
@@ -202,7 +201,7 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      return { success: true, cartId: cart.id }
+      return { success: true, cartId: cart_id }
     })
 
     const executionTime = Date.now() - startTime

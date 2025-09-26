@@ -135,25 +135,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       throw new Error('User must be logged in to add items to cart')
     }
     
-    // Optimistic update - show loading immediately
-    dispatch({ type: 'SET_LOADING', payload: true })
-    
-    // Set last added item for animation (immediate feedback)
+    // Immediate optimistic UI update for perceived performance
     setLastAddedItem(serviceId)
-    setTimeout(() => setLastAddedItem(null), 2000)
+    setTimeout(() => setLastAddedItem(null), 1500) // Shorter animation
+    
+    // Don't show loading state immediately - let the animation handle feedback
+    // dispatch({ type: 'SET_LOADING', payload: true })
     
     try {
       const startTime = Date.now()
       
       // Use AbortController for timeout
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 5000) // Reduced timeout to 5 seconds
       
       const response = await fetch('/api/cart', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache'
+          'Cache-Control': 'no-cache',
+          'X-Requested-With': 'XMLHttpRequest' // Add this for better caching
         },
         body: JSON.stringify({ serviceId, optionId, quantity }),
         signal: controller.signal
@@ -171,16 +172,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const result = await response.json()
       console.log('Add to cart success:', result)
       
-      // Refresh cart in background (non-blocking) with debouncing
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current)
-      }
-      
-      debounceTimerRef.current = setTimeout(() => {
-        fetchCart().catch(error => {
-          console.error('Background cart refresh failed:', error)
-        })
-      }, 100) // Small delay to batch multiple rapid calls
+      // Immediate cart refresh for better UX
+      fetchCart().catch(error => {
+        console.error('Background cart refresh failed:', error)
+      })
       
     } catch (error) {
       console.error('Add to cart error:', error)
@@ -196,11 +191,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         console.log('Retrying add to cart...')
         setTimeout(() => {
           addToCart(serviceId, optionId, quantity)
-        }, 1000)
+        }, 500) // Faster retry
       }
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false })
     }
+    // Remove finally block to avoid showing loading state
   }
 
   const removeFromCart = async (itemId: string) => {
