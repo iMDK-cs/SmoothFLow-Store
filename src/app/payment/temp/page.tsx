@@ -42,22 +42,53 @@ export default function TempPayment() {
       return
     }
 
-    // Load temporary order data from sessionStorage
-    const storedData = sessionStorage.getItem('tempOrderData')
+    // Load minimal checkout data from sessionStorage
+    const storedData = sessionStorage.getItem('checkoutData')
     if (!storedData) {
       router.push('/checkout')
       return
     }
 
     try {
-      const orderData = JSON.parse(storedData)
-      setTempOrderData(orderData)
+      const checkoutData = JSON.parse(storedData)
+      
+      // Now do the heavy work HERE while user sees payment options
+      async function prepareOrder() {
+        setLoading(true)
+        
+        // Prepare order items (heavy work happens here)
+        const orderItems = checkoutData.cartItems.map((item: any) => ({
+          serviceId: item.serviceId,
+          optionId: item.optionId || undefined,
+          quantity: item.quantity,
+          unitPrice: item.option ? item.option.price : item.service.basePrice,
+          totalPrice: (item.option ? item.option.price : item.service.basePrice) * item.quantity,
+          notes: '',
+        }))
+
+        console.log('Prepared order items for payment:', orderItems)
+
+        // Create temporary order data
+        const tempOrderData = {
+          items: orderItems,
+          notes: checkoutData.notes,
+          scheduledDate: checkoutData.scheduledDate,
+          totalAmount: checkoutData.totalAmount,
+          orderNumber: `TEMP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+        }
+
+        // Store prepared data
+        sessionStorage.setItem('tempOrderData', JSON.stringify(tempOrderData))
+        
+        setTempOrderData(tempOrderData)
+        setLoading(false)
+      }
+      
+      prepareOrder()
     } catch (error) {
-      console.error('Failed to parse temp order data:', error)
+      console.error('Failed to parse checkout data:', error)
       router.push('/checkout')
       return
-    } finally {
-      setLoading(false)
     }
   }, [session, router])
 

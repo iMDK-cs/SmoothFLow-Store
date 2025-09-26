@@ -37,54 +37,33 @@ export default function Checkout() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError('')
 
-    try {
-      // Validate scheduled date is not in the past
-      if (formData.scheduledDate) {
-        const selectedDate = new Date(formData.scheduledDate)
-        const now = new Date()
-        now.setHours(0, 0, 0, 0) // Reset time to start of day for comparison
-        
-        if (selectedDate < now) {
-          setError('لا يمكن تحديد تاريخ في الماضي')
-          setLoading(false)
-          return
-        }
+    // 1. ✅ BASIC VALIDATION ONLY (under 100ms)
+    if (formData.scheduledDate) {
+      const selectedDate = new Date(formData.scheduledDate)
+      const now = new Date()
+      now.setHours(0, 0, 0, 0)
+      
+      if (selectedDate < now) {
+        setError('لا يمكن تحديد تاريخ في الماضي')
+        return
       }
-
-      // Prepare order items for payment
-      const orderItems = state.cart!.items.map(item => ({
-        serviceId: item.serviceId,
-        optionId: item.optionId || undefined,
-        quantity: item.quantity,
-        unitPrice: item.option ? item.option.price : item.service.basePrice,
-        totalPrice: (item.option ? item.option.price : item.service.basePrice) * item.quantity,
-        notes: '',
-      }))
-
-      console.log('Prepared order items for payment:', orderItems)
-
-      // Create a temporary order session (not persisted to database yet)
-      const tempOrderData = {
-        items: orderItems,
-        notes: formData.notes,
-        scheduledDate: formData.scheduledDate,
-        totalAmount: getTotalPrice(),
-        orderNumber: `TEMP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-      }
-
-      // Store temporary order data in sessionStorage
-      sessionStorage.setItem('tempOrderData', JSON.stringify(tempOrderData))
-
-      // Redirect to payment with temporary order data
-      router.push(`/payment/temp?total=${tempOrderData.totalAmount}&items=${orderItems.length}`)
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'حدث خطأ غير متوقع')
-    } finally {
-      setLoading(false)
     }
+
+    // 2. ✅ STORE MINIMAL DATA ONLY (under 50ms)
+    const minimalData = {
+      cartItems: state.cart!.items,
+      notes: formData.notes,
+      scheduledDate: formData.scheduledDate,
+      totalAmount: getTotalPrice(),
+    }
+
+    // Store minimal data in sessionStorage
+    sessionStorage.setItem('checkoutData', JSON.stringify(minimalData))
+
+    // 3. ✅ REDIRECT IMMEDIATELY - Don't wait for anything else!
+    router.push('/payment/temp')
   }
 
   if (!session) {

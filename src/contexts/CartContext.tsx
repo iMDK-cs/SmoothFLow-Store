@@ -172,7 +172,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const result = await response.json()
       console.log('Add to cart success:', result)
       
-      // Refresh cart with real data from server
+      // Replace optimistic item with real data from server
       fetchCart().catch(error => {
         console.error('Background cart refresh failed:', error)
       })
@@ -204,7 +204,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       throw new Error('User must be logged in to add items to cart')
     }
     
-    // OPTIMISTIC UI UPDATE - Show immediate feedback
+    // 1. ✅ UPDATE UI FIRST (INSTANT - 0ms perceived)
     setLastAddedItem(serviceId)
     setTimeout(() => setLastAddedItem(null), 1500)
     
@@ -248,6 +248,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     }
     
+    // 2. ✅ Show success feedback immediately (you can add toast here)
+    console.log('✅ Item added to cart instantly!')
+    
+    // 3. ✅ API call happens in BACKGROUND (user doesn't wait)
     // Clear any existing debounce timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current)
