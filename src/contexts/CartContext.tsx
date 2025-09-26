@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useReducer, useEffect, useState, useCallback } from 'react'
+import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 
 interface CartItem {
@@ -86,6 +86,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState)
   const [lastAddedItem, setLastAddedItem] = useState<string | null>(null)
   const { data: session } = useSession()
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   const fetchCart = useCallback(async () => {
     // Don't make API calls if user is not logged in
@@ -171,17 +172,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.log('Add to cart success:', result)
       
       // Refresh cart in background (non-blocking) with debouncing
-      const debounceId = setTimeout(() => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+      
+      debounceTimerRef.current = setTimeout(() => {
         fetchCart().catch(error => {
           console.error('Background cart refresh failed:', error)
         })
       }, 100) // Small delay to batch multiple rapid calls
-      
-      // Clear any existing debounce timer
-      if ((addToCart as any).debounceId) {
-        clearTimeout((addToCart as any).debounceId)
-      }
-      (addToCart as any).debounceId = debounceId
       
     } catch (error) {
       console.error('Add to cart error:', error)

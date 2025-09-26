@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     console.log('📝 Order creation request body:', JSON.stringify(body, null, 2))
     
-    const { items, notes, scheduledDate, paymentMethod, paymentStatus, status, receiptPath, fileData } = createOrderSchema.parse(body)
+    const { items, notes, scheduledDate, paymentMethod, paymentStatus, status, fileData } = createOrderSchema.parse(body)
     console.log('✅ Parsed order data:', { itemsCount: items.length, notes, scheduledDate, paymentMethod, paymentStatus, status })
 
     // Calculate total amount

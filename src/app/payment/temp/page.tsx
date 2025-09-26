@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import FileUpload from '@/components/FileUpload'
 import { useOrderNotifications } from '@/components/EnhancedNotification'
 import { useCart } from '@/contexts/CartContext'
@@ -25,7 +25,6 @@ interface TempOrderData {
 export default function TempPayment() {
   const { data: session } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { clearCart } = useCart()
   const [tempOrderData, setTempOrderData] = useState<TempOrderData | null>(null)
   const [loading, setLoading] = useState(true)
