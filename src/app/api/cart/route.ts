@@ -178,26 +178,35 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Upsert cart item (single operation)
-      await tx.cartItem.upsert({
+      // Check if item already exists and update or create
+      const existingItem = await tx.cartItem.findFirst({
         where: {
-          cartId_serviceId_optionId: {
-            cartId: cart.id,
-            serviceId,
-            optionId: optionId || null,
-          }
-        },
-        update: {
-          quantity: { increment: quantity },
-          updatedAt: new Date()
-        },
-        create: {
           cartId: cart.id,
           serviceId,
           optionId: optionId || null,
-          quantity,
         }
       })
+
+      if (existingItem) {
+        // Update existing item
+        await tx.cartItem.update({
+          where: { id: existingItem.id },
+          data: {
+            quantity: { increment: quantity },
+            updatedAt: new Date()
+          }
+        })
+      } else {
+        // Create new item
+        await tx.cartItem.create({
+          data: {
+            cartId: cart.id,
+            serviceId,
+            optionId: optionId || null,
+            quantity,
+          }
+        })
+      }
 
       return { success: true, cartId: cart.id }
     })

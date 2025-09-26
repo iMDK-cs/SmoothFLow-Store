@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef, useMemo } from 'react'
+import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 
 interface CartItem {
