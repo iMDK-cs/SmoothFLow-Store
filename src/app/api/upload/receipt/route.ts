@@ -13,12 +13,14 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const orderId = formData.get('orderId') as string;
+    const tempOrder = formData.get('tempOrder') as string;
 
     if (!file) {
       return NextResponse.json({ error: 'لم يتم رفع أي ملف' }, { status: 400 });
     }
 
-    if (!orderId) {
+    // For temp orders, we don't need orderId validation
+    if (!tempOrder && !orderId) {
       return NextResponse.json({ error: 'معرف الطلب مطلوب' }, { status: 400 });
     }
 
@@ -48,7 +50,9 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now();
     const fileExtension = file.name.split('.').pop();
-    const fileName = `receipt_${orderId}_${timestamp}.${fileExtension}`;
+    const fileName = tempOrder 
+      ? `receipt_temp_${timestamp}.${fileExtension}`
+      : `receipt_${orderId}_${timestamp}.${fileExtension}`;
 
     // For Vercel, we'll store the file data as base64 in the database
     // In production, consider using cloud storage (AWS S3, Cloudinary, etc.)

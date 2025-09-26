@@ -90,6 +90,7 @@ export default function TempPayment() {
       const uploadData = await uploadResponse.json()
 
       if (!uploadResponse.ok) {
+        console.error('Upload error:', uploadData)
         throw new Error(uploadData.error || 'فشل في رفع الملف')
       }
 
