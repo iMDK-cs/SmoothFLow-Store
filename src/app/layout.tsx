@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import { NotificationProvider } from "@/components/EnhancedNotification";
+import { Toaster } from 'react-hot-toast';
 import { Cairo, Inter } from 'next/font/google';
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
@@ -20,7 +21,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "SmoothFlow - حلول تقنية",
   description: "خدمات كمبيوتر احترافية في الرس - تركيب، صيانة، وإصلاح جميع أنواع أجهزة الكمبيوتر مع ضمان شامل وخدمة عملاء متميزة",
-  keywords: "خدمات كمبيوتر, تركيب حاسوب, صيانة حاسوب, إصلاح حاسوب, الرس, السعودية, SmoothFlow",
+  keywords: "خدمات كمبيوتر, تركيب بي سي, صيانة بي سي, إصلاح بي سي, الرس, السعودية, SmoothFlow",
   authors: [{ name: "SmoothFlow" }],
   creator: "SmoothFlow",
   publisher: "SmoothFlow",
@@ -163,6 +164,7 @@ export default function RootLayout({
       >
         <Providers>
           <NotificationProvider>
+            <Toaster />
             {children}
           </NotificationProvider>
         </Providers>
