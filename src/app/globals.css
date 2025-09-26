@@ -2,39 +2,106 @@
 
 /* ===== CSS VARIABLES ===== */
 :root {
-  /* Core Colors */
-  --background: #000000;
+  --background: #0a0e1a;
   --foreground: #ffffff;
-  --primary: #00BFFF;
-  --primary-dark: #87CEEB;
-  --primary-light: #87CEFA;
-  --secondary: #1a1a1a;
+  --primary: #00d9ff;
+  --primary-dark: #0099cc;
+  --primary-light: #33e0ff;
+  --secondary: #1a1a2e;
   
-  /* Gradients */
-  --gradient-start: #00BFFF;
-  --gradient-middle: #87CEEB;
-  --gradient-end: #87CEFA;
+  --gradient-start: #00d9ff;
+  --gradient-middle: #0099cc;
+  --gradient-end: #006699;
   
-  /* Glass Effects */
-  --glass-bg: rgba(0, 191, 255, 0.05);
-  --glass-border: rgba(0, 191, 255, 0.1);
-  --card-bg: rgba(26, 26, 26, 0.8);
+  --glass-bg: rgba(0, 217, 255, 0.05);
+  --glass-border: rgba(0, 217, 255, 0.1);
+  --card-bg: rgba(26, 26, 46, 0.8);
   
-  /* Text Colors */
   --text-primary: #ffffff;
   --text-secondary: #e0e0e0;
   --text-muted: #a0a0a0;
   
-  /* Fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 /* ===== BASE STYLES ===== */
 body {
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 25%, #60a5fa 50%, #0ea5e9 75%, #0891b2 100%);
+  background: #0a0e1a;
   color: var(--foreground);
   font-family: 'Cairo', Arial, Helvetica, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ===== ANIMATED BACKGROUND ===== */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(135deg, rgba(0, 217, 255, 0.03) 0%, transparent 50%),
+    linear-gradient(45deg, transparent 50%, rgba(0, 153, 204, 0.03) 100%);
+  z-index: -2;
+  pointer-events: none;
+}
+
+.tech-grid-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.grid-lines {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(rgba(0, 217, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 217, 255, 0.1) 1px, transparent 1px);
+  background-size: 100px 100px;
+  animation: gridMove 20s linear infinite;
+}
+
+.floating-particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.particle {
+  position: absolute;
+  background: rgba(0, 217, 255, 0.6);
+  border-radius: 50%;
+  animation: particleFloat 15s ease-in-out infinite;
+}
+
+.particle::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  border-radius: 50%;
+  filter: blur(4px);
+  opacity: 0.5;
+}
+
+.code-pattern {
+  position: absolute;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: rgba(0, 217, 255, 0.3);
+  white-space: nowrap;
+  animation: codeScroll 25s linear infinite;
 }
 
 /* ===== DARK THEME DATETIME PICKER ===== */
@@ -64,25 +131,55 @@ input[type="datetime-local"]::-webkit-datetime-edit-text {
 
 input[type="datetime-local"]::-webkit-datetime-edit-month-field,
 input[type="datetime-local"]::-webkit-datetime-edit-day-field,
-input[type="datetime-local"]::-webkit-datetime-edit-year-field {
-  color: #ffffff !important;
-  background-color: #374151 !important;
-}
-
+input[type="datetime-local"]::-webkit-datetime-edit-year-field,
 input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
 input[type="datetime-local"]::-webkit-datetime-edit-minute-field {
   color: #ffffff !important;
   background-color: #374151 !important;
 }
 
-/* Firefox dark theme for datetime-local */
-input[type="datetime-local"] {
-  background-color: #374151 !important;
-  color: #ffffff !important;
-  border: 1px solid #4b5563 !important;
+/* ===== ANIMATIONS ===== */
+@keyframes gridMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(100px, 100px); }
 }
 
-/* ===== ESSENTIAL ANIMATIONS ONLY ===== */
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+  }
+  25% {
+    transform: translate(100px, -80px) scale(1.1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-50px, -150px) scale(0.9);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translate(-120px, -60px) scale(1.05);
+    opacity: 0.5;
+  }
+}
+
+@keyframes codeScroll {
+  0% {
+    transform: translateX(100vw);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -93,89 +190,68 @@ input[type="datetime-local"] {
   50% { opacity: 0.7; }
 }
 
-@keyframes backgroundGlow {
+@keyframes glowPulse {
   0%, 100% {
-    opacity: 0.4;
-    transform: scale(1);
+    box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
   }
   50% {
-    opacity: 0.7;
-    transform: scale(1.12);
-  }
-}
-
-@keyframes gentleFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  33% {
-    transform: translateY(-8px) rotate(1deg);
-  }
-  66% {
-    transform: translateY(4px) rotate(-1deg);
-  }
-}
-
-@keyframes colorShift {
-  0%, 100% {
-    filter: hue-rotate(0deg) saturate(1);
-  }
-  50% {
-    filter: hue-rotate(15deg) saturate(1.1);
+    box-shadow: 0 0 40px rgba(0, 217, 255, 0.6);
   }
 }
 
 /* ===== ANIMATION CLASSES ===== */
 .animate-fadeInUp { animation: fadeInUp 0.4s ease-out; }
 .animate-pulse-slow { animation: pulse 2s ease-in-out infinite; }
-.background-pulse { animation: backgroundGlow 15s ease-in-out infinite; }
-.gentle-float { animation: gentleFloat 12s ease-in-out infinite; }
-.color-shift { animation: colorShift 20s ease-in-out infinite; }
+.animate-glow { animation: glowPulse 2s ease-in-out infinite; }
 
 /* ===== HOVER EFFECTS ===== */
 .hover-lift {
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .hover-lift:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
 }
 
 /* ===== UTILITY CLASSES ===== */
-.sky-blue-glow {
-  box-shadow: 0 0 20px rgba(0, 191, 255, 0.4), 0 0 40px rgba(0, 191, 255, 0.2);
+.tech-glow {
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.4), 0 0 40px rgba(0, 217, 255, 0.2);
 }
 
 .modern-card {
-  background: rgba(31, 41, 55, 0.9);
+  background: rgba(26, 26, 46, 0.9);
   border-radius: 12px;
-  border: 1px solid rgba(75, 85, 99, 0.2);
-  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 217, 255, 0.2);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
 }
+
 .modern-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
   border-color: var(--primary);
+  box-shadow: 0 8px 32px rgba(0, 217, 255, 0.2);
 }
 
 .glass-effect {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 217, 255, 0.1);
 }
 
 .gradient-text {
-  background: linear-gradient(45deg, #00BFFF, #87CEEB, #87CEFA);
+  background: linear-gradient(45deg, #00d9ff, #0099cc, #33e0ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.sky-blue-text {
+.tech-text {
   color: var(--primary);
-  text-shadow: 0 0 8px rgba(0, 191, 255, 0.3);
+  text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
 }
 
-.sky-blue-gradient {
-  background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+.tech-gradient {
+  background: linear-gradient(135deg, #0a0e1a, #1a1a2e);
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
@@ -188,6 +264,7 @@ input[type="datetime-local"] {
 @media (max-width: 640px) {
   .container { padding-left: 1rem; padding-right: 1rem; }
   .hero-section { min-height: 100vh; padding: 2rem 0; }
+  .grid-lines { background-size: 50px 50px; }
 }
 
 @media (min-width: 640px) and (max-width: 1024px) {
@@ -226,3 +303,14 @@ input[type="datetime-local"] {
 .animate-delay-300 { animation-delay: 0.3s; }
 .animate-delay-400 { animation-delay: 0.4s; }
 .animate-delay-500 { animation-delay: 0.5s; }
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
