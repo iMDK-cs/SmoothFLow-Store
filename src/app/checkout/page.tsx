@@ -14,7 +14,6 @@ export default function Checkout() {
     notes: '',
     scheduledDate: '',
   })
-  // const [loading, setLoading] = useState(false) // Removed - no longer needed with instant redirect
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -39,7 +38,6 @@ export default function Checkout() {
     e.preventDefault()
     setError('')
 
-    // 1. ✅ BASIC VALIDATION ONLY (under 100ms)
     if (formData.scheduledDate) {
       const selectedDate = new Date(formData.scheduledDate)
       const now = new Date()
@@ -51,18 +49,24 @@ export default function Checkout() {
       }
     }
 
-    // 2. ✅ STORE MINIMAL DATA ONLY (under 50ms)
-    const minimalData = {
-      cartItems: state.cart!.items,
+    const preparedItems = state.cart!.items.map((item) => ({
+      serviceId: item.serviceId,
+      optionId: item.optionId || undefined,
+      quantity: item.quantity,
+      unitPrice: item.option ? item.option.price : item.service.basePrice,
+      totalPrice: (item.option ? item.option.price : item.service.basePrice) * item.quantity,
+      notes: '',
+    }))
+
+    const readyData = {
+      items: preparedItems,
       notes: formData.notes,
       scheduledDate: formData.scheduledDate,
       totalAmount: getTotalPrice(),
+      orderNumber: `TEMP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
     }
 
-    // Store minimal data in sessionStorage
-    sessionStorage.setItem('checkoutData', JSON.stringify(minimalData))
-
-    // 3. ✅ REDIRECT IMMEDIATELY - Don't wait for anything else!
+    sessionStorage.setItem('tempOrderData', JSON.stringify(readyData))
     router.push('/payment/temp')
   }
 
@@ -99,7 +103,6 @@ export default function Checkout() {
           <h1 className="text-3xl font-bold text-white mb-8">إتمام الطلب</h1>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Order Summary */}
             <div className="bg-gray-800 rounded-lg p-6">
               <h2 className="text-xl font-semibold text-white mb-4">ملخص الطلب</h2>
               
@@ -132,7 +135,6 @@ export default function Checkout() {
               </div>
             </div>
 
-            {/* Checkout Form */}
             <div className="bg-gray-800 rounded-lg p-6">
               <h2 className="text-xl font-semibold text-white mb-4">تفاصيل الطلب</h2>
               
