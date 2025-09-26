@@ -42,59 +42,20 @@ export default function TempPayment() {
       return
     }
 
-    // Load minimal checkout data from sessionStorage
-    const storedData = sessionStorage.getItem('checkoutData')
-    if (!storedData) {
+    const storedTempData = sessionStorage.getItem('tempOrderData')
+    
+    if (!storedTempData) {
       router.push('/checkout')
       return
     }
 
     try {
-      const checkoutData = JSON.parse(storedData)
-      
-      // Now do the heavy work HERE while user sees payment options
-      async function prepareOrder() {
-        setLoading(true)
-        
-        // Prepare order items (heavy work happens here)
-        const orderItems = checkoutData.cartItems.map((item: {
-          serviceId: string;
-          optionId?: string;
-          quantity: number;
-          service: { basePrice: number };
-          option?: { price: number };
-        }) => ({
-          serviceId: item.serviceId,
-          optionId: item.optionId || undefined,
-          quantity: item.quantity,
-          unitPrice: item.option ? item.option.price : item.service.basePrice,
-          totalPrice: (item.option ? item.option.price : item.service.basePrice) * item.quantity,
-          notes: '',
-        }))
-
-        console.log('Prepared order items for payment:', orderItems)
-
-        // Create temporary order data
-        const tempOrderData = {
-          items: orderItems,
-          notes: checkoutData.notes,
-          scheduledDate: checkoutData.scheduledDate,
-          totalAmount: checkoutData.totalAmount,
-          orderNumber: `TEMP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
-        }
-
-        // Store prepared data
-        sessionStorage.setItem('tempOrderData', JSON.stringify(tempOrderData))
-        
-        setTempOrderData(tempOrderData)
-        setLoading(false)
-      }
-      
-      prepareOrder()
+      const parsedData = JSON.parse(storedTempData)
+      setTempOrderData(parsedData)
+      setLoading(false)
     } catch (error) {
-      console.error('Failed to parse checkout data:', error)
+      console.error('Failed to parse temp order data:', error)
       router.push('/checkout')
-      return
     }
   }, [session, router])
 
@@ -113,11 +74,10 @@ export default function TempPayment() {
     setFileError('')
 
     try {
-      // First upload the file
       setUploadingFile(true)
       const formData = new FormData()
       formData.append('file', selectedFile)
-      formData.append('tempOrder', 'true') // Flag to indicate this is a temp order
+      formData.append('tempOrder', 'true')
 
       const uploadResponse = await fetch('/api/upload/receipt', {
         method: 'POST',
@@ -131,7 +91,6 @@ export default function TempPayment() {
         throw new Error(uploadData.error || 'فشل في رفع الملف')
       }
 
-      // Create the actual order with payment details
       const orderResponse = await fetch('/api/orders', {
         method: 'POST',
         headers: {
@@ -155,16 +114,9 @@ export default function TempPayment() {
         throw new Error(orderData.error || 'فشل في إنشاء الطلب')
       }
 
-      // Clear temporary data
       sessionStorage.removeItem('tempOrderData')
-      
-      // Clear cart
       await clearCart()
-
-      // Show success notification
       notifyReceiptUploaded(orderData.order.orderNumber)
-      
-      // Redirect to order tracking page
       router.push(`/orders/${orderData.order.id}?bank_transfer=true`)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'فشل في إتمام الدفع'
@@ -249,7 +201,6 @@ export default function TempPayment() {
           <div className="bg-gray-800 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-white mb-4">اختر طريقة الدفع</h2>
             
-            {/* Payment Method Selection */}
             <div className="mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
@@ -284,7 +235,6 @@ export default function TempPayment() {
               </div>
             </div>
 
-            {/* Card Payment Info */}
             {paymentMethod === 'card' && (
               <div className="mb-6">
                 <div className="bg-red-900/30 border border-red-500/50 rounded-lg p-4 mb-4">
@@ -296,40 +246,38 @@ export default function TempPayment() {
               </div>
             )}
 
-            {/* Bank Transfer Details */}
             <div className="mb-6 p-4 bg-gray-700/50 rounded-lg">
-                <h3 className="text-lg font-semibold text-white mb-3">تفاصيل الحساب البنكي</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">اسم صاحب الحساب:</span>
-                    <span className="text-white font-medium">محمد عبدالله صالح الدخيلي</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">IBAN:</span>
-                    <span className="text-white font-mono">SA23 8000 0499 6080 1600 4598</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">رقم الحساب:</span>
-                    <span className="text-white font-mono">499000010006086004598</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">المبلغ:</span>
-                    <span className="text-white font-bold text-lg">{tempOrderData.totalAmount.toFixed(2)} ريال</span>
-                  </div>
+              <h3 className="text-lg font-semibold text-white mb-3">تفاصيل الحساب البنكي</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">اسم صاحب الحساب:</span>
+                  <span className="text-white font-medium">محمد عبدالله صالح الدخيلي</span>
                 </div>
-                
-                <div className="mt-4 p-3 bg-blue-900/30 rounded-lg">
-                  <h4 className="text-blue-300 font-medium mb-2">خطوات الدفع:</h4>
-                  <ol className="text-blue-200 text-sm space-y-1 list-decimal list-inside">
-                    <li>قم بتحويل المبلغ إلى الحساب أعلاه</li>
-                    <li>احفظ إيصال التحويل</li>
-                    <li>ارفع إيصال التحويل أدناه</li>
-                    <li>انتظر موافقة الإدارة</li>
-                  </ol>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">IBAN:</span>
+                  <span className="text-white font-mono">SA23 8000 0499 6080 1600 4598</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">رقم الحساب:</span>
+                  <span className="text-white font-mono">499000010006086004598</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">المبلغ:</span>
+                  <span className="text-white font-bold text-lg">{tempOrderData.totalAmount.toFixed(2)} ريال</span>
                 </div>
               </div>
+              
+              <div className="mt-4 p-3 bg-blue-900/30 rounded-lg">
+                <h4 className="text-blue-300 font-medium mb-2">خطوات الدفع:</h4>
+                <ol className="text-blue-200 text-sm space-y-1 list-decimal list-inside">
+                  <li>قم بتحويل المبلغ إلى الحساب أعلاه</li>
+                  <li>احفظ إيصال التحويل</li>
+                  <li>ارفع إيصال التحويل أدناه</li>
+                  <li>انتظر موافقة الإدارة</li>
+                </ol>
+              </div>
+            </div>
 
-            {/* File Upload for Bank Transfer */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-white mb-3">رفع إيصال التحويل</h3>
               <FileUpload
@@ -341,7 +289,6 @@ export default function TempPayment() {
               />
             </div>
 
-            {/* Payment Button */}
             <div className="space-y-4">
               {paymentMethod === 'card' ? (
                 <button
