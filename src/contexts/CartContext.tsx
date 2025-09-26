@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, useState, useCallback, useRef } from 'react'
 import { useSession } from 'next-auth/react'
+import toast, { Toaster } from 'react-hot-toast'
 
 interface CartItem {
   id: string
@@ -57,11 +58,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
     case 'SET_ERROR':
       return { ...state, error: action.payload, loading: false }
     case 'ADD_ITEM':
-      return { ...state, loading: false } // Don't set loading to true for add
+      return { ...state, loading: false }
     case 'REMOVE_ITEM':
-      return { ...state, loading: false } // Don't set loading to true for remove
+      return { ...state, loading: false }
     case 'UPDATE_QUANTITY':
-      return { ...state, loading: false } // Don't set loading to true for update
+      return { ...state, loading: false }
     case 'CLEAR_CART':
       return { ...state, cart: null, loading: false, error: null }
     default:
@@ -90,7 +91,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const pendingRequestsRef = useRef<Set<string>>(new Set())
 
   const fetchCart = useCallback(async () => {
-    // Don't make API calls if user is not logged in
     if (!session?.user) {
       return
     }
@@ -103,7 +103,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         throw new Error(`Failed to fetch cart: ${response.status}`)
       }
       
-      // Check if response is JSON
       const contentType = response.headers.get('content-type')
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text()
@@ -112,29 +111,25 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       
       const data = await response.json()
-      console.log('Fetched cart data:', data) // Debug log
+      console.log('Fetched cart data:', data)
       dispatch({ type: 'SET_CART', payload: data.cart })
     } catch (error) {
-      console.error('Fetch cart error:', error) // Debug log
+      console.error('Fetch cart error:', error)
       dispatch({ type: 'SET_ERROR', payload: 'Failed to load cart' })
     }
   }, [session])
 
-  // Fetch cart on mount
   useEffect(() => {
     if (session?.user) {
       fetchCart()
     } else {
-      // Clear cart when user logs out
       dispatch({ type: 'CLEAR_CART' })
     }
   }, [session, fetchCart])
 
-  // Debounced API call to prevent spam
   const debouncedApiCall = useCallback(async (serviceId: string, optionId?: string, quantity = 1) => {
     const requestKey = `${serviceId}-${optionId || 'null'}-${quantity}`
     
-    // Prevent duplicate requests
     if (pendingRequestsRef.current.has(requestKey)) {
       console.log('Request already pending, skipping...')
       return
@@ -144,8 +139,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     
     try {
       const startTime = Date.now()
-      
-      // Use AbortController for timeout
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 5000)
       
@@ -172,7 +165,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const result = await response.json()
       console.log('Add to cart success:', result)
       
-      // Replace optimistic item with real data from server
       fetchCart().catch(error => {
         console.error('Background cart refresh failed:', error)
       })
@@ -180,7 +172,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Add to cart error:', error)
       
-      // ROLLBACK: Remove optimistic item on error
       if (state.cart) {
         const rollbackItems = state.cart.items.filter(item => 
           !(item.serviceId === serviceId && item.optionId === optionId && item.id.startsWith('temp-'))
@@ -190,8 +181,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       
       if (error instanceof Error && error.name === 'AbortError') {
         dispatch({ type: 'SET_ERROR', payload: 'Request timeout - please try again' })
+        toast.error('انتهت مهلة الطلب - يرجى المحاولة مرة أخرى')
       } else {
         dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to add item to cart' })
+        toast.error('فشل في الإضافة للسلة')
       }
     } finally {
       pendingRequestsRef.current.delete(requestKey)
@@ -199,16 +192,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [state.cart, fetchCart, dispatch])
 
   const addToCart = useCallback(async (serviceId: string, optionId?: string, quantity = 1) => {
-    // Don't make API calls if user is not logged in
     if (!session?.user) {
       throw new Error('User must be logged in to add items to cart')
     }
     
-    // 1. ✅ UPDATE UI FIRST (INSTANT - 0ms perceived)
     setLastAddedItem(serviceId)
     setTimeout(() => setLastAddedItem(null), 1500)
     
-    // Create optimistic cart item for immediate UI update
     const optimisticItem = {
       id: `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       serviceId,
@@ -216,7 +206,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       quantity,
       service: {
         id: serviceId,
-        title: 'جاري الإضافة...', // Loading placeholder
+        title: 'جاري الإضافة...',
         basePrice: 0,
         image: undefined,
         icon: undefined
@@ -228,14 +218,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       } : undefined
     }
     
-    // Immediately update UI with optimistic item
     if (state.cart) {
       const existingItemIndex = state.cart.items.findIndex(
         item => item.serviceId === serviceId && item.optionId === optionId
       )
       
       if (existingItemIndex >= 0) {
-        // Update existing item quantity optimistically
         const updatedItems = [...state.cart.items]
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
@@ -243,21 +231,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         }
         dispatch({ type: 'SET_CART', payload: { ...state.cart, items: updatedItems } })
       } else {
-        // Add new item optimistically
         dispatch({ type: 'SET_CART', payload: { ...state.cart, items: [...state.cart.items, optimisticItem] } })
       }
     }
     
-    // 2. ✅ Show success feedback immediately (you can add toast here)
-    console.log('✅ Item added to cart instantly!')
+    toast.success('تمت الإضافة للسلة ✓', {
+      duration: 1500,
+      position: 'bottom-center',
+      style: {
+        background: '#10b981',
+        color: '#fff',
+        fontSize: '14px',
+      }
+    })
     
-    // 3. ✅ API call happens in BACKGROUND (user doesn't wait)
-    // Clear any existing debounce timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current)
     }
     
-    // Debounce the API call by 300ms to batch rapid clicks
     debounceTimerRef.current = setTimeout(() => {
       debouncedApiCall(serviceId, optionId, quantity)
     }, 300)
@@ -278,6 +269,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await fetchCart()
     } catch {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to remove item from cart' })
+      toast.error('فشل في حذف العنصر')
     }
   }
 
@@ -300,6 +292,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await fetchCart()
     } catch {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to update quantity' })
+      toast.error('فشل في تحديث الكمية')
     }
   }
 
@@ -318,6 +311,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       await fetchCart()
     } catch {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to clear cart' })
+      toast.error('فشل في تفريغ السلة')
     }
   }
 
@@ -350,6 +344,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }}
     >
       {children}
+      <Toaster />
     </CartContext.Provider>
   )
 }
