@@ -14,7 +14,7 @@ export default function Checkout() {
     notes: '',
     scheduledDate: '',
   })
-  const [loading, setLoading] = useState(false)
+  // const [loading, setLoading] = useState(false) // Removed - no longer needed with instant redirect
   const [error, setError] = useState('')
 
   useEffect(() => {

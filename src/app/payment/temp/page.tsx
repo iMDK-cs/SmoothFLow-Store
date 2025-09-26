@@ -57,7 +57,13 @@ export default function TempPayment() {
         setLoading(true)
         
         // Prepare order items (heavy work happens here)
-        const orderItems = checkoutData.cartItems.map((item: any) => ({
+        const orderItems = checkoutData.cartItems.map((item: {
+          serviceId: string;
+          optionId?: string;
+          quantity: number;
+          service: { basePrice: number };
+          option?: { price: number };
+        }) => ({
           serviceId: item.serviceId,
           optionId: item.optionId || undefined,
           quantity: item.quantity,
