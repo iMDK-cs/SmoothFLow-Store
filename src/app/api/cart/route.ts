@@ -23,7 +23,7 @@ const updateQuantitySchema = z.object({
 const serviceCache = new Map<string, { data: { available: boolean; stock: number | null; title: string; active: boolean; basePrice: number } | null; timestamp: number }>()
 const CACHE_TTL = 600000 // 10 minutes - longer cache time
 const MAX_CACHE_SIZE = 2000 // Increased cache size for better hit rate
-const CART_CACHE_TTL = 30000 // 30 seconds for cart operations
+// const CART_CACHE_TTL = 30000 // 30 seconds for cart operations - reserved for future use
 
 // Cache cleanup function
 function cleanupCache() {
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
           (SELECT id FROM cart_upsert) as cart_id,
           (SELECT id FROM existing_item) as existing_item_id,
           (SELECT quantity FROM existing_item) as existing_quantity
-      ` as any[]
+      ` as Array<{ cart_id: string; existing_item_id: string | null; existing_quantity: number | null }>
 
       const { cart_id, existing_item_id, existing_quantity } = result[0]
       const totalQuantity = existing_quantity ? existing_quantity + quantity : quantity

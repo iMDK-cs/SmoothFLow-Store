@@ -86,7 +86,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(cartReducer, initialState)
   const [lastAddedItem, setLastAddedItem] = useState<string | null>(null)
   const { data: session } = useSession()
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  // const debounceTimerRef = useRef<NodeJS.Timeout | null>(null) // Reserved for future debouncing
 
   const fetchCart = useCallback(async () => {
     // Don't make API calls if user is not logged in
