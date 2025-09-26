@@ -152,48 +152,45 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Service is not available' }, { status: 400 })
     }
 
-    // Ultra-optimized transaction with minimal queries
+    // Optimized transaction with correct table names
     await prisma.$transaction(async (tx) => {
-      // Single query to get or create cart and check existing item
-      const result = await tx.$queryRaw`
-        WITH cart_upsert AS (
-          INSERT INTO "Cart" ("userId", "createdAt", "updatedAt")
-          VALUES (${user.id}, NOW(), NOW())
-          ON CONFLICT ("userId") DO UPDATE SET "updatedAt" = NOW()
-          RETURNING id
-        ),
-        existing_item AS (
-          SELECT ci.id, ci.quantity
-          FROM "CartItem" ci
-          JOIN "Cart" c ON ci."cartId" = c.id
-          WHERE c."userId" = ${user.id} 
-            AND ci."serviceId" = ${serviceId}
-            AND (ci."optionId" = ${optionId || null} OR (ci."optionId" IS NULL AND ${optionId} IS NULL))
-        )
-        SELECT 
-          (SELECT id FROM cart_upsert) as cart_id,
-          (SELECT id FROM existing_item) as existing_item_id,
-          (SELECT quantity FROM existing_item) as existing_quantity
-      ` as Array<{ cart_id: string; existing_item_id: string | null; existing_quantity: number | null }>
+      // Get or create cart
+      let cart = await tx.cart.findUnique({
+        where: { userId: user.id }
+      })
 
-      const { cart_id, existing_item_id, existing_quantity } = result[0]
-      const totalQuantity = existing_quantity ? existing_quantity + quantity : quantity
+      if (!cart) {
+        cart = await tx.cart.create({
+          data: { userId: user.id }
+        })
+      }
+
+      // Check if item already exists in cart
+      const existingItem = await tx.cartItem.findFirst({
+        where: {
+          cartId: cart.id,
+          serviceId,
+          optionId: optionId || null,
+        }
+      })
+
+      const totalQuantity = existingItem ? existingItem.quantity + quantity : quantity
 
       // Check stock if service has limited stock
       if (service.stock !== null && totalQuantity > service.stock) {
         throw new Error(`Only ${service.stock} items available for ${service.title}`)
       }
 
-      // Update or create cart item with single query
-      if (existing_item_id) {
+      // Update or create cart item
+      if (existingItem) {
         await tx.cartItem.update({
-          where: { id: existing_item_id },
+          where: { id: existingItem.id },
           data: { quantity: totalQuantity }
         })
       } else {
         await tx.cartItem.create({
           data: {
-            cartId: cart_id,
+            cartId: cart.id,
             serviceId,
             optionId: optionId || null,
             quantity,
@@ -201,7 +198,7 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      return { success: true, cartId: cart_id }
+      return { success: true, cartId: cart.id }
     })
 
     const executionTime = Date.now() - startTime
