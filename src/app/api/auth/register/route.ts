@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { sanitizeUserName, validateUserInput } from '@/lib/security'
-import { withRateLimit, authRateLimit } from '@/lib/rateLimit'
+import { sanitizeUserInput } from '@/lib/security'
+import { authRateLimit, withRateLimit, getClientIdentifier } from '@/lib/rateLimit'
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -15,10 +15,12 @@ const registerSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting check
-    const rateLimitCheck = await withRateLimit(authRateLimit)(request)
-    if (!rateLimitCheck.allowed) {
+    const identifier = getClientIdentifier(request)
+    const limitCheck = await withRateLimit(authRateLimit)(request, identifier)
+    
+    if (!limitCheck.allowed) {
       return NextResponse.json(
-        { error: rateLimitCheck.error },
+        { error: limitCheck.error },
         { status: 429 }
       )
     }
@@ -26,20 +28,21 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, email, password, phone } = registerSchema.parse(body)
 
-    // Sanitize and validate user input
-    const sanitizedName = sanitizeUserName(name)
-    if (!sanitizedName || !validateUserInput(sanitizedName, 100)) {
+    // Sanitize user input
+    const sanitizedName = sanitizeUserInput(name)
+    const sanitizedEmail = email?.toLowerCase().trim()
+    const sanitizedPhone = phone ? sanitizeUserInput(phone) : undefined
+
+    if (!sanitizedName) {
       return NextResponse.json(
         { error: 'Invalid name format' },
         { status: 400 }
       )
     }
 
-    const sanitizedPhone = phone ? sanitizeUserName(phone) : undefined
-
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email: sanitizedEmail }
     })
 
     if (existingUser) {
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
     const user = await prisma.user.create({
       data: {
         name: sanitizedName,
-        email,
+        email: sanitizedEmail,
         password: hashedPassword,
         phone: sanitizedPhone,
       },

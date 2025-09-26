@@ -1,9 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
+import { uploadRateLimit, withRateLimit, getClientIdentifier } from '@/lib/rateLimit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const identifier = getClientIdentifier(request)
+    const limitCheck = await withRateLimit(uploadRateLimit)(request, identifier)
+    
+    if (!limitCheck.allowed) {
+      return NextResponse.json(
+        { error: limitCheck.error },
+        { status: 429 }
+      )
+    }
+
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {

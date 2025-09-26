@@ -1,100 +1,37 @@
 /**
- * Security utilities for XSS protection and input sanitization
+ * Security utilities for XSS protection and input sanitization using DOMPurify
  */
+import DOMPurify from 'isomorphic-dompurify';
 
-// For client-side sanitization
-export const sanitizeInput = (input: string): string => {
-  if (typeof input !== 'string') {
-    return '';
-  }
+export const sanitizeUserInput = (input: string): string => {
+  if (!input || typeof input !== 'string') return '';
   
-  // Basic HTML entity encoding
-  return input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;');
+  // Use DOMPurify to remove all HTML
+  const clean = DOMPurify.sanitize(input, {
+    ALLOWED_TAGS: [],
+    KEEP_CONTENT: true
+  });
+  
+  return clean.trim().substring(0, 100);
 };
 
-// For server-side sanitization (when DOMPurify is available)
-export const sanitizeForServer = (input: string): string => {
-  if (typeof input !== 'string') {
-    return '';
-  }
-  
-  // Basic sanitization for server-side
-  return input
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+\s*=/gi, '');
-};
-
-// Validate user input length and content
-export const validateUserInput = (input: string, maxLength: number = 1000): boolean => {
-  if (typeof input !== 'string') {
-    return false;
-  }
-  
-  if (input.length > maxLength) {
-    return false;
-  }
-  
-  // Check for suspicious patterns
-  const suspiciousPatterns = [
-    /<script/i,
-    /javascript:/i,
-    /on\w+\s*=/i,
-    /<iframe/i,
-    /<object/i,
-    /<embed/i,
-    /<link/i,
-    /<meta/i,
-    /<style/i
-  ];
-  
-  return !suspiciousPatterns.some(pattern => pattern.test(input));
-};
-
-// Sanitize user name specifically
-export const sanitizeUserName = (name: string): string => {
-  if (!name || typeof name !== 'string') {
-    return '';
-  }
-  
-  // Remove any HTML tags and scripts
-  let sanitized = name
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/[<>]/g, '') // Remove remaining angle brackets
-    .trim();
-  
-  // Limit length
-  if (sanitized.length > 100) {
-    sanitized = sanitized.substring(0, 100);
-  }
-  
-  return sanitized;
-};
-
-// Sanitize notes/comments
 export const sanitizeNotes = (notes: string): string => {
-  if (!notes || typeof notes !== 'string') {
-    return '';
-  }
+  if (!notes || typeof notes !== 'string') return '';
   
-  // Remove script tags and dangerous attributes
-  let sanitized = notes
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+\s*=/gi, '');
+  const clean = DOMPurify.sanitize(notes, {
+    ALLOWED_TAGS: [],
+    KEEP_CONTENT: true
+  });
   
-  // Limit length
-  if (sanitized.length > 2000) {
-    sanitized = sanitized.substring(0, 2000);
-  }
-  
-  return sanitized;
+  return clean.trim().substring(0, 2000);
 };
+
+export const validateUserInput = (input: string, maxLength: number = 1000): boolean => {
+  if (!input || typeof input !== 'string') return false;
+  return input.length <= maxLength;
+};
+
+// Legacy functions for backward compatibility
+export const sanitizeInput = sanitizeUserInput;
+export const sanitizeUserName = sanitizeUserInput;
+export const sanitizeForServer = sanitizeUserInput;

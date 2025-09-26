@@ -4,8 +4,8 @@ import { authOptions, getUserFromSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { sendOrderStatusEmail } from '@/lib/emailNotifications'
-import { withRateLimit, apiRateLimit } from '@/lib/rateLimit'
-import { sanitizeNotes, validateUserInput } from '@/lib/security'
+import { apiRateLimit, withRateLimit, getClientIdentifier } from '@/lib/rateLimit'
+import { sanitizeNotes } from '@/lib/security'
 
 const createOrderSchema = z.object({
   items: z.array(z.object({
@@ -67,10 +67,12 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting check
-    const rateLimitCheck = await withRateLimit(apiRateLimit)(request)
-    if (!rateLimitCheck.allowed) {
+    const identifier = getClientIdentifier(request)
+    const limitCheck = await withRateLimit(apiRateLimit)(request, identifier)
+    
+    if (!limitCheck.allowed) {
       return NextResponse.json(
-        { error: rateLimitCheck.error },
+        { error: limitCheck.error },
         { status: 429 }
       )
     }
@@ -90,14 +92,8 @@ export async function POST(request: NextRequest) {
     
     const { items, notes, scheduledDate, paymentMethod, paymentStatus, status, fileData } = createOrderSchema.parse(body)
 
-    // Sanitize user input
-    const sanitizedNotes = notes ? sanitizeNotes(notes) : undefined
-    if (sanitizedNotes && !validateUserInput(sanitizedNotes, 2000)) {
-      return NextResponse.json(
-        { error: 'Invalid notes format' },
-        { status: 400 }
-      )
-    }
+    // Sanitize notes
+    const sanitizedNotes = notes ? sanitizeNotes(notes) : ''
     console.log('✅ Parsed order data:', { itemsCount: items.length, notes, scheduledDate, paymentMethod, paymentStatus, status })
 
     // Calculate total amount
@@ -140,7 +136,7 @@ export async function POST(request: NextRequest) {
 
     console.log('📦 Creating order in database...')
     // Prepare notes with file data if provided
-    let finalNotes = sanitizedNotes || ''
+    let finalNotes = sanitizedNotes
     if (fileData) {
       if (finalNotes) {
         finalNotes += '\n\n'
