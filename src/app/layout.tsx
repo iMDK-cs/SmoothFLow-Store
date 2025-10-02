@@ -5,7 +5,6 @@ import { NotificationProvider } from "@/components/EnhancedNotification";
 import { Toaster } from 'react-hot-toast';
 import { Cairo, Inter } from 'next/font/google';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-import Footer from '@/components/Footer';
 import ConditionalFooter from '@/components/ConditionalFooter';
 
 const cairo = Cairo({ 

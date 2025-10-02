@@ -70,12 +70,6 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   
-  // Font optimization
-  optimizeFonts: true,
-  
-  // SWC minification
-  swcMinify: true,
-  
   // React configuration
   reactStrictMode: process.env.NODE_ENV === 'development',
   
