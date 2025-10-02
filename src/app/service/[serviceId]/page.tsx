@@ -530,6 +530,8 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ servic
                 width={600}
                 height={600}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                priority={false}
               />
             </div>
             
@@ -543,6 +545,8 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ servic
                       width={200}
                       height={200}
                       className="w-full h-full object-cover"
+                      loading="lazy"
+                      priority={false}
                     />
                   </div>
                 ))}

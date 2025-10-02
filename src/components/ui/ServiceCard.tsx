@@ -55,6 +55,8 @@ export default function ServiceCard({
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              loading="lazy"
+              priority={false}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-sky-500 to-blue-600">
@@ -65,6 +67,8 @@ export default function ServiceCard({
                   width={64}
                   height={64}
                   className="text-white"
+                  loading="lazy"
+                  priority={false}
                 />
               ) : (
                 <div className="text-4xl text-white">🔧</div>

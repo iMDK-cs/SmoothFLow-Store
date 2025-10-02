@@ -111,6 +111,8 @@ const AdminFileViewer: React.FC<AdminFileViewerProps> = ({
               className="w-full max-h-64 object-contain rounded border border-gray-600"
               onError={() => setError('فشل في تحميل الصورة')}
               onLoad={() => setIsLoading(false)}
+              loading="lazy"
+              priority={false}
               unoptimized
             />
             {isLoading && (

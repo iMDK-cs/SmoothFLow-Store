@@ -53,9 +53,12 @@ const nextConfig: NextConfig = {
       'next-auth', 
       'react-hook-form', 
       'date-fns',
-      'formidable'
+      'formidable',
+      'react-hot-toast',
+      'zod'
     ],
     optimizeCss: true,
+    webVitalsAttribution: ['CLS', 'LCP'],
   },
 
   // Compiler optimizations
@@ -66,6 +69,12 @@ const nextConfig: NextConfig = {
   // Compression and security
   compress: true,
   poweredByHeader: false,
+  
+  // Font optimization
+  optimizeFonts: true,
+  
+  // SWC minification
+  swcMinify: true,
   
   // React configuration
   reactStrictMode: process.env.NODE_ENV === 'development',
@@ -156,6 +165,24 @@ const nextConfig: NextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/api/services/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, s-maxage=300',
+          },
+        ],
+      },
+      {
+        source: '/api/orders/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
           },
         ],
       },
