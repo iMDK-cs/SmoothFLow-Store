@@ -115,7 +115,7 @@ const Footer: React.FC = () => {
                   <span className="text-sm font-bold text-blue-600">VISA</span>
                 </div>
                 {/* Mada */}
-                <div className="w-16 h-10 bg-green-600 rounded-lg flex items-center justify-center shadow-sm">
+                <div className="w-16 h-10 bg-green-700 rounded-lg flex items-center justify-center shadow-sm">
                   <span className="text-sm font-bold text-white">مدى</span>
                 </div>
                 {/* Bank Transfer */}

@@ -176,7 +176,7 @@ export default function Checkout() {
                 <div className="pt-4">
                   <button
                     type="submit"
-                    className="w-full bg-sky-500 hover:bg-sky-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors"
+                    className="w-full bg-sky-700 hover:bg-sky-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors"
                   >
                     المتابعة للدفع
                   </button>

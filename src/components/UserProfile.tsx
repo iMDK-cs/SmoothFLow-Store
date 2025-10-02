@@ -40,7 +40,7 @@ export default function UserProfile() {
         </Link>
         <Link
           href="/auth/signup"
-          className="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg transition-colors font-medium shadow-lg shadow-sky-500/25"
+          className="px-4 py-2 bg-sky-700 hover:bg-sky-600 text-white rounded-lg transition-colors font-medium shadow-lg shadow-sky-500/25"
         >
           إنشاء حساب
         </Link>
