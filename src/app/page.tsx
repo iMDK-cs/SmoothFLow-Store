@@ -1347,21 +1347,6 @@ export default function MDKStore() {
         </section>
 
         {/* Footer */}
-        <footer className="bg-black/90 backdrop-blur-sm text-white py-8 border-t border-gray-800">
-          <div className="container mx-auto px-4 md:px-6">
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <div className="mb-4 md:mb-0">
-                <h3 className="text-lg font-bold">{storeConfig.storeName}</h3>
-                <p className="text-sky-400 text-xs">{storeConfig.tagline}</p>
-              </div>
-              
-              <div className="text-center md:text-right">
-                <p className="text-gray-400 text-sm mb-1">© 2025 {storeConfig.storeName}. جميع الحقوق محفوظة</p>
-                <p className="text-xs text-gray-500">الرس . المملكة العربية السعودية</p>
-              </div>
-            </div>
-          </div>
-        </footer>
 
         {/* Live Chat */}
         <ErrorBoundary>
