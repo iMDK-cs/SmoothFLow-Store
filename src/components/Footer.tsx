@@ -57,12 +57,6 @@ const Footer: React.FC = () => {
               <Link href="/faq" className="block text-gray-300 hover:text-blue-400 transition-colors duration-200 hover:underline">
                 الأسئلة الشائعة
               </Link>
-              <Link href="/privacy" className="block text-gray-300 hover:text-blue-400 transition-colors duration-200 hover:underline">
-                سياسة الخصوصية
-              </Link>
-              <Link href="/terms" className="block text-gray-300 hover:text-blue-400 transition-colors duration-200 hover:underline">
-                الشروط والأحكام
-              </Link>
             </nav>
           </div>
 
