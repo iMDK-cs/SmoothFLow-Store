@@ -20,7 +20,7 @@ const FooterExample: React.FC = () => {
               </h2>
               <p className="text-gray-600 leading-relaxed">
                 This is sample content to demonstrate the footer functionality. 
-                Scroll down to see the "Back to Top" button appear after 300px of scrolling.
+                Scroll down to see the &quot;Back to Top&quot; button appear after 300px of scrolling.
                 The footer includes all the requested features: RTL layout, Arabic text,
                 social media icons, quick links, contact information, trust badge,
                 payment methods, and smooth scroll functionality.
