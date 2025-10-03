@@ -110,26 +110,14 @@ const Footer: React.FC = () => {
             {/* Center - Payment Methods */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-3">
-                {/* Bank Transfer - Using SVG */}
-                <div className="h-6 px-2 bg-white rounded flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-gray-200">
-                  <Image 
-                    src="/bank-transfer-logo-svgrepo-com.svg" 
-                    alt="تحويل بنكي" 
-                    width={16} 
-                    height={16} 
-                    className="mr-1"
-                  />
-                  <span className="text-[10px] font-semibold text-gray-700">تحويل بنكي</span>
-                </div>
-
-                {/* Mada - Using SVG */}
-                <div className="h-6 w-16 rounded hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm overflow-hidden">
+                {/* Mada - Using SVG with white background */}
+                <div className="h-6 w-16 bg-white rounded hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-gray-200 flex items-center justify-center">
                   <Image 
                     src="/شعار مدى – SVG.svg" 
                     alt="مدى" 
                     width={64} 
                     height={24} 
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
 
@@ -138,6 +126,17 @@ const Footer: React.FC = () => {
                   <Image 
                     src="/visa-svgrepo-com.svg" 
                     alt="Visa" 
+                    width={48} 
+                    height={24} 
+                    className="object-contain"
+                  />
+                </div>
+
+                {/* Bank Transfer - Using SVG */}
+                <div className="h-6 w-16 bg-white rounded hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-gray-200 flex items-center justify-center">
+                  <Image 
+                    src="/bank-transfer-logo-svgrepo-com.svg" 
+                    alt="تحويل بنكي" 
                     width={48} 
                     height={24} 
                     className="object-contain"
