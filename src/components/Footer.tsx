@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const Footer: React.FC = () => {
 
@@ -109,27 +110,38 @@ const Footer: React.FC = () => {
             {/* Center - Payment Methods */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-3">
-                {/* Bank Transfer - Smaller */}
+                {/* Bank Transfer - Using SVG */}
                 <div className="h-6 px-2 bg-white rounded flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-gray-200">
-                  <svg className="w-3 h-3 text-blue-600 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                  </svg>
+                  <Image 
+                    src="/bank-transfer-logo-svgrepo-com.svg" 
+                    alt="تحويل بنكي" 
+                    width={16} 
+                    height={16} 
+                    className="mr-1"
+                  />
                   <span className="text-[10px] font-semibold text-gray-700">تحويل بنكي</span>
                 </div>
 
-                {/* Mada - Blue and Green design */}
-                <div className="h-6 w-16 rounded flex flex-col hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm overflow-hidden">
-                  <div className="h-3 bg-blue-600 flex items-center justify-center">
-                    <span className="text-white text-[8px] font-bold">مدى</span>
-                  </div>
-                  <div className="h-3 bg-green-600 flex items-center justify-center">
-                    <span className="text-white text-[8px] font-bold">mada</span>
-                  </div>
+                {/* Mada - Using SVG */}
+                <div className="h-6 w-16 rounded hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm overflow-hidden">
+                  <Image 
+                    src="/شعار مدى – SVG.svg" 
+                    alt="مدى" 
+                    width={64} 
+                    height={24} 
+                    className="object-cover"
+                  />
                 </div>
 
-                {/* Visa - Without blue V */}
-                <div className="h-6 bg-white rounded px-2 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-gray-200">
-                  <span className="text-blue-600 text-[10px] font-bold">VISA</span>
+                {/* Visa - Using SVG */}
+                <div className="h-6 w-16 bg-white rounded hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-gray-200 flex items-center justify-center">
+                  <Image 
+                    src="/visa-svgrepo-com.svg" 
+                    alt="Visa" 
+                    width={48} 
+                    height={24} 
+                    className="object-contain"
+                  />
                 </div>
 
                 {/* Apple Pay */}
