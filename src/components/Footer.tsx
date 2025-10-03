@@ -107,48 +107,37 @@ const Footer: React.FC = () => {
             </div>
 
             {/* Center - Payment Methods */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-400 font-medium">طرق الدفع:</span>
-              
+            <div className="flex items-center gap-3">
               <div className="flex items-center gap-3">
-                {/* Bank Transfer */}
-                <div className="h-8 px-3 bg-white rounded-lg flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-gray-200">
-                  <svg className="w-4 h-4 text-blue-600 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                {/* Bank Transfer - Smaller */}
+                <div className="h-6 px-2 bg-white rounded flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-gray-200">
+                  <svg className="w-3 h-3 text-blue-600 mr-1" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                   </svg>
-                  <span className="text-xs font-semibold text-gray-700">تحويل بنكي</span>
+                  <span className="text-[10px] font-semibold text-gray-700">تحويل بنكي</span>
                 </div>
 
-                {/* Cash */}
-                <div className="h-8 px-3 bg-green-50 rounded-lg flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-green-200">
-                  <svg className="w-4 h-4 text-green-600 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
-                  </svg>
-                  <span className="text-xs font-semibold text-green-600">كاش</span>
-                </div>
-
-                {/* Mada */}
-                <div className="h-8 bg-green-600 rounded-lg px-3 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm">
-                  <div className="w-6 h-4 bg-white rounded-sm flex items-center justify-center mr-2">
-                    <span className="text-green-600 text-xs font-bold">M</span>
+                {/* Mada - Blue and Green design */}
+                <div className="h-6 w-16 rounded flex flex-col hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm overflow-hidden">
+                  <div className="h-3 bg-blue-600 flex items-center justify-center">
+                    <span className="text-white text-[8px] font-bold">مدى</span>
                   </div>
-                  <span className="text-xs font-semibold text-white">مدى</span>
+                  <div className="h-3 bg-green-600 flex items-center justify-center">
+                    <span className="text-white text-[8px] font-bold">mada</span>
+                  </div>
                 </div>
 
-                {/* Visa */}
-                <div className="h-8 bg-white rounded-lg px-3 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-gray-200">
-                  <div className="w-6 h-4 bg-blue-600 rounded-sm flex items-center justify-center mr-2">
-                    <span className="text-white text-xs font-bold">V</span>
-                  </div>
-                  <span className="text-xs font-semibold text-blue-600">VISA</span>
+                {/* Visa - Without blue V */}
+                <div className="h-6 bg-white rounded px-2 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm border border-gray-200">
+                  <span className="text-blue-600 text-[10px] font-bold">VISA</span>
                 </div>
 
                 {/* Apple Pay */}
-                <div className="h-8 bg-black rounded-lg px-3 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm">
-                  <svg className="w-5 h-5 text-white mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <div className="h-6 bg-black rounded px-2 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer shadow-sm">
+                  <svg className="w-4 h-4 text-white mr-1" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                   </svg>
-                  <span className="text-xs font-semibold text-white">Pay</span>
+                  <span className="text-[10px] font-semibold text-white">Pay</span>
                 </div>
               </div>
             </div>
