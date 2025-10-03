@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const Footer: React.FC = () => {
 
@@ -95,64 +96,69 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-800 bg-[#000000]">
+      <div className="border-t border-gray-800 bg-[#000000]"> 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0">
             
-            {/* Right - Copyright */}
+            {/* Left - Copyright */}
             <div className="text-center lg:text-right">
-              <p className="text-sm text-gray-300">
+              <p className="text-sm text-white">
                 SmoothFlow © 2025. جميع الحقوق محفوظة
               </p>
             </div>
 
-           {/* Center - Payment Methods */}
-<div className="flex flex-col items-center gap-2">
-  <span className="text-xs text-gray-400 font-medium">طرق الدفع</span>
-  <div className="flex items-center gap-3 flex-wrap justify-center">
+            {/* Center - Payment Methods */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-400 font-medium whitespace-nowrap ml-2">طرق الدفع:</span>
+              
+              <div className="flex items-center gap-2">
+                {/* Bank Transfer */}
+                <div className="h-6 px-2 bg-white rounded flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+                  <span className="text-[10px] font-semibold text-gray-700">تحويل بنكي</span>
+                </div>
 
-  <div className="flex items-center gap-2 flex-wrap">
-  {/* Apple Pay */}
-  <div className="px-3 py-2 bg-black rounded border border-gray-300 flex items-center justify-center hover:shadow-md transition-all duration-200 cursor-pointer">
-    <svg className="w-8 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-    </svg>
-  </div>
+                {/* Cash */}
+                <div className="h-6 px-2 bg-gray-100 rounded flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+                  <span className="text-[10px] font-semibold text-green-600">كاش</span>
+                </div>
 
-  {/* Bank Transfer */}
-  <div className="px-3 py-2 bg-white rounded border border-gray-300 flex items-center justify-center hover:shadow-md transition-all duration-200 cursor-pointer">
-    <span className="text-blue-600 text-xs font-semibold whitespace-nowrap">BANK</span>
-  </div>
+                {/* Mada */}
+                <div className="h-6 bg-white rounded px-1 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+                  <Image 
+                    src="/payment/mada.png" 
+                    alt="مدى" 
+                    width={32} 
+                    height={20} 
+                    className="object-contain"
+                  />
+                </div>
 
-  {/* Mada */}
-  <div className="px-3 py-2 bg-red-600 rounded border border-gray-300 flex items-center justify-center hover:shadow-md transition-all duration-200 cursor-pointer">
-    <span className="text-white text-sm font-bold">مدى</span>
-  </div>
+                {/* Visa */}
+                <div className="h-6 bg-white rounded px-1 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+                  <Image 
+                    src="/payment/visa.png" 
+                    alt="Visa" 
+                    width={32} 
+                    height={20} 
+                    className="object-contain"
+                  />
+                </div>
 
-  {/* Visa */}
-  <div className="px-3 py-2 bg-white rounded border border-gray-300 flex items-center justify-center hover:shadow-md transition-all duration-200 cursor-pointer">
-    <span className="text-blue-600 text-base font-bold">VISA</span>
-  </div>
+                {/* Apple Pay */}
+                <div className="h-6 bg-white rounded px-1 flex items-center justify-center hover:scale-105 transition-transform duration-200 cursor-pointer">
+                  <Image 
+                    src="/payment/applepay.png" 
+                    alt="Apple Pay" 
+                    width={32} 
+                    height={20} 
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+            </div>
 
-  {/* Mastercard */}
-  <div className="px-3 py-2 bg-red-600 rounded border border-gray-300 flex items-center justify-center hover:shadow-md transition-all duration-200 cursor-pointer">
-    <svg className="w-8 h-6" viewBox="0 0 48 32" fill="none">
-      <circle cx="18" cy="16" r="12" fill="#EB001B"/>
-      <circle cx="30" cy="16" r="12" fill="#F79E1B" fillOpacity="0.8"/>
-    </svg>
-  </div>
-
-  {/* American Express */}
-  <div className="px-3 py-2 bg-blue-500 rounded border border-gray-300 flex items-center justify-center hover:shadow-md transition-all duration-200 cursor-pointer">
-    <span className="text-white text-xs font-bold">AMEX</span>
-  </div>
-</div>
-
-  </div>
-</div>
-
-            {/* Left - Empty for balance */}
-            <div className="hidden lg:block w-32"></div>
+            {/* Right - Empty space for balance */}
+            <div></div>
           </div>
         </div>
       </div>
