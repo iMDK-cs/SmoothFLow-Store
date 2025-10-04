@@ -8,7 +8,6 @@ import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import DotGrid from '@/components/DotGrid';
 
 // Import components with lazy loading for better performance
 const EnhancedShoppingCart = dynamic(() => import('@/components/EnhancedShoppingCart'), {
@@ -64,17 +63,42 @@ class ErrorBoundary extends React.Component<
 const AnimatedBackground = memo(() => {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      {/* Base gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-slate-900 to-slate-950" />
-      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/15 via-transparent to-blue-500/15 background-pulse"></div>
       
-      {/* Floating orbs with enhanced animations */}
-      <div className="absolute top-1/4 left-1/5 w-64 h-64 bg-sky-400/18 blur-3xl rounded-full background-pulse gentle-float color-shift" style={{ animationDelay: '2s' }}></div>
-      <div className="absolute bottom-1/3 right-1/5 w-72 h-72 bg-blue-500/15 blur-3xl rounded-full background-pulse gentle-float" style={{ animationDelay: '6s' }}></div>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-cyan-400/12 blur-3xl rounded-full background-pulse gentle-float color-shift" style={{ animationDelay: '10s' }}></div>
+      {/* Animated gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-sky-500/20 via-transparent to-blue-500/20 animate-pulse"></div>
       
-      {/* Additional floating elements */}
-      <div className="absolute top-1/6 right-1/4 w-32 h-32 bg-indigo-400/10 blur-2xl rounded-full gentle-float" style={{ animationDelay: '4s' }}></div>
-      <div className="absolute bottom-1/6 left-1/3 w-40 h-40 bg-teal-400/8 blur-2xl rounded-full gentle-float" style={{ animationDelay: '8s' }}></div>
+      {/* Large floating orbs with complex animations */}
+      <div className="absolute top-1/4 left-1/5 w-80 h-80 bg-gradient-to-r from-sky-400/25 to-blue-500/25 blur-3xl rounded-full animate-pulse-slow gentle-float color-shift" style={{ animationDelay: '0s', animationDuration: '8s' }}></div>
+      <div className="absolute bottom-1/3 right-1/5 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-3xl rounded-full animate-pulse-slow gentle-float" style={{ animationDelay: '3s', animationDuration: '12s' }}></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-cyan-400/15 to-sky-400/15 blur-3xl rounded-full animate-pulse-slow gentle-float color-shift" style={{ animationDelay: '6s', animationDuration: '10s' }}></div>
+      
+      {/* Medium floating elements */}
+      <div className="absolute top-1/6 right-1/4 w-48 h-48 bg-gradient-to-r from-indigo-400/15 to-purple-400/15 blur-2xl rounded-full gentle-float" style={{ animationDelay: '2s', animationDuration: '9s' }}></div>
+      <div className="absolute bottom-1/6 left-1/3 w-56 h-56 bg-gradient-to-r from-teal-400/12 to-cyan-400/12 blur-2xl rounded-full gentle-float" style={{ animationDelay: '5s', animationDuration: '11s' }}></div>
+      
+      {/* Small accent orbs */}
+      <div className="absolute top-1/3 right-1/3 w-24 h-24 bg-sky-300/20 blur-xl rounded-full gentle-float" style={{ animationDelay: '1s', animationDuration: '7s' }}></div>
+      <div className="absolute bottom-1/4 left-1/4 w-32 h-32 bg-blue-300/15 blur-xl rounded-full gentle-float" style={{ animationDelay: '4s', animationDuration: '8s' }}></div>
+      
+      {/* Animated grid pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div className="w-full h-full" style={{
+          backgroundImage: `
+            linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '50px 50px',
+          animation: 'grid-move 20s linear infinite'
+        }}></div>
+      </div>
+      
+      {/* Floating particles */}
+      <div className="absolute top-1/5 left-1/6 w-2 h-2 bg-sky-400/30 rounded-full animate-bounce" style={{ animationDelay: '0s', animationDuration: '3s' }}></div>
+      <div className="absolute top-2/5 right-1/5 w-1 h-1 bg-blue-400/40 rounded-full animate-bounce" style={{ animationDelay: '1s', animationDuration: '4s' }}></div>
+      <div className="absolute bottom-1/5 left-2/5 w-1.5 h-1.5 bg-cyan-400/35 rounded-full animate-bounce" style={{ animationDelay: '2s', animationDuration: '3.5s' }}></div>
+      <div className="absolute bottom-2/5 right-2/5 w-1 h-1 bg-indigo-400/30 rounded-full animate-bounce" style={{ animationDelay: '3s', animationDuration: '4.5s' }}></div>
     </div>
   );
 });
@@ -1148,21 +1172,6 @@ export default function MDKStore() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900 relative overflow-x-hidden" dir="rtl">
-        {/* DotGrid Background */}
-        <div style={{ width: '100%', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 1 }}>
-          <DotGrid
-            dotSize={10}
-            gap={15}
-            baseColor="#5227FF"
-            activeColor="#5227FF"
-            proximity={120}
-            shockRadius={250}
-            shockStrength={5}
-            resistance={750}
-            returnDuration={1.5}
-          />
-        </div>
-        
         {/* Enhanced Background Effects */}
         <AnimatedBackground />
         
