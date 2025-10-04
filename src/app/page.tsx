@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import Link from 'next/link';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
+import DotGrid from '@/components/DotGrid';
 
 // Import components with lazy loading for better performance
 const EnhancedShoppingCart = dynamic(() => import('@/components/EnhancedShoppingCart'), {
@@ -1147,16 +1148,33 @@ export default function MDKStore() {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-gradient-to-br from-gray-800 via-gray-900 to-slate-900 relative overflow-x-hidden" dir="rtl">
+        {/* DotGrid Background */}
+        <div style={{ width: '100%', height: '100vh', position: 'fixed', top: 0, left: 0, zIndex: 1 }}>
+          <DotGrid
+            dotSize={10}
+            gap={15}
+            baseColor="#5227FF"
+            activeColor="#5227FF"
+            proximity={120}
+            shockRadius={250}
+            shockStrength={5}
+            resistance={750}
+            returnDuration={1.5}
+          />
+        </div>
+        
         {/* Enhanced Background Effects */}
         <AnimatedBackground />
         
 
 
         {/* Simple Header */}
-        <SimpleHeader session={session} />
+        <div className="relative z-20">
+          <SimpleHeader session={session} />
+        </div>
 
         {/* Enhanced Hero Section */}
-        <section className="relative min-h-[85vh] flex items-center justify-center pt-20 pb-16 z-10 overflow-hidden">
+        <section className="relative min-h-[85vh] flex items-center justify-center pt-20 pb-16 z-20 overflow-hidden">
           {/* Beautiful overlay effects */}
           <div className="absolute inset-0">
             <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl"></div>
@@ -1218,7 +1236,7 @@ export default function MDKStore() {
         </section>
 
         {/* Enhanced Services Sections with Scroll Animations */}
-        <main className="space-y-12 md:space-y-16">
+        <main className="space-y-12 md:space-y-16 relative z-20">
           {loadingServices || !services ? (
             <div className="flex justify-center items-center py-20">
             <div className="text-center">
@@ -1256,7 +1274,7 @@ export default function MDKStore() {
         </main>
 
         {/* FAQ Section */}
-        <section className="py-10 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden z-10" aria-labelledby="faq-heading">
+        <section className="py-10 bg-gradient-to-br from-gray-900 to-black relative overflow-hidden z-20" aria-labelledby="faq-heading">
           <div className="absolute inset-0 bg-gradient-to-r from-sky-500/3 to-sky-700/3"></div>
           
           <div className="container mx-auto px-4 md:px-6 relative z-10">
