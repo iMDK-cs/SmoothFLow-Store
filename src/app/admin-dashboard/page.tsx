@@ -235,6 +235,16 @@ export default function AdminDashboard() {
             </div>
           </Link>
 
+          <Link href="/admin-chat" className="bg-purple-600 rounded-lg p-4 hover:bg-purple-700 transition-colors">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-200 text-sm mb-1">الدردشة</p>
+                <p className="text-2xl font-bold text-white">الدردشة</p>
+              </div>
+              <span className="text-2xl">💬</span>
+            </div>
+          </Link>
+
         </div>
 
         {/* Revenue and Pending Orders */}

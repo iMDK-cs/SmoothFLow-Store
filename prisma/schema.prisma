@@ -5,9 +5,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL") 
 }
 
 model User {
@@ -28,6 +27,9 @@ model User {
   accounts      Account[]
   cart          Cart?
   trackingUpdates OrderTracking[] @relation("TrackingUpdates")
+  chatRooms     ChatRoom[] @relation("ChatRoomUser")
+  adminChatRooms ChatRoom[] @relation("ChatRoomAdmin")
+  chatMessages  ChatMessage[] @relation("ChatMessageSender")
 
   @@map("users")
 }
@@ -286,6 +288,42 @@ model OrderTracking {
   admin   User  @relation("TrackingUpdates", fields: [adminId], references: [id])
 
   @@map("order_tracking")
+}
+
+model ChatRoom {
+  id        String   @id @default(cuid())
+  userId    String
+  adminId   String?
+  status    String   @default("ACTIVE") // ACTIVE, CLOSED, ARCHIVED
+  priority  String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  subject   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastMessageAt DateTime?
+
+  // Relations
+  user     User         @relation("ChatRoomUser", fields: [userId], references: [id], onDelete: Cascade)
+  admin    User?        @relation("ChatRoomAdmin", fields: [adminId], references: [id])
+  messages ChatMessage[]
+
+  @@map("chat_rooms")
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  roomId    String
+  senderId  String
+  message   String
+  messageType String @default("TEXT") // TEXT, IMAGE, FILE, SYSTEM
+  fileUrl   String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender User     @relation("ChatMessageSender", fields: [senderId], references: [id])
+
+  @@map("chat_messages")
 }
 
 

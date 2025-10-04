@@ -268,25 +268,9 @@ input[type="datetime-local"] {
   }
 }
 
-@keyframes grid-move {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(50px, 50px); }
-}
-
-@keyframes pulse-slow {
-  0%, 100% { 
-    opacity: 0.3; 
-    transform: scale(1);
-  }
-  50% { 
-    opacity: 0.6; 
-    transform: scale(1.05);
-  }
-}
-
 /* ===== ANIMATION CLASSES ===== */
 .animate-fadeInUp { animation: fadeInUp 0.4s ease-out; }
-.animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }
+.animate-pulse-slow { animation: pulse 2s ease-in-out infinite; }
 .background-pulse { animation: backgroundGlow 15s ease-in-out infinite; }
 .gentle-float { animation: gentleFloat 12s ease-in-out infinite; }
 .color-shift { animation: colorShift 20s ease-in-out infinite; }

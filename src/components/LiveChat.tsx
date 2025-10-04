@@ -1,13 +1,43 @@
-"use client"
+'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 
 interface Message {
   id: string
-  text: string
-  sender: 'user' | 'admin'
-  timestamp: Date
+  message: string
+  messageType: string
+  fileUrl?: string
+  createdAt: string
+  sender: {
+    id: string
+    name?: string
+    email: string
+    role: string
+  }
+}
+
+interface ChatRoom {
+  id: string
+  subject?: string
+  priority: string
+  status: string
+  createdAt: string
+  lastMessageAt?: string
+  user: {
+    id: string
+    name?: string
+    email: string
+  }
+  admin?: {
+    id: string
+    name?: string
+    email: string
+  }
+  messages: Message[]
+  _count: {
+    messages: number
+  }
 }
 
 export default function LiveChat() {
@@ -16,6 +46,8 @@ export default function LiveChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null)
+  const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -27,45 +59,132 @@ export default function LiveChat() {
   }, [messages])
 
   useEffect(() => {
-    // Initialize with welcome message
-    if (isOpen && messages.length === 0) {
+    if (isOpen && session) {
+      initializeChat()
+    }
+  }, [isOpen, session])
+
+  const initializeChat = async () => {
+    try {
+      setLoading(true)
+      
+      // Get or create chat room
+      const roomsResponse = await fetch('/api/chat/rooms')
+      if (!roomsResponse.ok) throw new Error('Failed to fetch rooms')
+      
+      const rooms = await roomsResponse.json()
+      
+      // Check if user has an active room
+      let activeRoom = rooms.find((room: ChatRoom) => room.status === 'ACTIVE')
+      
+      if (!activeRoom) {
+        // Create new room
+        const createResponse = await fetch('/api/chat/rooms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subject: 'دعم فني',
+            priority: 'NORMAL'
+          })
+        })
+        
+        if (!createResponse.ok) throw new Error('Failed to create room')
+        
+        const data = await createResponse.json()
+        activeRoom = data.room
+      }
+      
+      setCurrentRoom(activeRoom)
+      
+      // Load messages
+      const messagesResponse = await fetch(`/api/chat/messages?roomId=${activeRoom.id}`)
+      if (!messagesResponse.ok) throw new Error('Failed to fetch messages')
+      
+      const messagesData = await messagesResponse.json()
+      setMessages(messagesData)
+      
+    } catch (error) {
+      console.error('Error initializing chat:', error)
+      // Fallback to welcome message
       setMessages([
         {
           id: '1',
-          text: `مرحبا ${session?.user?.name || 'user'} كيف اقدر اساعدك`,
-          sender: 'admin',
-          timestamp: new Date(),
+          message: `مرحبا ${session?.user?.name || 'user'} كيف اقدر اساعدك`,
+          messageType: 'TEXT',
+          createdAt: new Date().toISOString(),
+          sender: {
+            id: 'admin',
+            name: 'الدعم الفني',
+            email: 'support@smoothflow.com',
+            role: 'ADMIN'
+          }
         }
       ])
+    } finally {
+      setLoading(false)
     }
-  }, [isOpen, messages.length, session?.user?.name])
+  }
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newMessage.trim() || !session) return
+    if (!newMessage.trim() || !session || !currentRoom || isTyping) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: newMessage,
-      sender: 'user',
-      timestamp: new Date(),
+      message: newMessage,
+      messageType: 'TEXT',
+      createdAt: new Date().toISOString(),
+      sender: {
+        id: session.user?.id || '',
+        name: session.user?.name || '',
+        email: session.user?.email || '',
+        role: 'USER'
+      }
     }
 
     setMessages(prev => [...prev, userMessage])
     setNewMessage('')
     setIsTyping(true)
 
-    // Auto-reply system
-    setTimeout(() => {
-      const adminMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: 'شكرا على رسالتك بحاول ارد عليك باقرب وقت',
-        sender: 'admin',
-        timestamp: new Date(),
+    try {
+      const response = await fetch('/api/chat/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roomId: currentRoom.id,
+          message: newMessage,
+          messageType: 'TEXT'
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send message')
       }
-      setMessages(prev => [...prev, adminMessage])
+
+      const sentMessage = await response.json()
+      setMessages(prev => [...prev, sentMessage])
+      
+    } catch (error) {
+      console.error('Error sending message:', error)
+      // Show error message
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        message: 'عذراً، حدث خطأ في إرسال الرسالة. يرجى المحاولة مرة أخرى.',
+        messageType: 'TEXT',
+        createdAt: new Date().toISOString(),
+        sender: {
+          id: 'system',
+          name: 'النظام',
+          email: 'system@smoothflow.com',
+          role: 'ADMIN'
+        }
+      }
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
       setIsTyping(false)
-    }, 1500)
+    }
   }
 
   if (!session) return null
@@ -105,39 +224,46 @@ export default function LiveChat() {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-xs px-3 py-2 rounded-lg ${
-                    message.sender === 'user'
-                      ? 'bg-gradient-to-r from-sky-500 to-cyan-500 text-white'
-                      : 'bg-gray-700 text-gray-100'
-                  }`}
-                >
-                  <p className="text-sm">{message.text}</p>
-                  <p className="text-xs opacity-70 mt-1">
-                    {message.timestamp.toLocaleTimeString('ar-SA', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
-                </div>
+            {loading ? (
+              <div className="flex justify-center items-center h-full">
+                <div className="text-gray-400">جاري التحميل...</div>
               </div>
-            ))}
-            
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="bg-gray-700 text-gray-100 px-3 py-2 rounded-lg">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            ) : (
+              <>
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${message.sender.role === 'USER' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-xs px-3 py-2 rounded-lg ${
+                        message.sender.role === 'USER'
+                          ? 'bg-gradient-to-r from-sky-500 to-cyan-500 text-white'
+                          : 'bg-gray-700 text-gray-100'
+                      }`}
+                    >
+                      <p className="text-sm">{message.message}</p>
+                      <p className="text-xs opacity-70 mt-1">
+                        {new Date(message.createdAt).toLocaleTimeString('ar-SA', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </div>
+                ))}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-700 text-gray-100 px-3 py-2 rounded-lg">
+                      <div className="flex space-x-1 space-x-reverse">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -152,15 +278,18 @@ export default function LiveChat() {
                 placeholder="اكتب رسالتك..."
                 className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                 dir="rtl"
+                disabled={isTyping || loading}
               />
               <button
                 type="submit"
-                disabled={!newMessage.trim()}
                 className="bg-gradient-to-r from-sky-500 to-cyan-500 hover:from-sky-600 hover:to-cyan-600 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                disabled={isTyping || loading || !newMessage.trim()}
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                </svg>
+                {isTyping ? 'جاري الإرسال...' : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                )}
               </button>
             </div>
           </form>
