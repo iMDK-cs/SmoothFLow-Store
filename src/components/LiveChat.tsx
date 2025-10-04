@@ -60,7 +60,13 @@ export default function LiveChat() {
       
       // Get or create chat room
       const roomsResponse = await fetch('/api/chat/rooms')
-      if (!roomsResponse.ok) throw new Error('Failed to fetch rooms')
+      if (!roomsResponse.ok) {
+        if (roomsResponse.status === 500) {
+          // Database not available, use fallback mode
+          throw new Error('Database not available')
+        }
+        throw new Error('Failed to fetch rooms')
+      }
       
       const rooms = await roomsResponse.json()
       
@@ -78,7 +84,12 @@ export default function LiveChat() {
           })
         })
         
-        if (!createResponse.ok) throw new Error('Failed to create room')
+        if (!createResponse.ok) {
+          if (createResponse.status === 500) {
+            throw new Error('Database not available')
+          }
+          throw new Error('Failed to create room')
+        }
         
         const data = await createResponse.json()
         activeRoom = data.room
@@ -88,14 +99,19 @@ export default function LiveChat() {
       
       // Load messages
       const messagesResponse = await fetch(`/api/chat/messages?roomId=${activeRoom.id}`)
-      if (!messagesResponse.ok) throw new Error('Failed to fetch messages')
+      if (!messagesResponse.ok) {
+        if (messagesResponse.status === 500) {
+          throw new Error('Database not available')
+        }
+        throw new Error('Failed to fetch messages')
+      }
       
       const messagesData = await messagesResponse.json()
       setMessages(messagesData)
       
     } catch (error) {
       console.error('Error initializing chat:', error)
-      // Fallback to welcome message
+      // Fallback to welcome message when database is not available
       setMessages([
         {
           id: '1',
@@ -106,6 +122,18 @@ export default function LiveChat() {
             id: 'admin',
             name: 'الدعم الفني',
             email: 'support@smoothflow.com',
+            role: 'ADMIN'
+          }
+        },
+        {
+          id: '2',
+          message: 'عذراً، النظام مؤقتاً غير متاح. يرجى المحاولة لاحقاً أو التواصل معنا عبر الواتساب.',
+          messageType: 'TEXT',
+          createdAt: new Date().toISOString(),
+          sender: {
+            id: 'system',
+            name: 'النظام',
+            email: 'system@smoothflow.com',
             role: 'ADMIN'
           }
         }
@@ -160,6 +188,9 @@ export default function LiveChat() {
       })
 
       if (!response.ok) {
+        if (response.status === 500) {
+          throw new Error('Database not available')
+        }
         throw new Error('Failed to send message')
       }
 
@@ -171,7 +202,7 @@ export default function LiveChat() {
       // Show error message
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        message: 'عذراً، حدث خطأ في إرسال الرسالة. يرجى المحاولة مرة أخرى.',
+        message: 'عذراً، النظام مؤقتاً غير متاح. يرجى المحاولة لاحقاً أو التواصل معنا عبر الواتساب.',
         messageType: 'TEXT',
         createdAt: new Date().toISOString(),
         sender: {
