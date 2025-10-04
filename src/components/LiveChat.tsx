@@ -54,16 +54,6 @@ export default function LiveChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  useEffect(() => {
-    if (isOpen && session) {
-      initializeChat()
-    }
-  }, [isOpen, session, initializeChat])
-
   const initializeChat = useCallback(async () => {
     try {
       setLoading(true)
@@ -124,6 +114,16 @@ export default function LiveChat() {
       setLoading(false)
     }
   }, [session?.user?.name])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  useEffect(() => {
+    if (isOpen && session) {
+      initializeChat()
+    }
+  }, [isOpen, session, initializeChat])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
