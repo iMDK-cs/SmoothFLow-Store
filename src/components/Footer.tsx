@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import DotGrid from './DotGrid';
 
 const Footer: React.FC = () => {
 
@@ -32,9 +33,23 @@ const Footer: React.FC = () => {
       </div>
 
       <footer className="bg-[#000000] text-white relative overflow-hidden footer-rtl arabic-text" dir="rtl">
+        {/* DotGrid Background */}
+        <div style={{ width: '100%', height: '600px', position: 'relative' }}>
+          <DotGrid
+            dotSize={10}
+            gap={15}
+            baseColor="#5227FF"
+            activeColor="#5227FF"
+            proximity={120}
+            shockRadius={250}
+            shockStrength={5}
+            resistance={750}
+            returnDuration={1.5}
+          />
+        </div>
 
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           
           {/* Right Column - Brand Section */}
@@ -42,7 +57,7 @@ const Footer: React.FC = () => {
             <h2 className="text-2xl font-bold text-white">SmoothFlow</h2>
             <p className="text-lg text-gray-300">PC Services</p>
             <p className="text-gray-400 text-sm leading-relaxed">
-              متجر مختص بخدمات تحسين الأداء التقني
+                متجر مختص بخدمات البي سي 
             </p>
           </div>
 
@@ -96,7 +111,7 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-gray-800 bg-[#000000]"> 
+      <div className="border-t border-gray-800 bg-[#000000] relative z-10"> 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col lg:flex-row items-center justify-between space-y-4 lg:space-y-0">
             
