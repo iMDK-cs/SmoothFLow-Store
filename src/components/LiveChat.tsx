@@ -135,7 +135,7 @@ export default function LiveChat() {
       messageType: 'TEXT',
       createdAt: new Date().toISOString(),
       sender: {
-        id: session.user?.id || '',
+        id: (session.user as { id?: string })?.id || Date.now().toString(),
         name: session.user?.name || '',
         email: session.user?.email || '',
         role: 'USER'
