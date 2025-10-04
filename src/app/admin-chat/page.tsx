@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -82,9 +82,9 @@ export default function AdminChat() {
     }
 
     fetchChatRooms()
-  }, [session, status, router, filter, priorityFilter])
+  }, [session, status, router, filter, priorityFilter, fetchChatRooms])
 
-  const fetchChatRooms = async () => {
+  const fetchChatRooms = useCallback(async () => {
     try {
       setLoading(true)
       const params = new URLSearchParams({
@@ -113,7 +113,7 @@ export default function AdminChat() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter, priorityFilter, router])
 
   const fetchMessages = async (roomId: string) => {
     try {

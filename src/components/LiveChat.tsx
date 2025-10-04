@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 
 interface Message {
@@ -62,9 +62,9 @@ export default function LiveChat() {
     if (isOpen && session) {
       initializeChat()
     }
-  }, [isOpen, session])
+  }, [isOpen, session, initializeChat])
 
-  const initializeChat = async () => {
+  const initializeChat = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -123,7 +123,7 @@ export default function LiveChat() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [session?.user?.name])
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
