@@ -69,21 +69,6 @@ export default function AdminChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  useEffect(() => {
-    if (status === 'loading') return
-
-    if (!session) {
-      router.push('/auth/signin')
-      return
-    }
-
-    fetchChatRooms()
-  }, [session, status, router, filter, priorityFilter, fetchChatRooms])
-
   const fetchChatRooms = useCallback(async () => {
     try {
       setLoading(true)
@@ -114,6 +99,21 @@ export default function AdminChat() {
       setLoading(false)
     }
   }, [filter, priorityFilter, router])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  useEffect(() => {
+    if (status === 'loading') return
+
+    if (!session) {
+      router.push('/auth/signin')
+      return
+    }
+
+    fetchChatRooms()
+  }, [session, status, router, filter, priorityFilter, fetchChatRooms])
 
   const fetchMessages = async (roomId: string) => {
     try {
